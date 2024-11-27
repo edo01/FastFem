@@ -9,12 +9,9 @@ namespace linalg
                              double *Mv)
   {
 
-    // initialize Mv to 0
-    for (size_t i = 0; i < M->rows; i++)
-    {
-      Mv[i] = 0;
-    }
+    memset(Mv, 0, M->rows * sizeof(double));
 
+#pragma omp parallel
     for (size_t index = 0; index < M->nnz; index++)
     {
       // MV[i] += M_ij * v[j]
@@ -66,6 +63,7 @@ namespace linalg
   double blas_dot(const double *A, const double *B, int N)
   {
     double res = 0;
+    #pragma omp parallel for reduction(+:res)
     for (int i = 0; i < N; i++)
     {
       res += A[i] * B[i];
@@ -78,6 +76,7 @@ namespace linalg
    */
   void blas_axpby(double a, const double *X, double b, double *Y, int N)
   {
+    #pragma omp parallel for
     for (int i = 0; i < N; i++)
     {
       Y[i] = a * X[i] + b * Y[i];
