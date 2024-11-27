@@ -21,7 +21,6 @@ using namespace mesh;
 using namespace linalg;
 using namespace fem::poisson;
 
-
 /******************************************************************************
  * Let's choose our right hand side f of -\Delta u + u = f
  *****************************************************************************/
@@ -64,13 +63,14 @@ int main(int argc, char **argv)
 
 	/* Solve (S + M)U = B */
 	double *U = array(N);
-	int iter = gradient_system_solve(&S, &M, B, U, N);
+	// int iter = gradient_system_solve(&S, &M, B, U, N);
+  int iter = CG_system_solve(&S, &M, B, U, N);
 	printf("System solved in %d iterations.\n", iter);
 
 	printf("Integrity check :\n");
 	printf("-----------------\n");
 	for (int i = 0; i < 8; i++) {
-		if (F[i] != 0) {
+		if (abs(F[i]) > 1e-12) {
 			printf("Ratio U/F : %f\n", U[i] / F[i]);
 		}
 	}

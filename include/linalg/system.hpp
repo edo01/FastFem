@@ -30,6 +30,10 @@ int gradient_system_solve(const struct SparseMatrix *S,
 			  const struct SparseMatrix *M, const double *B,
 			  double *U, int N);
 
+int CG_system_solve(const struct SparseMatrix *S,
+        const struct SparseMatrix *M, const double *B,
+        double *U, int N);
+
 void blas_axpby(double a, const double *X, double b, double *Y, int N);
 
 double blas_dot(const double *A, const double *B, int N);
