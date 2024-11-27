@@ -17,6 +17,7 @@
 #include "fem/poisson.hpp"
 #include "linalg/system.hpp"
 #include "linalg/sparse_matrix.hpp"
+#include "omp.h"
 using namespace mesh;
 using namespace linalg;
 using namespace fem::poisson;
@@ -39,6 +40,10 @@ int main(int argc, char **argv)
 		printf("Usage: %s N\n", argv[0]);
 		return EXIT_FAILURE;
 	}
+
+	//print omp num threads
+	printf("Number of threads: %d\n", omp_get_max_threads());
+
 	struct Mesh m;
 
 	// Build a cube mesh with N subdivisions per side
@@ -64,7 +69,7 @@ int main(int argc, char **argv)
 	/* Solve (S + M)U = B */
 	double *U = array(N);
 	// int iter = gradient_system_solve(&S, &M, B, U, N);
-  int iter = CG_system_solve(&S, &M, B, U, N);
+ 	int iter = CG_system_solve(&S, &M, B, U, N);
 	printf("System solved in %d iterations.\n", iter);
 
 	printf("Integrity check :\n");

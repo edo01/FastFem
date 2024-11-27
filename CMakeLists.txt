@@ -13,5 +13,13 @@ include_directories(include)
 # Find all source files in the src directory
 file(GLOB SOURCES "src/**/*.cpp")
 
+# Find and enable OpenMP
+find_package(OpenMP)
+
 # Add the executable
 add_executable(FastFEM ${SOURCES})
+
+# Link OpenMP libraries
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(FastFEM PUBLIC OpenMP::OpenMP_CXX)
+endif()

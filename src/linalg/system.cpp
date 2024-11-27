@@ -11,7 +11,6 @@ namespace linalg
 
     memset(Mv, 0, M->rows * sizeof(double));
 
-#pragma omp parallel
     for (size_t index = 0; index < M->nnz; index++)
     {
       // MV[i] += M_ij * v[j]
