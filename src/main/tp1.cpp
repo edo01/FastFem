@@ -8,7 +8,6 @@
  *
  * - Implement compensated dot product and see how the accuracy of the solver is affected
  * 
- * - 
  */
 
 #include "mesh/mesh.hpp"
@@ -56,20 +55,21 @@ int main(int argc, char **argv)
 	struct SparseMatrix S;
 	build_fem_matrices(&m, &S, &M);
 
-	/* Fill F */
+	// Fill F 
 	double *F = array(N);
 	for (int i = 0; i < N; i++) {
 		struct Vertex v = m.vertices[i];
 		F[i] = f(v.x, v.y, v.z);
 	}
-	/* Fill B = MF */
+
+	// Fill B = MF
 	double *B = array(N);
 	matrix_vector_product(&M, F, B);
 
-	/* Solve (S + M)U = B */
+	// Solve (S + M)U = B 
 	double *U = array(N);
-	// int iter = gradient_system_solve(&S, &M, B, U, N);
- 	int iter = CG_system_solve(&S, &M, B, U, N);
+	int iter = gradient_system_solve(&S, &M, B, U, N);
+ 	//int iter = CG_system_solve(&S, &M, B, U, N);
 	printf("System solved in %d iterations.\n", iter);
 
 	printf("Integrity check :\n");
@@ -82,8 +82,3 @@ int main(int argc, char **argv)
 
 	return (EXIT_SUCCESS);
 }
-
-
-
-
-
