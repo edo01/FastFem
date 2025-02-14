@@ -6,12 +6,13 @@ namespace fastfem{
 namespace linalg{
 
 class SparseMatrix {
-private:
+protected:
     size_t n_rows;
     size_t n_cols;
     size_t nnz;
 
 public:
+    SparseMatrix(size_t n_rows, size_t n_cols, size_t nnz) : n_rows(n_rows), n_cols(n_cols), nnz(nnz) {}
     virtual ~SparseMatrix() = default;
     virtual Vector gemv(const Vector& x) const = 0;
 
