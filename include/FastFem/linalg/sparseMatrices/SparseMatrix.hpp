@@ -9,20 +9,29 @@ class SparseMatrix {
 protected:
     size_t n_rows;
     size_t n_cols;
-    size_t nnz;
 
 public:
-    SparseMatrix(size_t n_rows, size_t n_cols, size_t nnz) : n_rows(n_rows), n_cols(n_cols), nnz(nnz) {}
+    SparseMatrix(size_t n_rows, size_t n_cols);
     virtual ~SparseMatrix() = default;
-    virtual Vector gemv(const Vector& x) const = 0;
 
-    Vector operator*(const Vector& x) const {
-        return gemv(x);
-    }
+    virtual Vector gemv(const Vector& x) const = 0;
+    Vector operator*(const Vector& x) const;
+
+    const double &operator()(size_t i, size_t j) const;
+    virtual inline size_t nnz() const = 0;
+
+private:
+    virtual const double &get_entry(size_t i, size_t j) const = 0;
+    
+protected:
+    bool check_bounds(size_t i, size_t j) const;
+
 };
 
-class SymmetricMatrix : virtual public SparseMatrix {
-    // Marker class to enforce symmetry
+// Marker class to enforce symmetry
+class SymmetricMatrix : public SparseMatrix {
+    // inherit constructors
+    using SparseMatrix::SparseMatrix;
 };
 
 } // namespace linalg

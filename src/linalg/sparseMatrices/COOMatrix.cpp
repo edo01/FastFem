@@ -3,24 +3,22 @@
 namespace fastfem{
 namespace linalg{
 
-COOMatrix::COOMatrix(size_t n_rows, size_t n_cols, size_t nnz) : SparseMatrix(n_rows, n_cols, nnz) {
-    row_indices.reserve(nnz);
-    col_indices.reserve(nnz);
-    values.reserve(nnz);
+COOMatrix::COOMatrix(size_t n_rows, size_t n_cols, size_t nnz_hint) : SparseMatrix(n_rows, n_cols) {
+    row_indices.reserve(nnz_hint);
+    col_indices.reserve(nnz_hint);
+    values.reserve(nnz_hint);
 }
 
-double &COOMatrix::operator()(size_t i, size_t j) {
-    static double dummy = 0.0;
-    if(i >= n_rows || j >= n_cols){
-        throw std::out_of_range("COOMatrix::operator(): index out of range");
-    }
+const double &COOMatrix::get_entry(size_t i, size_t j) const {
 
-    for(size_t k = 0; k < nnz; ++k){
+    static double dummy = 0.0;
+
+    for(size_t k = 0; k < nnz(); ++k){
         if(row_indices[k] == i && col_indices[k] == j){
             return values[k];
         }
-    }
-
+    }   
+    
     return dummy;
 }
 
@@ -33,10 +31,19 @@ Vector COOMatrix::gemv(const Vector& x) const{
     for(size_t i = 0; i < n_rows; ++i){
         y[i] = 0.0;
     }
-    for(size_t k = 0; k < nnz; ++k){
+    for(size_t k = 0; k < nnz(); ++k){
         y[row_indices[k]] += values[k] * x[col_indices[k]];
     }
     return y;
+}
+
+void COOMatrix::add_entry(size_t i, size_t j, double value){
+    if(!check_bounds(i, j)){
+        throw std::out_of_range("COOMatrix::add_entry(): index out of range");
+    }
+    row_indices.push_back(i);
+    col_indices.push_back(j);
+    values.push_back(value);
 }
 
 } // namespace linalg

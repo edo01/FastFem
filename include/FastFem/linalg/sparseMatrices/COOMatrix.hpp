@@ -13,9 +13,12 @@ private:
     std::vector<double> values;
 
 public:
-    COOMatrix(size_t n_rows, size_t n_cols, size_t nnz);
+    COOMatrix(size_t n_rows, size_t n_cols, size_t nnz_hint = 0);
     Vector gemv(const Vector& x) const override;
-    double &operator()(size_t i, size_t j);
+    inline size_t nnz() const override { return row_indices.size(); }
+    void add_entry(size_t i, size_t j, double value);
+private:
+    const double &get_entry(size_t i, size_t j) const override;
 };
 
 } // namespace linalg
