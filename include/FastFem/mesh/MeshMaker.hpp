@@ -51,6 +51,20 @@ private:
     CubeSurfaceMaker cubeSurfaceMaker;
 };
 
+class SquareMaker : public MeshMaker<2, 2>
+{
+public :
+    SquareMaker(int N) : N(N) {}
+    virtual ~SquareMaker() = default;
+    virtual Mesh<2, 2> make_mesh() const override;
+
+private:
+    int N;
+
+    void build_square_vertices(Mesh<2, 2> &mesh) const;
+    void build_square_triangles(Mesh<2, 2> &mesh) const;
+};
+
 } // namespace mesh
 } // namespace fastfem
 
