@@ -5,6 +5,7 @@
 
 #include "FastFem/mesh/Mesh.hpp"
 #include "FastFem/mesh/MeshMaker.hpp"
+#include "FastFem/mesh/MeshIO.hpp"
 
 using namespace fastfem::mesh;
 int main(int argc, char** argv)
@@ -40,6 +41,16 @@ int main(int argc, char** argv)
 
     assert(mesh3.elem_count() == 2 * N * N);
     assert(mesh3.vtx_count() == (N + 1) * (N + 1));
-    
+
+    MeshIO io1(mesh);
+    io1.save_vtu("cube.vtu");
+
+    MeshIO io2(mesh2);
+    io2.save_vtu("sphere.vtu");
+
+    MeshIO io3(mesh3);
+    io3.save_vtu("square.vtu");
+    io3.save_msh("square.msh");
+
     return 0;
 }
