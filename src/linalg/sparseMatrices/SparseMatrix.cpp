@@ -30,7 +30,15 @@ const double &SparseMatrix::operator()(size_t i, size_t j) const
     return get_entry(i, j);
 }
 
-
+void SparseMatrix::print() const
+{
+    for(size_t i = 0; i < n_rows; ++i){
+        for(size_t j = 0; j < n_cols; ++j){
+            std::cout << get_entry(i, j) << " ";
+        }
+        std::cout << std::endl;
+    }
+}
 
 } // namespace linalg
 } // namespace FastFem

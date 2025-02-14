@@ -23,14 +23,13 @@ const double &COOMatrix::get_entry(size_t i, size_t j) const {
 }
 
 Vector COOMatrix::gemv(const Vector& x) const{
-    if(x.size() != n_cols){
+
+    if(n_cols != x.size()){
         throw std::invalid_argument("COOMatrix::gemv(): incompatible dimensions");
     }
 
     Vector y(n_rows);
-    for(size_t i = 0; i < n_rows; ++i){
-        y[i] = 0.0;
-    }
+
     for(size_t k = 0; k < nnz(); ++k){
         y[row_indices[k]] += values[k] * x[col_indices[k]];
     }
