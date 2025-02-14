@@ -102,8 +102,8 @@ int dedup_mesh_vertices(Mesh<dim, spacedim> &mesh)
         
 	}
 	/* Remap triangle indices */
-	for (int i = 0; i < mesh.elem_count(); i++) {
-		Simplex<dim> T = mesh.get_element(i);
+	for (auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it) {
+		Simplex<dim> T = *it;
         for(int j = 0; j < dim; j++){
             T.set_vertex(j, remap[T.get_vertex(j)]);
             assert(T.get_vertex(j) < vtx_count);

@@ -71,11 +71,10 @@ Mesh<2,3> CubeSurfaceMaker::make_mesh() const
 	mesh.resize_vertices(vtx_count);
 
 	// Rescale to unit cube centered at the origin
-	 for (int i = 0; i < mesh.vtx_count(); ++i) {
-		struct Vertex<3> &v = mesh.get_vertex(i);
-		v.coords[0] = 2 * v.coords[0] / N - 1;
-		v.coords[1] = 2 * v.coords[1] / N - 1;
-		v.coords[2] = 2 * v.coords[2] / N - 1;
+	for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
+		v->coords[0] = 2 * v->coords[0] / N - 1;
+		v->coords[1] = 2 * v->coords[1] / N - 1;
+		v->coords[2] = 2 * v->coords[2] / N - 1;
 	}
 
 	return mesh;
