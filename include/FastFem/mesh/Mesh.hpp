@@ -108,6 +108,12 @@ public:
     void reserve_vertices(size_t n) { vertices.reserve(n); }
     void reserve_elements(size_t n) { elements.reserve(n); }
 
+    auto vtx_begin() { return vertices.begin(); }
+    auto vtx_end() { return vertices.end(); }
+
+    auto elem_begin() { return elements.begin(); }
+    auto elem_end() { return elements.end(); }
+
 private:
     std::vector<Vertex<spacedim>> vertices;
     std::vector<Simplex<dim>> elements;

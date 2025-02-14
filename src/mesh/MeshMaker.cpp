@@ -79,8 +79,28 @@ Mesh<2,3> CubeSurfaceMaker::make_mesh() const
 	}
 
 	return mesh;
-}
+};
 
+
+void SphereSurfaceMaker::sendPointsToSphere(Mesh<2,3> &mesh) const{
+	/**
+	 * The so-called spherical cube, built by simply normalizing all vertices of
+	 * the cube mesh so that they end up in S^2
+	 */
+	//use foreach on the vertices of the mesh
+	for(auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v){
+		double norm = sqrt(v->coords[0] * v->coords[0] + v->coords[1] * v->coords[1] + v->coords[2] * v->coords[2]);
+		v->coords[0] /= norm;
+		v->coords[1] /= norm;
+		v->coords[2] /= norm;
+	}
+};
+
+Mesh<2,3> SphereSurfaceMaker::make_mesh() const{
+	Mesh<2,3> mesh = cubeSurfaceMaker.make_mesh();
+	sendPointsToSphere(mesh);
+	return mesh;
+};
 
 } // namespace mesh
 } // namespace fastfem

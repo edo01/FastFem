@@ -36,16 +36,19 @@ private:
 };
 
 
-class makeSphereSurface : public MeshMaker<2, 3>
+class SphereSurfaceMaker : public MeshMaker<2, 3>
 {
 public:
-    makeSphereSurface(int N) : N(N) {}
-    virtual ~makeSphereSurface() = default;
+    SphereSurfaceMaker(int N) : N(N), cubeSurfaceMaker(N) {}
+    virtual ~SphereSurfaceMaker() = default;
+    virtual Mesh<2, 3> make_mesh() const override;
 
 private:
-    void sendPointsToSphere() const;
+    void sendPointsToSphere(Mesh<2,3> &mesh) const;
 
     int N;
+    // we leverage CubeSurfaceMaker
+    CubeSurfaceMaker cubeSurfaceMaker;
 };
 
 } // namespace mesh
