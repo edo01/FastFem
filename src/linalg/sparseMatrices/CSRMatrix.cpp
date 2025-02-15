@@ -41,7 +41,7 @@ const double &CSRMatrix::get_entry(size_t i, size_t j) const
 
 void CSRMatrix::add_entry(size_t index, double value)
 {
-    if(index >= base_pattern->col_indices.size()){
+    if(index >= nnz()){
         throw std::out_of_range("CSRMatrix::add_entry(): index out of range");
     }
     values[index] = value;
@@ -58,6 +58,7 @@ Vector CSRMatrix::gemv(const Vector& x) const {
     const auto& row_ptr = base_pattern->row_ptr;
     const auto& col_indices = base_pattern->col_indices;
 
+    #pragma omp parallel for
     for(size_t i = 0; i < n_rows; ++i){
         size_t row_start = row_ptr[i];
         size_t row_end = row_ptr[i + 1];
@@ -68,6 +69,28 @@ Vector CSRMatrix::gemv(const Vector& x) const {
 
     return y;
 }
+
+void CSRMatrix::print_pattern() const
+{
+    for(size_t i = 0; i < n_rows; ++i)
+    {
+        for(size_t j = 0; j < n_cols; ++j)
+        {
+            bool found = false;
+            for(size_t k = base_pattern->row_ptr[i]; k < base_pattern->row_ptr[i + 1]; ++k)
+            {
+                if(base_pattern->col_indices[k] == j)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            std::cout << (found ? "1" : "0") << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+        
 
 } // namespace linalg
 } // namespace FastFem

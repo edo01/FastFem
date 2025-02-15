@@ -1,5 +1,5 @@
-#ifndef CSRMATRIX_HPP
-#define CSRMATRIX_HPP
+#ifndef FASTFEM_CSRMATRIX_HPP
+#define FASTFEM_CSRMATRIX_HPP
 
 #include <FastFem/linalg/sparseMatrices/SparseMatrix.hpp>
 #include <vector>
@@ -18,7 +18,7 @@ struct CSRPattern
 
 class CSRMatrix : public SparseMatrix
 {
-private:
+protected:
     std::shared_ptr<CSRPattern> base_pattern;
     std::vector<double> values;
 
@@ -29,7 +29,9 @@ public:
 
     inline size_t nnz() const override { return base_pattern->col_indices.size(); }
 
-    virtual void add_entry(size_t index, double value);
+    void add_entry(size_t index, double value);
+
+    void print_pattern() const;
 
 private:
     const double &get_entry(size_t i, size_t j) const override;
@@ -38,7 +40,7 @@ private:
 } // namespace linalg
 } // namespace FastFem
 
-#endif // CSRMATRIX_HPP
+#endif // FASTFEM_CSRMATRIX_HPP
 
 
 // 0 1 0 2     0 1 0 2

@@ -31,19 +31,17 @@ Vector Vector::operator*(double scalar) const {
     return result;
 }
 
-Vector Vector::axpby(double a, const Vector& x, double b, const Vector& y) const {
-    Vector result(data.size());
+void Vector::axpby(double a, double b, const Vector& y) {
     #pragma omp parallel for
     for (std::size_t i = 0; i < data.size(); ++i) {
-        result.data[i] = a * x.data[i] + b * y.data[i];
+        this->data[i] = a * this->data[i] + b * y.data[i];
     }
-    return result;
 }
 
-void Vector::axpby(double a, const Vector& x, double b, Vector& y) const {
+void Vector::axpy(double a, const Vector& y) {
     #pragma omp parallel for
     for (std::size_t i = 0; i < data.size(); ++i) {
-        y.data[i] = a * x.data[i] + b * y.data[i];
+        this->data[i] = a * this->data[i] + y.data[i];
     }
 }
 

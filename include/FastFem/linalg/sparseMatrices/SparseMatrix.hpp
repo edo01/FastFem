@@ -1,5 +1,5 @@
-#ifndef SPARSEMATRIX_HPP
-#define SPARSEMATRIX_HPP
+#ifndef FASTFEM_SPARSEMATRIX_HPP
+#define FASTFEM_SPARSEMATRIX_HPP
 #include <FastFem/linalg/Vector.hpp>
 
 namespace fastfem{
@@ -44,4 +44,4 @@ class SymmetricMatrix : public SparseMatrix {
 } // namespace linalg
 } // namespace FastFem
 
-#endif // SPARSEMATRIX_HPP
+#endif // FASTFEM_SPARSEMATRIX_HPP

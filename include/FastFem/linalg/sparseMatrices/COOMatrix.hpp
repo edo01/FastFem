@@ -1,5 +1,5 @@
-#ifndef FASTFEM_LINALG_SPARSEMATRICES_COOMATRIX_HPP
-#define FASTFEM_LINALG_SPARSEMATRICES_COOMATRIX_HPP
+#ifndef FASTFEM_COOMATRIX_HPP
+#define FASTFEM_COOMATRIX_HPP
 
 #include <FastFem/linalg/sparseMatrices/SparseMatrix.hpp>
 
@@ -24,4 +24,4 @@ private:
 } // namespace linalg
 } // namespace FastFem
 
-#endif // FASTFEM_LINALG_SPARSEMATRICES_COOMATRIX_HPP
+#endif // FASTFEM_COOMATRIX_HPP

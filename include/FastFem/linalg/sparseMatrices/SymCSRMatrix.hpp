@@ -1,5 +1,5 @@
-#ifndef SYMCSRMATRIX_HPP
-#define SYMCSRMATRIX_HPP
+#ifndef FASTFEM_SYMCSRMATRIX_HPP
+#define FASTFEM_SYMCSRMATRIX_HPP
 
 #include <FastFem/linalg/sparseMatrices/CSRMatrix.hpp>
 // #include <vector>
@@ -15,8 +15,6 @@ public:
 
     Vector gemv(const Vector& x) const override;
 
-    void add_entry(size_t index, double value) override;
-
     inline bool is_symmetric() const override { return true; }
 
 private:
@@ -26,4 +24,4 @@ private:
 } // namespace linalg
 } // namespace FastFem
 
-#endif // SYMCSRMATRIX_HPP
+#endif // FASTFEM_SYMCSRMATRIX_HPP
