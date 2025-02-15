@@ -38,7 +38,7 @@ void MeshIO<dim,spacedim>::save_vtu(const std::string &filename) const{
     file << "<DataArray type=\"Float64\" NumberOfComponents=\"" << 3 << "\" format=\"ascii\">\n"; 
     for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
         for(unsigned int i = 0; i < spacedim; i++)
-            file << v->coords[i] << " ";
+            file << v->point.coords[i] << " ";
         if (spacedim < 3) {
             for(unsigned int i = spacedim; i < 3; i++)
                 file << "0 ";
@@ -88,7 +88,7 @@ void MeshIO<dim,spacedim>::save_msh(const std::string &filename) const{
     for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
         file << id++ << " ";
         for(unsigned int i = 0; i < spacedim; i++)
-            file << v->coords[i] << " ";
+            file << v->point.coords[i] << " ";
         if (spacedim < 3) {
             for(unsigned int i = spacedim; i < 3; i++)
                 file << "0 ";

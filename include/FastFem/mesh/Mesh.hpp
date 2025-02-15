@@ -13,17 +13,23 @@
 namespace fastfem {
 namespace mesh {
 
+template <unsigned int spacedim>
+struct Point
+{
+    double coords[spacedim];
+};
+
 /* A Vertex is simply a point in R^3 */
 template <unsigned int spacedim>
 struct Vertex 
 {
-    double coords[spacedim];
+    Point<spacedim> point;
 
     bool operator==(const Vertex<spacedim> &v) const 
     {
         for (int i = 0; i < spacedim; ++i)
         {
-            if (coords[i] != v.coords[i])
+            if (point.coords[i] != v.point.coords[i])
                 return false;
         }
         return true;

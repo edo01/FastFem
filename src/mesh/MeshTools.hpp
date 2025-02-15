@@ -32,7 +32,7 @@ struct VertexHasher
         Vertex<spacedim> v = mesh.get_vertex(key);
         
         for(int i=0; i<spacedim; i++){
-            std::size_t hvalue = hasher(v.coords[i]);
+            std::size_t hvalue = hasher(v.point.coords[i]);
             hash = hashCombine(hash, hvalue);
             std::size_t hindex = hasher_int(i);
             hash = hashCombine(hash, hindex);

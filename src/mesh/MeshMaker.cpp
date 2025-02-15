@@ -72,9 +72,9 @@ Mesh<2,3> CubeSurfaceMaker::make_mesh() const
 
 	// Rescale to unit cube centered at the origin
 	for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
-		v->coords[0] = 2 * v->coords[0] / N - 1;
-		v->coords[1] = 2 * v->coords[1] / N - 1;
-		v->coords[2] = 2 * v->coords[2] / N - 1;
+		v->point.coords[0] = 2 * v->point.coords[0] / N - 1;
+		v->point.coords[1] = 2 * v->point.coords[1] / N - 1;
+		v->point.coords[2] = 2 * v->point.coords[2] / N - 1;
 	}
 
 	return mesh;
@@ -87,10 +87,10 @@ void SphereSurfaceMaker::sendPointsToSphere(Mesh<2,3> &mesh) const{
 	 */
 	//use foreach on the vertices of the mesh
 	for(auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v){
-		double norm = sqrt(v->coords[0] * v->coords[0] + v->coords[1] * v->coords[1] + v->coords[2] * v->coords[2]);
-		v->coords[0] /= norm;
-		v->coords[1] /= norm;
-		v->coords[2] /= norm;
+		double norm = sqrt(v->point.coords[0] * v->point.coords[0] + v->point.coords[1] * v->point.coords[1] + v->point.coords[2] * v->point.coords[2]);
+		v->point.coords[0] /= norm;
+		v->point.coords[1] /= norm;
+		v->point.coords[2] /= norm;
 	}
 };
 
@@ -148,8 +148,8 @@ Mesh<2,2> SquareMaker::make_mesh() const {
 
 	// Rescale to unit cube centered at the origin
 	for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
-		v->coords[0] = 2 * v->coords[0] / N - 1;
-		v->coords[1] = 2 * v->coords[1] / N - 1;
+		v->point.coords[0] = 2 * v->point.coords[0] / N - 1;
+		v->point.coords[1] = 2 * v->point.coords[1] / N - 1;
 	}
 
 	return mesh;
