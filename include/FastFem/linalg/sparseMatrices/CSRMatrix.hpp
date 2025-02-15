@@ -29,7 +29,7 @@ public:
 
     inline size_t nnz() const override { return base_pattern->col_indices.size(); }
 
-    void add_entry(size_t index, double value);
+    virtual void add_entry(size_t index, double value);
 
 private:
     const double &get_entry(size_t i, size_t j) const override;
@@ -39,3 +39,13 @@ private:
 } // namespace FastFem
 
 #endif // CSRMATRIX_HPP
+
+
+// 0 1 0 2     0 1 0 2
+// 1 1 0 0       1 0 0
+// 0 0 1 0 -->     1 0
+// 2 0 0 2           2
+
+// row_ptr = {0, 2, 3, 4, 5}
+// col_indices = {1, 3, 1, 2, 3}
+

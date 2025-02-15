@@ -25,6 +25,8 @@ public:
     size_t get_n_rows() const { return n_rows; }
     size_t get_n_cols() const { return n_cols; }
 
+    virtual inline bool is_symmetric() const { return false; } // override in symmetric matrices
+
 private:
     virtual const double &get_entry(size_t i, size_t j) const = 0;
 
