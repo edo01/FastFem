@@ -1,25 +1,44 @@
 cmake_minimum_required(VERSION 3.10)
-
-# Set the project name
-project(FastFEM)
-
-# Specify the C++ standard
+project(FastFem)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Make OpenMP optional
+option(USE_OPENMP "Enable OpenMP support" ON)
 
 # Add include directories
 include_directories(include)
 
-# Find all source files in the src directory
-file(GLOB SOURCES "src/**/*.cpp")
+# Collect all source files
+file(GLOB_RECURSE LIB_SOURCES "src/*.cpp")
+file(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
 
-# Find and enable OpenMP
-find_package(OpenMP)
+# Define the shared library
+add_library(FastFem SHARED ${LIB_SOURCES})
+target_include_directories(FastFem PUBLIC include)
 
-# Add the executable
-add_executable(FastFEM ${SOURCES})
-
-# Link OpenMP libraries
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(FastFEM PUBLIC OpenMP::OpenMP_CXX)
+if(USE_OPENMP)
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(FastFem PUBLIC OpenMP::OpenMP_CXX)
+        target_compile_definitions(FastFem PUBLIC HAVE_OPENMP)
+    else()
+        message(WARNING "OpenMP requested but not found. Building without OpenMP support.")
+    endif()
 endif()
+
+# Add tests
+foreach(TEST_FILE ${TEST_SOURCES})
+    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+    add_executable(${TEST_NAME} ${TEST_FILE})
+    target_link_libraries(${TEST_NAME} FastFem)
+    
+    if(OpenMP_CXX_FOUND AND USE_OPENMP)
+        target_link_libraries(${TEST_NAME} OpenMP::OpenMP_CXX)
+    endif()
+endforeach()
+
+# Enable testing support
+include(CTest)
+add_test(NAME RunAllTests COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
