@@ -8,16 +8,11 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
+#include <FastFem/mesh/Geometry.hpp>
 #include <vector>
 
 namespace fastfem {
 namespace mesh {
-
-template <unsigned int spacedim>
-struct Point
-{
-    double coords[spacedim];
-};
 
 /* A Vertex is simply a point in R^3 */
 template <unsigned int spacedim>
@@ -36,54 +31,75 @@ struct Vertex
     }
 };
 
-
-template <unsigned int dim>
-class Simplex
+/**
+ * We separate the definition of a simplex from the mesh. A MeshSimplex is a utility class that is used to represent a simplex 
+ * in a mesh. It is a container for the indices of the vertices of the simplex and 
+ */
+template <unsigned int dim, unsigned int spacedim=dim>
+class MeshSimplex
 {
 public:
-    size_t vertex_count() const { return dim + 1; }
-    size_t face_count() const { return dim + 1; }
+    MeshSimplex(const size_t v[dim + 1])
+    {
+        std::copy(v, v + dim + 1, vertices);
+    }
 
-    size_t get_vertex(unsigned int i) const { return vertices[i]; }
-    void set_vertex(unsigned int i, unsigned int v) { vertices[i] = v; }
-
-    Simplex(const int v[])
+    // just check if the vertices are the same
+    bool operator==(const Simplex<dim> &s) const
     {
         for (size_t i = 0; i < dim + 1; ++i)
         {
-            vertices[i] = v[i];
+            if (vertices[i] != s.vertices[i])
+                return false;
         }
-        
-        // build faces
-        /* for (size_t i = 0; i < dim + 1; ++i)
-        {
-            Vertex<spacedim> face_vertices[dim];
-            for (size_t j = 0; j < dim; ++j)
-            {
-                if (j < i)
-                    face_vertices[j] = v[j];
-                else
-                    face_vertices[j] = v[j + 1];
-            }
-            faces[i] = Simplex<dim-1>(face_vertices);
-        } */
+        return true;
     }
 
+    void set_vertex(size_t i, size_t v) { vertices[i] = v; }
+    size_t get_vertex(size_t i) const { return vertices[i]; }
+    int vertex_count() const { return dim + 1; }
+
 private:
-    //Simplex<dim-1> faces[dim];
     size_t vertices[dim + 1];
 };
 
-// Specialization for 1-dimensional simplex (a line segment)
-/* template <>
-class Simplex<1>
-{
+/* template <unsigned int dim, unsigned int spacedim=dim>
+class BoundaryIterator {
 public:
-    size_t vertex_count() const { return 2; }
-    size_t face_count() const { return 2; }
+    using iterator_category = std::forward_iterator_tag;
+    using value_type =MeshSimplex<dim, spacedim>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = MeshSimplex<dim, spacedim>*;
+    using reference = MeshSimplex<dim, spacedim>&;
+
+    BoundaryIterator(std::vector<size_t>::iterator it, std::vector<Simplex<dim>>& elems)
+        : boundary_it(it), elements(elems) {}
+
+    reference operator*() const { return elements[*boundary_it]; }
+    pointer operator->() const { return &elements[*boundary_it]; }
+
+    BoundaryIterator& operator++() {
+        ++boundary_it;
+        return *this;
+    }
+
+    BoundaryIterator operator++(int) {
+        BoundaryIterator tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    friend bool operator==(const BoundaryIterator& a, const BoundaryIterator& b) {
+        return a.boundary_it == b.boundary_it;
+    }
+
+    friend bool operator!=(const BoundaryIterator& a, const BoundaryIterator& b) {
+        return !(a == b);
+    }
 
 private:
-    size_t vertices[2];
+    std::vector<size_t>::iterator boundary_it;
+    std::vector<Simplex<dim>>& elements;
 }; */
 
 /**
@@ -101,13 +117,13 @@ public:
     size_t elem_count() const { return elements.size(); }
 
     void add_vertex(const Vertex<spacedim> &v) { vertices.push_back(v); }
-    void add_element(const Simplex<dim> &e) { elements.push_back(e); }
+    void add_element(const MeshSimplex<dim, spacedim> &e) { elements.push_back(e); }
 
     void set_vertex(size_t i, const Vertex<spacedim> &v) { vertices[i] = v; }
-    void set_element(size_t i, const Simplex<dim> &e) { elements[i] = e; }
+    void set_element(size_t i, const MeshSimplex<dim, spacedim> &e) { elements[i] = e; }
 
     Vertex<spacedim> &get_vertex(size_t i) { return vertices[i]; }
-    Simplex<dim> &get_element(size_t i) { return elements[i]; }
+    MeshSimplex<dim, spacedim> &get_mesh_element(size_t i) { return elements[i]; }
 
     void resize_vertices(size_t n) { vertices.resize(n); }
 
@@ -120,9 +136,34 @@ public:
     auto elem_begin() { return elements.begin(); }
     auto elem_end() { return elements.end(); }
 
-private:
+    /* void add_boundary(size_t i) { boundary.push_back(i); }
+    size_t boundary_count() const { return boundary.size(); } */
+
+    Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const
+    {
+        Point<spacedim> p[dim + 1];
+        for (size_t i = 0; i < dim + 1; ++i)
+        {
+            p[i] = vertices[s.get_vertex(i)];
+        }
+        return Simplex<dim, spacedim>(p);
+    }
+
+    /*  Simplex<dim> get_boundary_elem(size_t i) const { return elements[boundary[i]]; }
+    
+    BoundaryIterator<dim> boundary_begin() {
+        return BoundaryIterator(boundary.begin(), elements);
+    }
+
+    BoundaryIterator<dim> boundary_end() {
+        return BoundaryIterator(boundary.end(), elements);
+    } */
+    
+    private:
     std::vector<Vertex<spacedim>> vertices;
-    std::vector<Simplex<dim>> elements;
+    std::vector<MeshSimplex<dim, spacedim>> elements;
+    //std::vector<size_t> boundary;
+
 };
 
 }// mesh

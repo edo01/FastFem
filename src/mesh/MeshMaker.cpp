@@ -36,17 +36,17 @@ void CubeSurfaceMaker::build_cube_triangles(Mesh<2,3> &mesh) const
 	int V = N + 1;
     mesh.reserve_elements(12 * N * N);
     
-    int indices[3];
+    size_t indices[3];
 	for (int face = 0; face < 6; face++) {
 		for (int row = 0; row < N; row++) {
 			for (int col = 0; col < N; col++) {
 				int v = face * V * V + row * V + col;
                 
                 indices[0] = v; indices[1] = v + 1; indices[2] = v + 1 + V;
-                Simplex<2> t1(indices);
+                MeshSimplex<2,3> t1(indices);
                 mesh.add_element(t1);
                 indices[0] = v; indices[1] = v + 1 + V; indices[2] = v + V;
-                Simplex<2> t2(indices);
+                MeshSimplex<2, 3> t2(indices);
                 mesh.add_element(t2);
 			}
 		}
@@ -121,16 +121,16 @@ void SquareMaker::build_square_triangles(Mesh<2,2>& mesh) const
 	int V = N + 1;
 	mesh.reserve_elements(2 * N * N);
 	
-	int indices[3];
+	size_t indices[3];
 	for (int row = 0; row < N; row++) {
 		for (int col = 0; col < N; col++) {
 			int v = row * V + col;
 			
 			indices[0] = v; indices[1] = v + 1; indices[2] = v + 1 + V;
-			Simplex<2> t1(indices);
+			MeshSimplex<2,2> t1(indices);
 			mesh.add_element(t1);
 			indices[0] = v; indices[1] = v + 1 + V; indices[2] = v + V;
-			Simplex<2> t2(indices);
+			MeshSimplex<2,2> t2(indices);
 			mesh.add_element(t2);
 		}
 	}
@@ -152,6 +152,14 @@ Mesh<2,2> SquareMaker::make_mesh() const {
 		v->point.coords[1] = 2 * v->point.coords[1] / N - 1;
 	}
 
+	// add boundary elements
+/* 	for (int i = 0; i < V; i++) {
+		mesh.add_boundary(i);
+		mesh.add_boundary(V * i);
+		mesh.add_boundary(V * (V - 1) + i);
+		mesh.add_boundary(V * i + V - 1);
+	}
+ */
 	return mesh;
 }
 
