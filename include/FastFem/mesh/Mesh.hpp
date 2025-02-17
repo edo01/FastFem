@@ -8,8 +8,12 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include <FastFem/mesh/Geometry.hpp>
 #include <vector>
+#include <stdint.h>
+
+#include "FastFem/mesh/Geometry.hpp"
+#include "FastFem/mesh/VertexHasher.hpp"
+#include "FastFem/common/hash_table.h"
 
 namespace fastfem {
 namespace mesh {
@@ -22,7 +26,7 @@ struct Vertex
 
     bool operator==(const Vertex<spacedim> &v) const 
     {
-        for (int i = 0; i < spacedim; ++i)
+        for (unsigned int i = 0; i < spacedim; ++i)
         {
             if (point.coords[i] != v.point.coords[i])
                 return false;
@@ -45,9 +49,9 @@ public:
     }
 
     // just check if the vertices are the same
-    bool operator==(const Simplex<dim> &s) const
+    bool operator==(const MeshSimplex<dim, spacedim> &s) const
     {
-        for (size_t i = 0; i < dim + 1; ++i)
+        for (unsigned int i = 0; i < dim + 1; ++i)
         {
             if (vertices[i] != s.vertices[i])
                 return false;
@@ -111,12 +115,14 @@ public:
         return Simplex<dim, spacedim>(p);
     }
 
+ 
+
     private:
     std::vector<Vertex<spacedim>> vertices;
     std::vector<MeshSimplex<dim, spacedim>> elements;
+
     // Pointer to the boundary vertices
     std::vector<size_t> boundary;
-    
 
 };
 

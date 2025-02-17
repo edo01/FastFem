@@ -144,8 +144,6 @@ Mesh<2,2> SquareMaker::make_mesh() const {
 	build_square_vertices(mesh);
 	build_square_triangles(mesh);
 
-	int V = N + 1;
-
 	// Rescale to unit cube centered at the origin
 	for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
 		v->point.coords[0] = 2 * v->point.coords[0] / N - 1;

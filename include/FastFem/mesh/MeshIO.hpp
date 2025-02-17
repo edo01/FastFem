@@ -50,7 +50,7 @@ void MeshIO<dim,spacedim>::save_vtu(const std::string &filename) const{
     file << "<Cells>\n";
     file << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
     for (auto e = mesh.elem_begin(); e != mesh.elem_end(); ++e) {
-        for (size_t i = 0; i < e->vertex_count(); ++i) {
+        for (int i = 0; i < e->vertex_count(); ++i) {
             file << e->get_vertex(i) << " ";
         }
         file << "\n";
@@ -104,7 +104,7 @@ void MeshIO<dim,spacedim>::save_msh(const std::string &filename) const{
         file << "2 "; // 2 corresponds to VTK_TRIANGLE in Gmsh file format
         file << "3 "; // 3 corresponds to number of tags
         file << "1 1 1 "; // tags
-        for (size_t i = 0; i < e->vertex_count(); ++i) {
+        for (int i = 0; i < e->vertex_count(); ++i) {
             file << e->get_vertex(i) << " ";
         }
         file << "\n";
