@@ -13,6 +13,7 @@
 #endif
 #include <assert.h>
 #include <stdlib.h>
+#include <vector>
 
 #include "sys_utils.h"
 
@@ -38,11 +39,11 @@ struct HashTable {
     public:
 	/* Methods */
 	HashTable(size_t expected_nkeys = 8, H hasher = H());
-	~HashTable();
+	~HashTable(){};
 	size_t size() const;
 	void clear();
 	void reserve(size_t expected_nkeys);
-	V *get(K key) const;
+	V *get(K key);
 	V *get_or_set(K key, V alt_val);
 	void set_at(K key, V val);
 	float load_factor() const;
@@ -51,8 +52,8 @@ struct HashTable {
 	/* Members */
 	size_t _size;
 	size_t _buckets;
-	K *keys;
-	V *vals;
+	std::vector<K> keys;
+	std::vector<V> vals;
 	H hasher;
 	/* Methods */
 	void grow(size_t buckets);
@@ -61,7 +62,7 @@ struct HashTable {
 
 /* Free function not linked to the class but useful in similar contexts */
 template <typename K, typename H>
-static inline size_t hash_lookup(K *keys, size_t buckets, H hasher, K key)
+static inline size_t hash_lookup(const std::vector<K> &keys, size_t buckets, H hasher, K key)
 {
 	assert(((buckets - 1) & buckets) == 0);
 	size_t mask = buckets - 1;
@@ -92,22 +93,8 @@ HashTable<K, V, H>::HashTable(size_t expected_keys, H hasher)
 		_buckets *= 2;
 	}
 
-	keys = static_cast<K *>(malloc(_buckets * sizeof(K)));
-	vals = static_cast<V *>(malloc(_buckets * sizeof(V)));
-	assert(keys != nullptr && vals != nullptr);
-
-	clear();
-}
-
-template <typename K, typename V, typename H> HashTable<K, V, H>::~HashTable()
-{
-	_buckets = 0;
-	_size = 0;
-
-	free(keys);
-	keys = nullptr;
-	free(vals);
-	vals = nullptr;
+	keys.resize(_buckets, hasher.empty_key);
+	vals.resize(_buckets);
 }
 
 template <typename K, typename V, typename H>
@@ -118,10 +105,8 @@ inline size_t HashTable<K, V, H>::size() const
 
 template <typename K, typename V, typename H> void HashTable<K, V, H>::clear()
 {
-	for (size_t i = 0; i < _buckets; ++i) {
-		keys[i] = hasher.empty_key;
-		assert(hasher.is_empty(keys[i]));
-	}
+	keys.clear();
+	vals.clear();
 	_size = 0;
 }
 
@@ -137,7 +122,7 @@ void HashTable<K, V, H>::reserve(size_t expected_keys)
 }
 
 template <typename K, typename V, typename H>
-inline V *HashTable<K, V, H>::get(K key) const
+inline V *HashTable<K, V, H>::get(K key)
 {
 	size_t bucket = hash_lookup(keys, _buckets, hasher, key);
 	return hasher.is_empty(keys[bucket]) ? nullptr : &vals[bucket];
@@ -195,12 +180,8 @@ void HashTable<K, V, H>::grow(size_t new_buckets)
 
 	assert((new_buckets & (new_buckets - 1)) == 0);
 
-	K *newk = (K *)malloc(new_buckets * sizeof(*newk));
-	V *newv = (V *)malloc(new_buckets * sizeof(*newv));
-
-	for (size_t i = 0; i < new_buckets; ++i) {
-		newk[i] = hasher.empty_key;
-	}
+	std::vector<K> newk(new_buckets, hasher.empty_key);
+	std::vector<V> newv(new_buckets);
 
 	for (size_t probe = 0; probe < _buckets; ++probe) {
 		const K key = keys[probe];
@@ -215,11 +196,10 @@ void HashTable<K, V, H>::grow(size_t new_buckets)
 		newv[new_idx] = vals[probe];
 	}
 
-	free(keys);
-	free(vals);
-	keys = newk;
-	vals = newv;
+	keys = std::move(newk);
+	vals = std::move(newv);
 	_buckets = new_buckets;
+
 }
 
 template <typename K, typename V, typename H>
