@@ -20,7 +20,7 @@ public:
     const double &operator()(size_t i, size_t j) const;
     virtual inline size_t nnz() const = 0;
 
-    void print() const;
+    void print(const std::string& name = "") const;
 
     size_t get_n_rows() const { return n_rows; }
     size_t get_n_cols() const { return n_cols; }

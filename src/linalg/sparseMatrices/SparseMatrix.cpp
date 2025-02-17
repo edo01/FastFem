@@ -1,5 +1,8 @@
 #include "FastFem/linalg/sparseMatrices/SparseMatrix.hpp"
 
+#include <iostream>
+#include <iomanip>
+
 namespace fastfem{
 namespace linalg{
 
@@ -30,13 +33,17 @@ const double &SparseMatrix::operator()(size_t i, size_t j) const
     return get_entry(i, j);
 }
 
-void SparseMatrix::print() const
+void SparseMatrix::print(const std::string& name) const
 {
-    for(size_t i = 0; i < n_rows; ++i){
-        for(size_t j = 0; j < n_cols; ++j){
-            std::cout << get_entry(i, j) << " ";
+    if (!name.empty()) {
+        std::cout << name << std::endl;
+    }
+
+    for (size_t i = 0; i < n_rows; ++i) {
+        for (size_t j = 0; j < n_cols; ++j) {
+            std::cout << std::fixed << std::setprecision(2) << std::setw(5) << get_entry(i, j) << " ";
         }
-        std::cout << std::endl;
+        std::cout << '\n';  // Use '\n' for better performance over std::endl
     }
 }
 

@@ -28,13 +28,14 @@ public:
     Vector operator+(const Vector& other) const;
     Vector operator-(const Vector& other) const;
     Vector operator*(double scalar) const;
-    void axpby(double a, double b, const Vector& y);  // x = a*x + b*y
-    void axpy(double a, const Vector& y);  // x = a*x + y
     double dot(const Vector& other) const;
     double norm() const;
 
+    static void axpby(double a, const Vector& x, double b, Vector& y);  // y = a*x + b*y
+    static void axpy(double a, const Vector& x, Vector& y);  // y = a*x + y
+
     // I/O
-    void print() const;
+    void print(std::string name = "") const;
 };
 
 } // namespace linalg

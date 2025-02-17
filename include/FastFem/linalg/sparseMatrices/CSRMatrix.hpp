@@ -13,7 +13,8 @@ struct CSRPattern
     std::vector<size_t> row_ptr;
     std::vector<size_t> col_indices;
 
-    CSRPattern(std::initializer_list<size_t> row_ptr, std::initializer_list<size_t> col_indices);
+    //CSRPattern(std::initializer_list<size_t> row_ptr, std::initializer_list<size_t> col_indices);
+    CSRPattern(const std::vector<size_t>& row_ptr, const std::vector<size_t>& col_indices);
 };
 
 class CSRMatrix : public SparseMatrix

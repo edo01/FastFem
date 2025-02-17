@@ -2,6 +2,7 @@
 #define FASTFEM_COOMATRIX_HPP
 
 #include <FastFem/linalg/sparseMatrices/SparseMatrix.hpp>
+#include <FastFem/linalg/sparseMatrices/CSRMatrix.hpp>
 
 namespace fastfem{
 namespace linalg{
@@ -17,6 +18,12 @@ public:
     Vector gemv(const Vector& x) const override;
     inline size_t nnz() const override { return row_indices.size(); }
     void add_entry(size_t i, size_t j, double value);
+
+    static COOMatrix random(size_t n_rows, size_t n_cols, double sparsity, double min_value = -1.0, double max_value = 1.0, bool upper_triangular = false);
+
+    CSRMatrix to_CSR() const;
+
+    void print_pattern() const;
 private:
     const double &get_entry(size_t i, size_t j) const override;
 };

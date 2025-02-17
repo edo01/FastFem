@@ -1,15 +1,26 @@
 #include "FastFem/linalg/sparseMatrices/CSRMatrix.hpp"
 #include <algorithm>
+#include <random>
 
 namespace fastfem{
 namespace linalg{
 
-CSRPattern::CSRPattern(std::initializer_list<size_t> row_ptr, std::initializer_list<size_t> col_indices) : row_ptr(row_ptr), col_indices(col_indices)
+// CSRPattern::CSRPattern(std::initializer_list<size_t> row_ptr, std::initializer_list<size_t> col_indices) : row_ptr(row_ptr), col_indices(col_indices)
+// {
+//     if(this->row_ptr.size() < 2){
+//         throw std::invalid_argument("CSRPattern::CSRPattern(): invalid row_ptr size");
+//     }
+//     if(this->col_indices.size() != this->row_ptr.back()){
+//         throw std::invalid_argument("CSRPattern::CSRPattern(): invalid col_indices size");
+//     }
+// }
+
+CSRPattern::CSRPattern(const std::vector<size_t>& row_ptr, const std::vector<size_t>& col_indices) : row_ptr(row_ptr), col_indices(col_indices)
 {
     if(this->row_ptr.size() < 2){
         throw std::invalid_argument("CSRPattern::CSRPattern(): invalid row_ptr size");
     }
-    if(this->col_indices.size() != this->row_ptr.back()){
+    if(this->col_indices.size() != (!this->row_ptr.empty() ? this->row_ptr.back() : 0)){
         throw std::invalid_argument("CSRPattern::CSRPattern(): invalid col_indices size");
     }
 }
@@ -19,7 +30,7 @@ CSRMatrix::CSRMatrix(size_t n_cols, const CSRPattern& pattern) :
   base_pattern(std::make_shared<CSRPattern>(pattern)),
   values(pattern.col_indices.size())
 {
-    if(n_cols == 0 || *std::max_element(pattern.col_indices.begin(), pattern.col_indices.end()) >= n_cols){
+    if(nnz() > 0 && *std::max_element(pattern.col_indices.begin(), pattern.col_indices.end()) >= n_cols){
         throw std::invalid_argument("CSRMatrix::CSRMatrix(): invalid n_cols");
     }
 }
@@ -46,7 +57,6 @@ void CSRMatrix::add_entry(size_t index, double value)
     }
     values[index] = value;
 }
-
 
 Vector CSRMatrix::gemv(const Vector& x) const {
 
@@ -85,7 +95,7 @@ void CSRMatrix::print_pattern() const
                     break;
                 }
             }
-            std::cout << (found ? "1" : "0") << " ";
+            std::cout << (found ? "X" : "O");
         }
         std::cout << std::endl;
     }

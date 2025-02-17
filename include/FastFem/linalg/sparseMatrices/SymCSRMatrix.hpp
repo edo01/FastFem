@@ -2,8 +2,6 @@
 #define FASTFEM_SYMCSRMATRIX_HPP
 
 #include <FastFem/linalg/sparseMatrices/CSRMatrix.hpp>
-// #include <vector>
-// #include <memory>
 
 namespace fastfem{
 namespace linalg{
@@ -12,6 +10,8 @@ class SymCSRMatrix : public CSRMatrix
 {
 public:
     SymCSRMatrix(size_t n_cols, const CSRPattern& pattern);
+
+    SymCSRMatrix(CSRMatrix&& A);
 
     Vector gemv(const Vector& x) const override;
 

@@ -10,9 +10,9 @@ class IterativeSolver {
 protected:
     int maxIterations;
     double tolerance;
+
     Vector r;
-    double r2;
-    double b2;
+    double error;
 
 public:
     IterativeSolver(int maxIter = 1000, double tol = 1e-6)
@@ -23,6 +23,7 @@ public:
     virtual Vector solve(const SparseMatrix& A, const Vector& b);
 
 private:
+    virtual double initialize(const SparseMatrix& A, const Vector& b, Vector& x) = 0;
     virtual double iterate(const SparseMatrix& A, const Vector& b, Vector& x) = 0;
 
 };

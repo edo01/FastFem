@@ -7,6 +7,9 @@ namespace linalg{
 SymCSRMatrix::SymCSRMatrix(size_t n_cols, const CSRPattern& pattern) :
   CSRMatrix(n_cols, pattern){};
 
+SymCSRMatrix::SymCSRMatrix(CSRMatrix&& A) :
+  CSRMatrix(std::move(A)){};
+
 const double &SymCSRMatrix::get_entry(size_t i, size_t j) const
 {
     if(i > j){
@@ -38,13 +41,17 @@ Vector SymCSRMatrix::gemv(const Vector& x) const {
 
     for(size_t i = 0; i < n_rows; ++i){
         size_t row_start = row_ptr[i];
-        size_t row_end = row_ptr[i + 1] - 1;
+        size_t row_end = row_ptr[i + 1];
         for(size_t k = row_start; k < row_end; ++k){
             y[i] += values[k] * x[col_indices[k]];
-            y[col_indices[k]] += values[k] * x[i];
         }
-        // adding last contribution
-        y[i] += values[row_end] * x[col_indices[row_end]];
+        for(size_t k = row_start; k < row_end; ++k){
+            size_t j = col_indices[k];
+            if(i != j){
+                y[j] += values[k] * x[i];
+            }
+        }
+
     }
 
     return y;

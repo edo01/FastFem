@@ -14,17 +14,18 @@ Vector IterativeSolver::solve(const SparseMatrix& A, const Vector& b)
     }
 
     Vector x(b.size());
-    r = b - A * x;
-
-    r2 = r.dot(r);
-    b2 = b.dot(b);
 
     unsigned iter = 0;
-    double error;
-    do {
+    error = initialize(A, b, x);
+
+    while(iter < maxIterations && error > tolerance){
+        //std::cout << "----------- Iteration " << iter << ", error = " << error << " -----------" << std::endl;
+
         error = iterate(A, b, x);
         ++iter;
-    } while(iter < maxIterations && error > tolerance);
+    }
+
+    std::cout << "IterativeSolver::solve(): " << iter << " iterations, error = " << error << std::endl;
 
     if(iter == maxIterations){
         throw std::runtime_error("IterativeSolver::solve(): maximum number of iterations reached");
