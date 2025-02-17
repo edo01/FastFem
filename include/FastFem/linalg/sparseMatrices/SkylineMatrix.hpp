@@ -29,6 +29,12 @@ public:
 
     inline bool is_symmetric() const override { return true; }
 
+    void cholesky_factorize();
+
+    Vector cholesky_solve(const Vector& b) const;
+
+    void insert_entry(size_t i, size_t j, double value);
+
 private:
     const double &get_entry(size_t i, size_t j) const override;
 };

@@ -11,6 +11,9 @@ SkylineMatrix::SkylineMatrix(size_t n_cols, const std::vector<size_t>& skyline) 
         if(n_cols == 0 || skyline.size() < 2){
             throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): invalid dimensions");
         }
+        if(skyline.size() - 1 != n_cols){
+            throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): matrix must be square");
+        }
     }
 
 const double &SkylineMatrix::get_entry(size_t i, size_t j) const
@@ -106,6 +109,100 @@ void SkylineMatrix::print_pattern() const
     }
 }
 
+/**
+ * @brief Computes the in-place Cholesky factorization: A = LL^T
+ */
+void SkylineMatrix::cholesky_factorize() {
+    for (size_t i = 0; i < n_rows; ++i) {
+        size_t row_start = (*skyline)[i];
+        size_t row_end = (*skyline)[i + 1];
+        size_t first_col = i - (row_end - row_start) + 1;
+
+        // Compute L(i, i)
+        double sum = 0.0;
+        for (size_t k = first_col; k < i; ++k) {
+            sum += (*this)(i, k) * (*this)(i, k);
+        }
+
+        values[row_end - 1] = std::sqrt((*this)(i, i) - sum);
+
+        for (size_t j = i + 1; j < n_rows; ++j) {
+            size_t row_start_j = (*skyline)[j];
+            size_t row_end_j = (*skyline)[j + 1];
+            size_t row_length_j = row_end_j - row_start_j;  // Length of stored values in row j
+            size_t first_col_j = j - row_length_j + 1;
+        
+            // Stop looping if column i is outside the skyline storage of row j
+            if (first_col_j > i) break;
+        
+            double sum = 0.0;
+            for (size_t k = first_col; k < i; ++k) {
+                sum += (*this)(j, k) * (*this)(i, k);
+            }
+        
+            values[row_start_j + (i - first_col_j)] = ((*this)(j, i) - sum) / values[row_end - 1];
+        }        
+    }
+}
+
+
+/**
+ * @brief Solves Ax = b using the precomputed Cholesky factor L.
+ */
+Vector SkylineMatrix::cholesky_solve(const Vector& b) const {
+    if (n_rows != b.size()) {
+        throw std::invalid_argument("Incompatible dimensions");
+    }
+
+    Vector x = b;
+
+    // Forward Substitution: Solve L * y = b
+    for (size_t i = 0; i < n_rows; ++i) {
+        size_t row_start = (*skyline)[i];
+        size_t row_end = (*skyline)[i + 1];
+        size_t first_col = i - (row_end - row_start) + 1;
+
+        for (size_t k = row_start; k < row_end - 1; ++k) {
+            x[i] -= values[k] * x[first_col + (k - row_start)];
+        }
+        x[i] /= values[row_end - 1];
+    }
+
+    // Backward Substitution: Solve L^T * x = y
+    for (size_t i = n_rows; i > 0; --i) {       
+        size_t row_start = (*skyline)[i - 1];
+        size_t row_end = (*skyline)[i];
+        size_t first_col = i - (row_end - row_start);
+
+        x[i - 1] /= values[row_end - 1];
+
+        for (size_t k = row_start; k < row_end - 1; ++k) {
+            x[first_col + (k - row_start)] -= values[k] * x[i - 1];
+        }
+    }
+
+    return x;
+}
+
+void SkylineMatrix::insert_entry(size_t i, size_t j, double value) {
+    if (i < j) {
+        std::swap(i, j);
+    }
+
+    size_t row_start = (*skyline)[i];
+    size_t row_end = (*skyline)[i + 1];
+    size_t row_length = row_end - row_start;
+    size_t first_col = i - row_length + 1;
+
+    if (j < first_col) {
+        throw std::out_of_range("SkylineMatrix::insert_entry(): Position is outside skyline storage.");
+    }
+
+    // Compute the index in the values array
+    size_t index = row_start + (j - first_col);
+
+    add_entry(index, value);
+}
 
 } // namespace linalg
 } // namespace FastFem
