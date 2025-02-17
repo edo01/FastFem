@@ -63,45 +63,6 @@ private:
     size_t vertices[dim + 1];
 };
 
-/* template <unsigned int dim, unsigned int spacedim=dim>
-class BoundaryIterator {
-public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type =MeshSimplex<dim, spacedim>;
-    using difference_type = std::ptrdiff_t;
-    using pointer = MeshSimplex<dim, spacedim>*;
-    using reference = MeshSimplex<dim, spacedim>&;
-
-    BoundaryIterator(std::vector<size_t>::iterator it, std::vector<Simplex<dim>>& elems)
-        : boundary_it(it), elements(elems) {}
-
-    reference operator*() const { return elements[*boundary_it]; }
-    pointer operator->() const { return &elements[*boundary_it]; }
-
-    BoundaryIterator& operator++() {
-        ++boundary_it;
-        return *this;
-    }
-
-    BoundaryIterator operator++(int) {
-        BoundaryIterator tmp = *this;
-        ++(*this);
-        return tmp;
-    }
-
-    friend bool operator==(const BoundaryIterator& a, const BoundaryIterator& b) {
-        return a.boundary_it == b.boundary_it;
-    }
-
-    friend bool operator!=(const BoundaryIterator& a, const BoundaryIterator& b) {
-        return !(a == b);
-    }
-
-private:
-    std::vector<size_t>::iterator boundary_it;
-    std::vector<Simplex<dim>>& elements;
-}; */
-
 /**
  *  This domain, and the mesh that covers it, represents a _dim-dimensional_ manifold
  *  and lives in _spacedim_ spatial dimensions, where dim and spacedim are the template 
@@ -136,9 +97,10 @@ public:
     auto elem_begin() { return elements.begin(); }
     auto elem_end() { return elements.end(); }
 
-    /* void add_boundary(size_t i) { boundary.push_back(i); }
-    size_t boundary_count() const { return boundary.size(); } */
-
+    void add_boundary(size_t i) { boundary.push_back(i); }
+    size_t boundary_count() const { return boundary.size(); }
+    Vertex<spacedim> get_boundary_vertex(size_t i) const { return vertices[boundary[i]]; }
+    
     Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const
     {
         Point<spacedim> p[dim + 1];
@@ -149,20 +111,12 @@ public:
         return Simplex<dim, spacedim>(p);
     }
 
-    /*  Simplex<dim> get_boundary_elem(size_t i) const { return elements[boundary[i]]; }
-    
-    BoundaryIterator<dim> boundary_begin() {
-        return BoundaryIterator(boundary.begin(), elements);
-    }
-
-    BoundaryIterator<dim> boundary_end() {
-        return BoundaryIterator(boundary.end(), elements);
-    } */
-    
     private:
     std::vector<Vertex<spacedim>> vertices;
     std::vector<MeshSimplex<dim, spacedim>> elements;
-    //std::vector<size_t> boundary;
+    // Pointer to the boundary vertices
+    std::vector<size_t> boundary;
+    
 
 };
 

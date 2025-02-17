@@ -62,6 +62,11 @@ public:
         return std::vector<Point<spacedim>>(vertices, vertices + dim + 1);
     }
 
+    Point<spacedim> get_vertex(size_t i) const
+    {
+        return vertices[i];
+    }
+
     // An intersection between two simplices is a simplex of lower dimension.
     // Since a simplex is completely defined by its vertices, we can simply return the vertices that are common 
     // to the two simplices.
