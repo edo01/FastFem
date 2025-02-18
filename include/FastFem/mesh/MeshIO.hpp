@@ -23,7 +23,6 @@ public:
 
 private:
     Mesh<dim, spacedim> &mesh;
-
 };
 
 } // namespace mesh
