@@ -58,6 +58,25 @@ void CSRMatrix::add_entry(size_t index, double value)
     values[index] = value;
 }
 
+void CSRMatrix::insert_entry(size_t i, size_t j, double value)
+{
+    if(!check_bounds(i, j)){
+        throw std::out_of_range("CSRMatrix::insert_entry(): index out of range");
+    }
+
+    size_t row_start = base_pattern->row_ptr[i];
+    size_t row_end = base_pattern->row_ptr[i + 1];
+
+    for(size_t k = row_start; k < row_end; ++k){
+        if(base_pattern->col_indices[k] == j){
+            values[k] = value;
+            return;
+        }
+    }
+
+    throw std::invalid_argument("CSRMatrix::insert_entry(): entry not found");
+}
+
 Vector CSRMatrix::gemv(const Vector& x) const {
 
     if(n_cols != x.size()){
@@ -99,8 +118,7 @@ void CSRMatrix::print_pattern() const
         }
         std::cout << std::endl;
     }
-}
-        
+}        
 
 } // namespace linalg
 } // namespace FastFem

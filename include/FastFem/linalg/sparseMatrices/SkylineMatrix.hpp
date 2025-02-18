@@ -18,21 +18,13 @@ protected:
 
 public:
     SkylineMatrix(size_t n_cols, const std::vector<size_t>& skyline);
-
     Vector gemv(const Vector& x) const override;
-
     inline size_t nnz() const override { return skyline->back(); } 
-
     void add_entry(size_t index, double value);
-
     void print_pattern() const;
-
     inline bool is_symmetric() const override { return true; }
-
     void cholesky_factorize();
-
     Vector cholesky_solve(const Vector& b) const;
-
     void insert_entry(size_t i, size_t j, double value);
 
 private:

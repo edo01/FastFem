@@ -17,18 +17,28 @@ private:
 public:
     DofHandler(unsigned int n_elems)
     {
-        dofs_per_cell.resize(n_elems);
+        //dofs_per_cell.resize(n_elems);
         //rng
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<unsigned int> dis(0, 10);
-        for(unsigned int i = 0; i < n_elems; ++i){
-            unsigned int n_dofs = dis(gen);
-            dofs_per_cell[i].resize(n_dofs);
-            for(unsigned int j = 0; j < n_dofs; ++j){
-                dofs_per_cell[i][j] = j;
-            }
-        }
+        // std::random_device rd;
+        // std::mt19937 gen(rd());
+        // std::uniform_int_distribution<unsigned int> dis(2, n_elems);
+        // unsigned int n_dofs = dis(gen);
+        // std::uniform_int_distribution<unsigned int> dis2(0, n_dofs - 1);
+        // for(unsigned int i = 0; i < n_elems; ++i){
+        //     dofs_per_cell[i].resize(n_dofs);
+        //     for(unsigned int j = 0; j < n_dofs; ++j){
+        //         dofs_per_cell[i][j] = dis2(gen);
+        //     }
+        // }
+
+        // dofs_per_cell.resize(3);
+        // dofs_per_cell[0] = {0,1};
+        // dofs_per_cell[1] = {2,1};
+        // dofs_per_cell[2] = {2,0};
+
+        dofs_per_cell.resize(2);
+        dofs_per_cell[0] = {0,1,3};
+        dofs_per_cell[1] = {0,2,3};
     }
     
     inline unsigned int n_elements() const { return dofs_per_cell.size(); }
