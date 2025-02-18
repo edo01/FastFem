@@ -46,8 +46,6 @@ public:
 
     mesh::Simplex<dim, spacedim> get_reference_simplex() const { return reference_simplex; }
 
-    //std::vector<local_index_t> get_ref_dofs_on_cell(
-
 protected:    
     unsigned int n_components;    // number of components of the finite element
     unsigned int n_dofs_per_element; // total number of degrees of freedom of the finite element
@@ -58,11 +56,6 @@ protected:
     mesh::Simplex<dim> reference_simplex; // reference simplex
 
     std::vector<mesh::Point<spacedim>> dofs; // points on the reference simplex that correspond to the dofs
-
-
-
-
-
 
 };
 

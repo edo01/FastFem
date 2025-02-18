@@ -27,7 +27,6 @@ public:
     virtual ~CubeSurfaceMaker() = default;
     virtual Mesh<2, 3> make_mesh() const override;
 
-
 private:
     int N;
 

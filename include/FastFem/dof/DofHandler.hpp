@@ -62,9 +62,20 @@ namespace dof{
 template <unsigned int dim, unsigned int spacedim>
 class DoFHandler
 {
+    static_assert(dim > 0, "The dimension must be greater than 0");
+    static_assert(dim <= spacedim, "The dimension must be less or equal to the space it lives in");
+    static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
+
+    using vertex_id = fastfem::types::vertex_id;
+    using edge_id = fastfem::types::edge_id;
+    using face_id = fastfem::types::face_id;
+    using cell_id = fastfem::types::cell_id;
+
+    using dof_index_t = fastfem::types::dof_index_t;
+
 public:
     DoFHandler(const mesh::Mesh<dim, spacedim> &mesh, std::unique_ptr<fe::FESimplexP<dim, spacedim>> fe)
-    : mesh(mesh), fe(std::move(fe)) {}
+    : mesh(mesh), fe(std::move(fe)) {} 
 
     /**
      * Distribute the degrees of freedom on the mesh. We offer a default implementation that works for 
@@ -83,13 +94,15 @@ public:
     unsigned int distribute_dofs() {
         n_dofs = 0;
         
-        // distribute on the vertices
+        /*
+         * DISTRIBUTION OF THE DOFS ON THE VERTICES
+         */
         unsigned int dofs_per_vertex = (*fe).get_n_dofs_per_vertex();
 
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
             mesh::MeshSimplex<dim, spacedim> T = *it;
 
-            for(auto &v : T.get_vertex_indices()){
+            for(const vertex_id &v : T.get_vertex_indices()){
 
                 if(vertex_dofs.find(v) == vertex_dofs.end()){
                     vertex_dofs[v] = std::vector<long unsigned int>(dofs_per_vertex, -1);
@@ -100,7 +113,9 @@ public:
             }   
         }
         
-        // distribute on the edges
+        /*
+         * DISTRIBUTION OF THE DOFS ON THE EDGES
+         */
         unsigned int dofs_per_edge = (*fe).get_n_dofs_per_edge();
 
         // we assume that if dofs_per_edge is 0, then the DoFs are only on the vertices
@@ -108,7 +123,7 @@ public:
 
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
             mesh::MeshSimplex<dim, spacedim> T = *it;
-            for(auto &e : T.get_edges_indices()){
+            for(const edge_id &e : T.get_edges_indices()){
                 if(edge_dofs.find(e) == edge_dofs.end()){
                     edge_dofs[e] = std::vector<long unsigned int>(dofs_per_edge, -1);
                     for(long unsigned int i = 0; i < dofs_per_edge; ++i){
@@ -117,7 +132,10 @@ public:
                 }
             }
         }
-                
+
+        /*
+         * DISTRIBUTION OF THE DOFS ON THE FACES
+         */     
         unsigned int dofs_per_face = (*fe).get_n_dofs_per_face();
 
         if(dofs_per_face == 0) return n_dofs; 
@@ -125,7 +143,7 @@ public:
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
             mesh::MeshSimplex<dim, spacedim> T = *it;
             // distribute on the faces
-            for(auto &f : T.get_faces_indices()){
+            for(const face_id &f : T.get_faces_indices()){
                 if(face_dofs.find(f) == face_dofs.end()){
                     face_dofs[f] = std::vector<long unsigned int>(dofs_per_face, -1);
                     for(long unsigned int i = 0; i < dofs_per_face; ++i){
@@ -135,33 +153,80 @@ public:
             }
         }
 
-        // not implemented yet
- /*        // distribute on the tetrahedra
-        unsigned int dofs_per_tetrahedron = (*fe).get_n_dofs_per_cell();
-        
-        if(dofs_per_tetrahedron == 0) return n_dofs;
+        /*
+         * DISTRIBUTION OF THE DOFS ON THE CELLS
+         */
+        unsigned int dofs_per_cell = (*fe).get_n_dofs_per_cell();
+
+        if(dofs_per_cell == 0) return n_dofs;
 
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
             mesh::MeshSimplex<dim, spacedim> T = *it;
-            auto t = T.get_element_indices();
-            if(tetrahedron_dofs.find(t) == tetrahedron_dofs.end()){
-                tetrahedron_dofs[t] = std::vector<long unsigned int>(dofs_per_tetrahedron, -1);
-                for(long unsigned int i = 0; i < dofs_per_tetrahedron; ++i){
-                    tetrahedron_dofs[t][i] = n_dofs++;
+            for(const cell_id &c : T.get_cell_indices()){
+                if(cell_dofs.find(c) == cell_dofs.end()){
+                    cell_dofs[c] = std::vector<long unsigned int>(dofs_per_cell, -1);
+                    for(long unsigned int i = 0; i < dofs_per_cell; ++i){
+                        cell_dofs[c][i] = n_dofs++;
+                    }
                 }
             }
-        } */
+        }
 
         return n_dofs; // number of DoFs
     }
 
-    std::vector<fastfem::types::dof_index_t> get_dofs_on_cell(const mesh::MeshSimplex<dim, spacedim> &T) const {
-        std::vector<fastfem::types::dof_index_t> dofs;
-        unsigned int dofs_per_cell = (*fe).get_n_dofs_per_cell();
+    /**
+     * Get the global indices of the DoFs of the given element. The ordering of the DoFs is not coherent 
+     * with the ordering of the local DoFs of the element. 
+     */
+    std::vector<dof_index_t> get_unordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const {
+        unsigned int dofs_per_element = (*fe).get_n_dofs_per_element();
+        std::vector<dof_index_t> dofs;
+        dofs.reserve(dofs_per_element);
 
+        for(const vertex_id &v : T.get_vertex_indices()){
+            for(const dof_index_t &d : vertex_dofs.at(v)){
+                dofs.push_back(d);
+            }
+            // auto &d = vertex_dofs.at(v);
+            // dofs.insert(dofs.end(), d.begin(), d.end());
+        }
+        for(const edge_id &e : T.get_edges_indices()){
+            for(const dof_index_t &d : edge_dofs.at(e)){
+                dofs.push_back(d);
+            }
+        }
+        for(const face_id &f : T.get_faces_indices()){
+            for(const dof_index_t &d : face_dofs.at(f)){
+                dofs.push_back(d);
+            }
+        }
+        for(const cell_id &t : T.get_cells_indices()){
+            for(const dof_index_t &d : cell_dofs.at(t)){
+                dofs.push_back(d);
+            }
+        }
+
+        assert(dofs.size() == dofs_per_element);
+
+        return dofs;
+    }
+
+    /**
+     * Get the global indices of the DoFs of the given element. The ordering of the DoFs is coherent 
+     * with the ordering of the local DoFs of the element. 
+     */
+/*     std::vector<fastfem::types::dof_index_t> get_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const {
+        unsigned int dofs_per_element = (*fe).get_n_dofs_per_element();
+        std::vector<fastfem::types::dof_index_t> dofs(dofs_per_element, -1);
+        
         for(auto &v : T.get_vertex_indices()){
             for(auto &d : vertex_dofs.at(v)){
-                dofs.push_back(d);
+                // std::vector<local_index> of the dof = fe.get_local_index_on_vertex(local_simplex_index<0>)
+                //assemble the local indices of the dofs on the vertex
+                for(auto &local_index : fe.get_local_index_on_vertex(v)){
+                    dofs[local_index] = d;
+                }
             }
         }
         for(auto &e : T.get_edges_indices()){
@@ -180,7 +245,8 @@ public:
             }
         }
         return dofs;
-    }
+    } */
+
 
     void print_dofs() const {
         for(auto &v : vertex_dofs){
@@ -193,6 +259,8 @@ public:
     }
 
     unsigned int get_n_dofs() const { return n_dofs; }
+
+    inline size_t get_n_elements() const { return mesh.elem_count(); }
 
 private:
     const mesh::Mesh<dim, spacedim> &mesh;

@@ -7,6 +7,19 @@
 namespace fastfem{
 namespace mesh{
 
+constexpr inline size_t binom(size_t n, size_t k) noexcept
+{
+    return
+      (        k> n  )? 0 :          // out of range
+      (k==0 || k==n  )? 1 :          // edge
+      (k==1 || k==n-1)? n :          // first
+      (     k+k < n  )?              // recursive:
+      (binom(n-1,k-1) * n)/k :       //  path to k=1   is faster
+      (binom(n-1,k) * n)/(n-k);      //  path to k=n-1 is faster
+}
+
+constexpr inline size_t num_m_subsimplex_on_n_simplex(size_t m, size_t n) { return binom(n+1, m+1); }
+
 template <unsigned int spacedim>
 struct Point
 {

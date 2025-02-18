@@ -14,19 +14,6 @@
 #include "FastFem/common/hash_table.h"
 #include "FastFem/types/CommonTypes.hpp"
 
-constexpr inline size_t binom(size_t n, size_t k) noexcept
-{
-    return
-      (        k> n  )? 0 :          // out of range
-      (k==0 || k==n  )? 1 :          // edge
-      (k==1 || k==n-1)? n :          // first
-      (     k+k < n  )?              // recursive:
-      (binom(n-1,k-1) * n)/k :       //  path to k=1   is faster
-      (binom(n-1,k) * n)/(n-k);      //  path to k=n-1 is faster
-}
-
-#define get_m_faces_on_n_simplex(m, n) (binom(n+1, m+1))
-
 namespace fastfem {
 namespace mesh {
 
@@ -57,38 +44,44 @@ class MeshSimplex
     static_assert(dim <= spacedim, "The dimension of the simplex must be less or equal to the space it lives in");
     static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 
+    using vertex_id = fastfem::types::vertex_id;
+    using edge_id = fastfem::types::edge_id;
+    using face_id = fastfem::types::face_id;
+    using cell_id = fastfem::types::cell_id;
+
+    using dof_index_t = fastfem::types::dof_index_t;
 
 public:
 
     static constexpr unsigned int n_vertices = dim + 1;
-    static constexpr unsigned int n_edges = get_m_faces_on_n_simplex(1, dim);
-    static constexpr unsigned int n_faces = get_m_faces_on_n_simplex(2, dim);
-    static constexpr unsigned int n_cells = get_m_faces_on_n_simplex(3, dim);
+    static constexpr unsigned int n_edges = num_m_subsimplex_on_n_simplex(1, dim);
+    static constexpr unsigned int n_faces = num_m_subsimplex_on_n_simplex(2, dim);
+    static constexpr unsigned int n_cells = num_m_subsimplex_on_n_simplex(3, dim);
 
     MeshSimplex(const size_t v[dim + 1]);
 
     /**
      * Get the indices of the vertices of the simplex. 
      */
-    const std::array<fastfem::types::simplex_index<0>, n_vertices> get_vertex_indices() const;
+    const std::array<vertex_id, n_vertices> get_vertex_indices() const;
 
     /**
      * Get the indices of the edges of the simplex. Each edge is represented by an
      * ordered pair of indices of the vertices.
      */
-    const std::array<fastfem::types::simplex_index<1>, n_edges> get_edges_indices() const;
+    const std::array<edge_id, n_edges> get_edges_indices() const;
 
     /**
      * Get the indices of the faces of the simplex, if present. Each face is represented by an
      * ordered triple of indices of the vertices. 
      */
-    const std::array<fastfem::types::simplex_index<2>, n_faces> get_faces_indices() const; 
+    const std::array<face_id, n_faces> get_faces_indices() const; 
 
     /**
      * Get the indices of the cells of the simplex, if present. Each cell is represented by an
      * ordered quadruple of indices of the vertices.
      */
-    const std::array<fastfem::types::simplex_index<3>, n_cells> get_cell_indices() const;
+    const std::array<cell_id, n_cells> get_cell_indices() const;
 
     bool operator==(const MeshSimplex<dim, spacedim> &s) const;
 
@@ -109,6 +102,9 @@ private:
 template <unsigned int dim, unsigned int spacedim = dim>
 class Mesh
 {
+    static_assert(dim > 0, "The dimension of the mesh must be greater than 0");
+    static_assert(dim <= spacedim, "The dimension of the mesh must be less or equal to the space it lives in");
+    static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 
 public:
     inline size_t vtx_count() const { return vertices.size(); }

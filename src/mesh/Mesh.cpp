@@ -3,6 +3,14 @@
 namespace fastfem{
 namespace mesh{
 
+
+using vertex_id = fastfem::types::vertex_id;
+using edge_id = fastfem::types::edge_id;
+using face_id = fastfem::types::face_id;
+using cell_id = fastfem::types::cell_id;
+
+using dof_index_t = fastfem::types::dof_index_t;
+
 /*
  * ----------------------VECTOR----------------------------
  */
@@ -28,10 +36,10 @@ MeshSimplex<dim, spacedim>::MeshSimplex(const size_t v[dim + 1])
 }
 
 template<unsigned int dim, unsigned int spacedim>
-const std::array<fastfem::types::simplex_index<0>, MeshSimplex<dim, spacedim>::n_vertices> 
+const std::array<vertex_id, MeshSimplex<dim, spacedim>::n_vertices> 
 MeshSimplex<dim, spacedim>::get_vertex_indices() const {
 
-    std::array<fastfem::types::simplex_index<0>, n_vertices> v_indices;
+    std::array<vertex_id, n_vertices> v_indices;
     unsigned int vertex_count = 0;
 
     for (size_t i = 0; i < dim + 1; ++i)
@@ -43,9 +51,10 @@ MeshSimplex<dim, spacedim>::get_vertex_indices() const {
 }
 
 template<unsigned int dim, unsigned int spacedim>
-const std::array<fastfem::types::simplex_index<1>, MeshSimplex<dim, spacedim>::n_edges> 
+const std::array<edge_id, MeshSimplex<dim, spacedim>::n_edges> 
 MeshSimplex<dim, spacedim>::get_edges_indices() const {
-    std::array<fastfem::types::simplex_index<1>, n_edges> e_indices;
+    
+    std::array<edge_id, n_edges> e_indices;
     unsigned int edge_count = 0;
 
     for (size_t i = 0; i < dim + 1; ++i)
@@ -66,18 +75,18 @@ MeshSimplex<dim, spacedim>::get_edges_indices() const {
 }
 
 template<unsigned int dim, unsigned int spacedim>
-const std::array<fastfem::types::simplex_index<2>, MeshSimplex<dim, spacedim>::n_faces> 
+const std::array<face_id, MeshSimplex<dim, spacedim>::n_faces> 
 MeshSimplex<dim, spacedim>::get_faces_indices() const {
     if(n_faces == 0) return {}; // in 1D there are no faces
 
-    std::array<fastfem::types::simplex_index<2>, n_faces> f_indices;
+    std::array<face_id, n_faces> f_indices;
 
     unsigned int face_count = 0;
 
     for (size_t i = 0; i < dim + 1; ++i){
         for (size_t j = i + 1; j < dim + 1; ++j){
             for (size_t k = j + 1; k < dim + 1; ++k){
-                fastfem::types::simplex_index<2> face = {vertices[i], vertices[j], vertices[k]};
+                face_id face = {vertices[i], vertices[j], vertices[k]};
                 std::sort(face.begin(), face.end());
                 // copy starting from the face_count index
                 f_indices[face_count++] = face;
@@ -91,11 +100,11 @@ MeshSimplex<dim, spacedim>::get_faces_indices() const {
 }
 
 template<unsigned int dim, unsigned int spacedim>
-const std::array<fastfem::types::simplex_index<3>, MeshSimplex<dim, spacedim>::n_cells> 
+const std::array<cell_id, MeshSimplex<dim, spacedim>::n_cells> 
 MeshSimplex<dim, spacedim>::get_cell_indices() const {
     if(n_cells == 0) return {}; // in 1D and 2D there are no cells
     
-    std::array<fastfem::types::simplex_index<3>, n_cells> c_indices;
+    std::array<cell_id, n_cells> c_indices;
 
     unsigned int cell_count = 0;
 
@@ -103,7 +112,7 @@ MeshSimplex<dim, spacedim>::get_cell_indices() const {
         for (size_t j = i + 1; j < dim + 1; ++j){
             for (size_t k = j + 1; k < dim + 1; ++k){
                 for (size_t l = k + 1; l < dim + 1; ++l){
-                    fastfem::types::simplex_index<3> cell = {vertices[i], vertices[j], vertices[k], vertices[l]};
+                   cell_id cell = {vertices[i], vertices[j], vertices[k], vertices[l]};
                     std::sort(cell.begin(), cell.end());
                     c_indices[cell_count++] = cell;                        
                 }
