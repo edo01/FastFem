@@ -100,6 +100,15 @@ void SkylineMatrix::add_entry(size_t index, double value)
     values[index] = value;
 }
 
+//TO BE CANCELLED
+void SkylineMatrix::set_values(const std::vector<double>& values)
+{
+    if (values.size() != this->values.size()) {
+        throw std::invalid_argument("SkylineMatrix::set_values(): incompatible dimensions");
+    }
+    this->values = values;
+}
+
 void SkylineMatrix::print_pattern() const
 {
     for (size_t i = 0; i < n_rows; ++i)
@@ -155,7 +164,7 @@ void SkylineMatrix::cholesky_factorize() {
             size_t first_col_j = j - row_length_j + 1;
         
             // Stop looping if column i is outside the skyline storage of row j
-            if (first_col_j > i) break;
+            if (first_col_j > i) continue;
         
             double sum = 0.0;
             for (size_t k = first_col; k < i; ++k) {

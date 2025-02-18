@@ -113,24 +113,33 @@ int main()
   std::cout << "---------- Testing Skyline Cholesky ----------" << std::endl;
 
   // Define the skyline structure for A
-  std::vector<size_t> skyline = {0, 1, 3, 5, 7, 9};
+  // std::vector<size_t> skyline = {0, 1, 3, 5, 7, 9};
+  // SkylinePattern pattern(skyline);
+  // SkylineMatrix A(5, pattern);
+  //std::vector<size_t> skyline = {0, 1, 3, 5, 9, 13, 17};
+  std::vector<size_t> skyline = {0, 1, 3, 5, 9, 14, 19};
   SkylinePattern pattern(skyline);
-  SkylineMatrix A(5, pattern);
+  SkylineMatrix A(6, pattern);
 
   // Fill values (lower triangular part)
   /*std::vector<double> values = {4, 1, 4, 1, 4, 1, 4, 1, 4};
   for (size_t i = 0; i < values.size(); ++i) {
       A.add_entry(i, values[i]);
   }*/
-  A.insert_entry(0, 0, 4);
-  A.insert_entry(0, 1, 1);
-  A.insert_entry(1, 1, 4);
-  A.insert_entry(1, 2, 1);
-  A.insert_entry(2, 2, 4);
-  A.insert_entry(2, 3, 1);
-  A.insert_entry(3, 3, 4);
-  A.insert_entry(3, 4, 1);
-  A.insert_entry(4, 4, 4);
+  // A.insert_entry(0, 0, 4);
+  // A.insert_entry(0, 1, 1);
+  // A.insert_entry(1, 1, 4);
+  // A.insert_entry(1, 2, 1);
+  // A.insert_entry(2, 2, 4);
+  // A.insert_entry(2, 3, 1);
+  // A.insert_entry(3, 3, 4);
+  // A.insert_entry(3, 4, 1);
+  // A.insert_entry(4, 4, 4);
+
+  //std::vector<double> values = {4,2,5,1,6,3,0,0,4,4,0,2,7,5,0,0,8};
+  std::vector<double> values = {6.0, 1.5, 7.0, 2.1, 8.0, 2.0, 0.0, 1.8, 6.5, 1.2, 1.7, 0.0, 2.4, 7.5, 0.5, 2.3, 0.0, 1.9, 8.0};
+  //SkylineMatrix A(4, pattern);
+  A.set_values(values);
 
   // Copy a for testing reasona, considring A will be modified
   SkylineMatrix A2 = A;
@@ -141,7 +150,7 @@ int main()
   A.print();
 
   // Define right-hand side vector b
-  Vector b = {5.0, 6.0, 7.0, 8.0, 9.0};
+  Vector b = {5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
 
   // Solve Ax = b using Cholesky
   A.cholesky_factorize();

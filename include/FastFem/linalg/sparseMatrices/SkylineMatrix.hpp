@@ -42,6 +42,8 @@ public:
     void cholesky_factorize();
     Vector cholesky_solve(const Vector& b) const;
     void insert_entry(size_t i, size_t j, double value);
+    //TO BE CANCELLED
+    void set_values(const std::vector<double>& values);
 
 private:
     const double &get_entry(size_t i, size_t j) const override;
