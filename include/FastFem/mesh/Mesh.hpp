@@ -44,12 +44,10 @@ class MeshSimplex
     static_assert(dim <= spacedim, "The dimension of the simplex must be less or equal to the space it lives in");
     static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 
-    using vertex_id = fastfem::types::vertex_id;
-    using edge_id = fastfem::types::edge_id;
-    using face_id = fastfem::types::face_id;
-    using cell_id = fastfem::types::cell_id;
-
-    using dof_index_t = fastfem::types::dof_index_t;
+    using global_vertex_id = fastfem::types::global_vertex_id;
+    using global_edge_id = fastfem::types::global_edge_id;
+    using global_face_id = fastfem::types::global_face_id;
+    using global_cell_id = fastfem::types::global_cell_id;
 
 public:
 
@@ -63,25 +61,25 @@ public:
     /**
      * Get the indices of the vertices of the simplex. 
      */
-    const std::array<vertex_id, n_vertices> get_vertex_indices() const;
+    const std::array<global_vertex_id, n_vertices> get_vertex_indices() const;
 
     /**
      * Get the indices of the edges of the simplex. Each edge is represented by an
      * ordered pair of indices of the vertices.
      */
-    const std::array<edge_id, n_edges> get_edges_indices() const;
+    const std::array<global_edge_id, n_edges> get_edges_indices() const;
 
     /**
      * Get the indices of the faces of the simplex, if present. Each face is represented by an
      * ordered triple of indices of the vertices. 
      */
-    const std::array<face_id, n_faces> get_faces_indices() const; 
+    const std::array<global_face_id, n_faces> get_faces_indices() const; 
 
     /**
      * Get the indices of the cells of the simplex, if present. Each cell is represented by an
      * ordered quadruple of indices of the vertices.
      */
-    const std::array<cell_id, n_cells> get_cell_indices() const;
+    const std::array<global_cell_id, n_cells> get_cell_indices() const;
 
     bool operator==(const MeshSimplex<dim, spacedim> &s) const;
 

@@ -10,15 +10,22 @@
 namespace fastfem{
 namespace types{
     
-typedef unsigned long dof_index_t;
+typedef unsigned long global_dof_index_t;
+typedef unsigned long local_dof_index_t;
 
 template <unsigned short D>
 using simplex_id = std::array<std::size_t, D+1>;
 
-typedef simplex_id<0> vertex_id;
-typedef simplex_id<1> edge_id;
-typedef simplex_id<2> face_id;
-typedef simplex_id<3> cell_id; 
+typedef simplex_id<0> global_vertex_id;
+typedef simplex_id<1> global_edge_id;
+typedef simplex_id<2> global_face_id;
+typedef simplex_id<3> global_cell_id; 
+
+typedef simplex_id<0> local_vertex_id;
+typedef simplex_id<1> local_edge_id;
+typedef simplex_id<2> local_face_id;
+typedef simplex_id<3> local_cell_id; 
+
 
 template <unsigned short D>
 struct ArrayHasher {
@@ -32,10 +39,10 @@ struct ArrayHasher {
 };
     
 template <unsigned short D>
-using dof_table = std::unordered_map<simplex_id<D>, std::vector<dof_index_t>, ArrayHasher<D>>;
+using global_dof_table = std::unordered_map<simplex_id<D>, std::vector<global_dof_index_t>, ArrayHasher<D>>;
 
-/* template <unsigned short D, unsigned short dof_per_entry>
-using dof_table = std::unordered_map<simplex_id<D>, std::vector<dof_index_t>, ArrayHasher<D>>; */
+template <unsigned short D>
+using local_dof_table = std::unordered_map<simplex_id<D>, std::vector<local_dof_index_t>, ArrayHasher<D>>;
 
 } // namespace types
 } // namespace fastfem

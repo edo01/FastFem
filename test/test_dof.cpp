@@ -62,18 +62,41 @@ int main(int argc, char** argv)
 
     assert(n_dofs3 == (size_t)(n_components*((N + 1) * (N + 1) + 2*(N*N + 2*N*(N+1)) + (2 * N * N))));
 
-    //for each element in the mesh, print the global indices of the dofs
-/*     for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
-        MeshSimplex<2, 2> T = *it;
-        std::vector<dof_index_t> dofs = dof_handler2.get_dofs_on_cell(T);
-        std::cout << "Element: " << T.get_vertex(0) << " " << T.get_vertex(1) << " " << T.get_vertex(2) << std::endl;
-        std::cout << "Dofs: ";
-        for(auto &d : dofs){
-            std::cout << d << " ";
+    SquareMaker square3(2);
+    Mesh<2, 2> mesh3 = square3.make_mesh();
+
+    FESimplexP1<2, 2> fe4(2);
+    DoFHandler<2, 2> dof_handler4(mesh3, std::make_unique<FESimplexP1<2, 2>>(fe4));
+
+    unsigned int n_dofs4 = dof_handler4.distribute_dofs();
+
+    std::cout << " TEST mappping " << std::endl;
+    std::cout << "Number of elements: " << mesh3.elem_count() << std::endl;
+    std::cout << "Number of vertices: " << mesh3.vtx_count() << std::endl;
+    std::cout << "Number of DoFs using P2: " << n_dofs4 << std::endl;
+
+
+    // print all elements
+    for(int i=0; i<mesh3.elem_count(); ++i){
+        MeshSimplex<2, 2> T = mesh3.get_mesh_element(i);
+        std::cout << "Element " << i << ": ";
+        for(int j=0; j<T.vertex_count(); ++j){
+            std::cout << T.get_vertex(j) << " ";
         }
         std::cout << std::endl;
-    } */
-    //dof_handler.print_dofs();
+    }
+
+    // print the DoFs on all elements
+    for(int i=0; i<mesh3.elem_count(); ++i){
+        MeshSimplex<2, 2> T = mesh3.get_mesh_element(i);
+        std::vector<fastfem::types::global_dof_index_t> ordered_dofs = dof_handler4.get_ordered_dofs_on_element(T);
+        std::cout << "DoFs on element " << i << ": ";
+        for(int j=0; j<ordered_dofs.size(); ++j){
+            std::cout << ordered_dofs[j] << " ";
+        }
+        std::cout << std::endl;
+    }   
+
 
     return 0;
 }
