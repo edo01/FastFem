@@ -211,63 +211,63 @@
 #include <FastFem/dof/DofHandler.hpp>
 #include <FastFem/linalg/sparseMatrices/CSRMatrix.hpp>
 
-// Function to assemble the CSRMatrix from the DofHandler
-void assemble_csr_matrix(fastfem::linalg::CSRMatrix& matrix, const fastfem::dof::DofHandler<2, 2>& dof_handler) {
-    const auto& csr_pattern = *matrix.base_pattern;
-    const unsigned int num_elements = dof_handler.n_elements();
+// // Function to assemble the CSRMatrix from the DofHandler
+// void assemble_csr_matrix(fastfem::linalg::CSRMatrix& matrix, const fastfem::dof::DofHandler<2, 2>& dof_handler) {
+//     const auto& csr_pattern = *matrix.base_pattern;
+//     const unsigned int num_elements = dof_handler.n_elements();
 
-    for (unsigned int elem = 0; elem < num_elements; ++elem) {
-        const auto& dofs = dof_handler.get_element_dofs(elem);
+//     for (unsigned int elem = 0; elem < num_elements; ++elem) {
+//         const auto& dofs = dof_handler.get_element_dofs(elem);
         
-        for (size_t i = 0; i < dofs.size(); ++i) {
-            for (size_t j = 0; j < dofs.size(); ++j) {
-                size_t row = dofs[i];
-                size_t col = dofs[j];
+//         for (size_t i = 0; i < dofs.size(); ++i) {
+//             for (size_t j = 0; j < dofs.size(); ++j) {
+//                 size_t row = dofs[i];
+//                 size_t col = dofs[j];
 
-                double value = static_cast<double>(row + col) / 2.0;
+//                 double value = static_cast<double>(row + col) / 2.0;
 
-                size_t start = csr_pattern.row_ptr[row];
-                size_t end = csr_pattern.row_ptr[row + 1];
+//                 size_t start = csr_pattern.row_ptr[row];
+//                 size_t end = csr_pattern.row_ptr[row + 1];
 
-                for (size_t k = start; k < end; ++k) {
-                    if (csr_pattern.col_indices[k] == col) {
-                        matrix.add_entry(k, value);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}
+//                 for (size_t k = start; k < end; ++k) {
+//                     if (csr_pattern.col_indices[k] == col) {
+//                         matrix.add_entry(k, value);
+//                         break;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
-// Function to assemble a symmetric CSRMatrix
-void assemble_symmetric_csr_matrix(fastfem::linalg::CSRMatrix& matrix, const fastfem::dof::DofHandler<2, 2>& dof_handler) {
-    const auto& csr_pattern = *matrix.base_pattern;
-    const unsigned int num_elements = dof_handler.n_elements();
+// // Function to assemble a symmetric CSRMatrix
+// void assemble_symmetric_csr_matrix(fastfem::linalg::CSRMatrix& matrix, const fastfem::dof::DofHandler<2, 2>& dof_handler) {
+//     const auto& csr_pattern = *matrix.base_pattern;
+//     const unsigned int num_elements = dof_handler.n_elements();
 
-    for (unsigned int elem = 0; elem < num_elements; ++elem) {
-        const auto& dofs = dof_handler.get_element_dofs(elem);
+//     for (unsigned int elem = 0; elem < num_elements; ++elem) {
+//         const auto& dofs = dof_handler.get_element_dofs(elem);
         
-        for (size_t i = 0; i < dofs.size(); ++i) {
-            for (size_t j = i; j < dofs.size(); ++j) {  // Ensure symmetric storage
-                size_t row = std::min(dofs[i], dofs[j]);
-                size_t col = std::max(dofs[i], dofs[j]);
+//         for (size_t i = 0; i < dofs.size(); ++i) {
+//             for (size_t j = i; j < dofs.size(); ++j) {  // Ensure symmetric storage
+//                 size_t row = std::min(dofs[i], dofs[j]);
+//                 size_t col = std::max(dofs[i], dofs[j]);
 
-                double value = static_cast<double>(row + col) / 2.0;
+//                 double value = static_cast<double>(row + col) / 2.0;
 
-                size_t start = csr_pattern.row_ptr[row];
-                size_t end = csr_pattern.row_ptr[row + 1];
+//                 size_t start = csr_pattern.row_ptr[row];
+//                 size_t end = csr_pattern.row_ptr[row + 1];
 
-                for (size_t k = start; k < end; ++k) {
-                    if (csr_pattern.col_indices[k] == col) {
-                        matrix.add_entry(k, value);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}
+//                 for (size_t k = start; k < end; ++k) {
+//                     if (csr_pattern.col_indices[k] == col) {
+//                         matrix.add_entry(k, value);
+//                         break;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
 // Function to print a dense matrix from the DofHandler for validation
 void print_dense_matrix_from_dofhandler(const fastfem::dof::DofHandler<2, 2>& dof_handler, size_t n_dofs) {

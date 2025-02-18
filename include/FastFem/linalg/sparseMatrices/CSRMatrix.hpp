@@ -32,16 +32,19 @@ class CSRMatrix : public SparseMatrix
 {
 protected:
     std::vector<double> values;
+    std::shared_ptr<CSRPattern> base_pattern;
 
 public:
-std::shared_ptr<CSRPattern> base_pattern;
-
     CSRMatrix(size_t n_cols, const CSRPattern& pattern);
+
     Vector gemv(const Vector& x) const override;
-    inline size_t nnz() const override { return base_pattern->col_indices.size(); }
     void add_entry(size_t index, double value);
-    void print_pattern() const;
     void insert_entry(size_t i, size_t j, double value);
+    void accumulate_entry(size_t i, size_t j, double value);
+
+    inline size_t nnz() const override { return base_pattern->col_indices.size(); }
+    void print_pattern() const;
+
 
 private:
     const double &get_entry(size_t i, size_t j) const override;
@@ -60,28 +63,9 @@ CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DofHandler<di
             for(int k = j; k < dofs.size(); ++k){
                 dof_interactions[dofs[j]].insert(dofs[k]);
                 dof_interactions[dofs[k]].insert(dofs[j]);
-                // std::cout << "Adding dof_interactions[" << dofs[j] << "]: " << dofs[k] << std::endl;
-                // std::cout << "Adding dof_interactions[" << dofs[k] << "]: " << dofs[j] << std::endl;
             }
         }
-        //print dof_interactions[i]
-        // std::cout << "dof_interactions[" << i << "]: ";
-        // for(auto it = dof_interactions[i].begin(); it != dof_interactions[i].end(); ++it){
-        //     std::cout << *it << " ";
-        // }
     }
-
-    //print dof_interactions
-    // std::cout<<"AAAAAA"<<std::endl;
-    // for(int i = 0; i < dof_interactions.size(); ++i){
-    //     std::cout << "dof_interactions[" << i << "]: ";
-    //     for(auto it = dof_interactions[i].begin(); it != dof_interactions[i].end(); ++it){
-    //         std::cout << *it << " ";
-    //     }
-    //     std::cout << std::endl;
-    //}
-
-    // std::cout<<"finishing"<<std::endl;
 
     //////////
     //std::vector<size_t> row_ptr(dof_handler.n_elements() + 1);
