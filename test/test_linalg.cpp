@@ -117,9 +117,20 @@ int main()
   // SkylinePattern pattern(skyline);
   // SkylineMatrix A(5, pattern);
   //std::vector<size_t> skyline = {0, 1, 3, 5, 9, 13, 17};
-  std::vector<size_t> skyline = {0, 1, 3, 5, 9, 14, 19};
-  SkylinePattern pattern(skyline);
-  SkylineMatrix A(6, pattern);
+
+
+
+
+
+  //ACTUAL
+  // std::vector<size_t> skyline = {0, 1, 3, 5, 9, 14, 19};
+  // SkylinePattern pattern(skyline);
+  // SkylineMatrix A(6, pattern);
+  //ACTUAL
+
+
+
+
 
   // Fill values (lower triangular part)
   /*std::vector<double> values = {4, 1, 4, 1, 4, 1, 4, 1, 4};
@@ -137,38 +148,42 @@ int main()
   // A.insert_entry(4, 4, 4);
 
   //std::vector<double> values = {4,2,5,1,6,3,0,0,4,4,0,2,7,5,0,0,8};
-  std::vector<double> values = {6.0, 1.5, 7.0, 2.1, 8.0, 2.0, 0.0, 1.8, 6.5, 1.2, 1.7, 0.0, 2.4, 7.5, 0.5, 2.3, 0.0, 1.9, 8.0};
-  //SkylineMatrix A(4, pattern);
-  A.set_values(values);
+
+  //ACTUAL
+  // std::vector<double> values = {6.0, 1.5, 7.0, 2.1, 8.0, 2.0, 0.0, 1.8, 6.5, 1.2, 1.7, 0.0, 2.4, 7.5, 0.5, 2.3, 0.0, 1.9, 8.0};
+  // //SkylineMatrix A(4, pattern);
+  // A.set_values(values);
 
   // Copy a for testing reasona, considring A will be modified
-  SkylineMatrix A2 = A;
+  // SkylineMatrix A2 = A;
 
-  std::cout << "Matrix pattern:" << std::endl;
-  A.print_pattern();
-  std::cout << "Original matrix:" << std::endl;
-  A.print();
+  // std::cout << "Matrix pattern:" << std::endl;
+  // A.print_pattern();
+  // std::cout << "Original matrix:" << std::endl;
+  // A.print();
 
-  // Define right-hand side vector b
-  Vector b = {5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+  // // Define right-hand side vector b
+  // Vector b = {5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
 
-  // Solve Ax = b using Cholesky
-  A.cholesky_factorize();
+  // // Solve Ax = b using Cholesky
+  // A.cholesky_factorize();
 
-  // Print the computed lower triangular matrix L
-  std::cout << "Cholesky factor L (lower triangular part):" << std::endl;
-  A.print();
+  // // Print the computed lower triangular matrix L
+  // std::cout << "Cholesky factor L (lower triangular part):" << std::endl;
+  // A.print();
 
-  Vector x = A.cholesky_solve(b);
+  // Vector x = A.cholesky_solve(b);
 
-  // Print solution
-  std::cout << "Solution vector x:" << std::endl;
-  x.print();
+  // // Print solution
+  // std::cout << "Solution vector x:" << std::endl;
+  // x.print();
 
-  // Verify Ax ≈ b
-  std::cout << "Computing A * x..." << std::endl;
-  Vector Ax = A2.gemv(x);
-  Ax.print();
+  // // Verify Ax ≈ b
+  // std::cout << "Computing A * x..." << std::endl;
+  // Vector Ax = A2.gemv(x);
+  // Ax.print();
 
-  return 1;
+  // return 1;
+  //ACTUAL
+
 }

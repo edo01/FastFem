@@ -15,11 +15,9 @@ struct SkylinePattern
     std::vector<size_t> skyline_rows;
 
 private:
-    // TO BE RESTORED PRIVATE
-    //SkylinePattern(const std::vector<size_t>& skyline) : skyline_rows(skyline) {}
+    SkylinePattern(const std::vector<size_t>& skyline) : skyline_rows(skyline) {}
 
 public:
-    SkylinePattern(const std::vector<size_t>& skyline) : skyline_rows(skyline) {}
     template <unsigned int dim, unsigned int spacedim>
     static SkylinePattern create_from_dof_handler(const fastfem::dof::DofHandler<dim, spacedim>& dof_handler);
 };
@@ -52,27 +50,24 @@ private:
 template <unsigned int dim, unsigned int spacedim>
 SkylinePattern SkylinePattern::create_from_dof_handler(const fastfem::dof::DofHandler<dim, spacedim>& dof_handler)
 {
-    std::vector<std::set<unsigned int>> dof_interactions(4);
+    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.n_dofs());
 
     for(unsigned int i = 0; i < dof_handler.n_elements(); ++i){
         const auto& dofs = dof_handler.get_element_dofs(i);
         for(int j = 0; j < dofs.size(); ++j){
             for(int k = j; k < dofs.size(); ++k){
-                dof_interactions[dofs[j]].insert(dofs[k]);
-                dof_interactions[dofs[k]].insert(dofs[j]);
+                dofs[j] > dofs[k] ? dof_interactions[dofs[j]].insert(dofs[k]) : dof_interactions[dofs[k]].insert(dofs[j]); 
             }
         }
     }
 
-    std::vector<size_t> row_ptr(5);
-    std::vector<size_t> col_indices;
+    std::vector<size_t> skyline_rows(dof_handler.n_dofs() + 1);
 
     for(unsigned int i = 0; i < dof_interactions.size(); ++i){
-        row_ptr[i + 1] = row_ptr[i] + dof_interactions[i].size();
-        col_indices.insert(col_indices.end(), dof_interactions[i].begin(), dof_interactions[i].end());
+        skyline_rows[i + 1] = skyline_rows[i] + (i - *dof_interactions[i].begin() + 1);
     }
 
-    return SkylinePattern(row_ptr);
+    return SkylinePattern(skyline_rows);
 }
 
 } // namespace linalg

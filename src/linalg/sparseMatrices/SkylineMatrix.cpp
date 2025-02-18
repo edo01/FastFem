@@ -116,10 +116,8 @@ void SkylineMatrix::print_pattern() const
         for (size_t j = 0; j <= i; ++j)
         {
             bool found = false;
-            //for (size_t k = (*skyline)[i]; k < (*skyline)[i + 1]; ++k)
             for (size_t k = (base_skyline->skyline_rows)[i]; k < (base_skyline->skyline_rows)[i + 1]; ++k)
             {
-                //if (j == i - ((*skyline)[i + 1] - k - 1))
                 if (j == i - ((base_skyline->skyline_rows)[i + 1] - k - 1))  
                 {
                     std::cout << "1 ";
@@ -134,6 +132,12 @@ void SkylineMatrix::print_pattern() const
         }
         std::cout << std::endl;
     }
+
+    std::cout << "\nSkyline values: ";
+    for(size_t i=0; i<this->base_skyline->skyline_rows.size(); i++){
+        std::cout << this->base_skyline->skyline_rows[i] << " ";
+    }
+    std::cout << std::endl;
 }
 
 /**
@@ -141,8 +145,6 @@ void SkylineMatrix::print_pattern() const
  */
 void SkylineMatrix::cholesky_factorize() {
     for (size_t i = 0; i < n_rows; ++i) {
-        //size_t row_start = (*skyline)[i];
-        //size_t row_end = (*skyline)[i + 1];
         size_t row_start = (base_skyline->skyline_rows)[i];
         size_t row_end = (base_skyline->skyline_rows)[i + 1];
         size_t first_col = i - (row_end - row_start) + 1;
@@ -156,8 +158,6 @@ void SkylineMatrix::cholesky_factorize() {
         values[row_end - 1] = std::sqrt((*this)(i, i) - sum);
 
         for (size_t j = i + 1; j < n_rows; ++j) {
-            // size_t row_start_j = (*skyline)[j];
-            // size_t row_end_j = (*skyline)[j + 1];
             size_t row_start_j = (base_skyline->skyline_rows)[j];
             size_t row_end_j = (base_skyline->skyline_rows)[j + 1];
             size_t row_length_j = row_end_j - row_start_j;  // Length of stored values in row j
@@ -189,8 +189,6 @@ Vector SkylineMatrix::cholesky_solve(const Vector& b) const {
 
     // Forward Substitution: Solve L * y = b
     for (size_t i = 0; i < n_rows; ++i) {
-        // size_t row_start = (*skyline)[i];
-        // size_t row_end = (*skyline)[i + 1];
         size_t row_start = (base_skyline->skyline_rows)[i];
         size_t row_end = (base_skyline->skyline_rows)[i + 1];
         size_t first_col = i - (row_end - row_start) + 1;
@@ -203,8 +201,6 @@ Vector SkylineMatrix::cholesky_solve(const Vector& b) const {
 
     // Backward Substitution: Solve L^T * x = y
     for (size_t i = n_rows; i > 0; --i) {       
-        // size_t row_start = (*skyline)[i - 1];
-        // size_t row_end = (*skyline)[i];
         size_t row_start = (base_skyline->skyline_rows)[i - 1];
         size_t row_end = (base_skyline->skyline_rows)[i];
         size_t first_col = i - (row_end - row_start);
@@ -224,8 +220,6 @@ void SkylineMatrix::insert_entry(size_t i, size_t j, double value) {
         std::swap(i, j);
     }
 
-    // size_t row_start = (*skyline)[i];
-    // size_t row_end = (*skyline)[i + 1];
     size_t row_start = (base_skyline->skyline_rows)[i];
     size_t row_end = (base_skyline->skyline_rows)[i + 1];
     size_t row_length = row_end - row_start;

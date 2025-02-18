@@ -36,13 +36,21 @@ public:
         // dofs_per_cell[1] = {2,1};
         // dofs_per_cell[2] = {2,0};
 
-        dofs_per_cell.resize(2);
-        dofs_per_cell[0] = {0,1,3};
-        dofs_per_cell[1] = {0,2,3};
+        // dofs_per_cell.resize(2);
+        // dofs_per_cell[0] = {0,1,3};
+        // dofs_per_cell[1] = {0,2,3};
+
+        dofs_per_cell.resize(4);
+        dofs_per_cell[0] = {0, 1, 4};
+        dofs_per_cell[1] = {1, 2, 5};
+        dofs_per_cell[2] = {2, 3, 6};
+        dofs_per_cell[3] = {0, 3, 7};
+
     }
     
     inline unsigned int n_elements() const { return dofs_per_cell.size(); }
     inline const std::vector<unsigned int>& get_element_dofs(unsigned int i) const { return dofs_per_cell[i]; }
+    inline unsigned int n_dofs() const { return 8; }
     
 };
 

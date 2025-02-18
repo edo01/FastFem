@@ -210,6 +210,7 @@
 #include <iomanip>
 #include <FastFem/dof/DofHandler.hpp>
 #include <FastFem/linalg/sparseMatrices/CSRMatrix.hpp>
+#include <FastFem/linalg/sparseMatrices/SkylineMatrix.hpp>
 
 // // Function to assemble the CSRMatrix from the DofHandler
 // void assemble_csr_matrix(fastfem::linalg::CSRMatrix& matrix, const fastfem::dof::DofHandler<2, 2>& dof_handler) {
@@ -298,7 +299,7 @@ void print_dense_matrix_from_dofhandler(const fastfem::dof::DofHandler<2, 2>& do
 }
 
 int main() {
-    const unsigned int num_elements = 2;
+    const unsigned int num_elements = 4;
     fastfem::dof::DofHandler<2,2> dof_handler(num_elements);
 
     //print dof handler
@@ -314,6 +315,7 @@ int main() {
 
     fastfem::linalg::CSRPattern csr_pattern = fastfem::linalg::CSRPattern::create_from_dof_handler(dof_handler);
     fastfem::linalg::CSRPattern symmetric_pattern = fastfem::linalg::CSRPattern::create_symmetric_from_dof_handler(dof_handler);
+    fastfem::linalg::SkylinePattern skyline_pattern = fastfem::linalg::SkylinePattern::create_from_dof_handler(dof_handler);
     //print csr pattern
     // std::cout << "CSR Pattern:\n";
     // std::cout << "Row Pointers: ";
@@ -336,6 +338,7 @@ int main() {
 
     fastfem::linalg::CSRMatrix csr_matrix(n_dofs, csr_pattern);
     fastfem::linalg::CSRMatrix symmetric_csr_matrix(n_dofs, symmetric_pattern);
+    fastfem::linalg::SkylineMatrix skyline_matrix(n_dofs, skyline_pattern);
 
     //assemble_csr_matrix(csr_matrix, dof_handler);
     //assemble_symmetric_csr_matrix(symmetric_csr_matrix, dof_handler);
@@ -346,6 +349,11 @@ int main() {
     std::cout << "\n";
     std::cout << "\nCSR Matrix (Symmetric Pattern):\n";
     symmetric_csr_matrix.print_pattern();
+
+    std::cout << "\n";
+    std::cout << "\nSkyline Matrix:\n";
+    skyline_matrix.print_pattern();
+
 
     // std::cout << "\n";
     // csr_matrix.print();

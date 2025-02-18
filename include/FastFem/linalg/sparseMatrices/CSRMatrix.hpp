@@ -53,9 +53,7 @@ private:
 template <unsigned int dim, unsigned int spacedim>
 CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DofHandler<dim, spacedim>& dof_handler)
 {
-    ////////////////
-    //std::vector<std::set<unsigned int>> dof_interactions(dof_handler.n_dofs());
-    std::vector<std::set<unsigned int>> dof_interactions(4);
+    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.n_dofs());
 
     for(unsigned int i = 0; i < dof_handler.n_elements(); ++i){
         const auto& dofs = dof_handler.get_element_dofs(i);
@@ -67,9 +65,7 @@ CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DofHandler<di
         }
     }
 
-    //////////
-    //std::vector<size_t> row_ptr(dof_handler.n_dofs() + 1);
-    std::vector<size_t> row_ptr(5);
+    std::vector<size_t> row_ptr(dof_handler.n_dofs() + 1);
     std::vector<size_t> col_indices;
 
     for(unsigned int i = 0; i < dof_interactions.size(); ++i){
@@ -83,10 +79,7 @@ CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DofHandler<di
 template <unsigned int dim, unsigned int spacedim>
 CSRPattern CSRPattern::create_symmetric_from_dof_handler(const fastfem::dof::DofHandler<dim, spacedim>& dof_handler)
 {
-    ///////n_dofs
-    //std::vector<std::set<unsigned int>> dof_interactions(dof_handler.n_dofs());
-    std::vector<std::set<unsigned int>> dof_interactions(4);
-
+    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.n_dofs());
 
     for(unsigned int i = 0; i < dof_handler.n_elements(); ++i){
         const auto& dofs = dof_handler.get_element_dofs(i);
@@ -98,9 +91,7 @@ CSRPattern CSRPattern::create_symmetric_from_dof_handler(const fastfem::dof::Dof
         }
     }
 
-    /////
-    //std::vector<size_t> row_ptr(dof_handler.n_dofs + 1);
-    std::vector<size_t> row_ptr(5);
+    std::vector<size_t> row_ptr(dof_handler.n_dofs() + 1);
     std::vector<size_t> col_indices;
 
     for(unsigned int i = 0; i < dof_interactions.size(); ++i){
