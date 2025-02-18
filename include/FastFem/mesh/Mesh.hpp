@@ -4,11 +4,22 @@
  * We also assume to work with simplicial conforming meshes.
  * 
  */
-
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include <vector>
+constexpr inline size_t binom(size_t n, size_t k) noexcept
+{
+    return
+      (        k> n  )? 0 :          // out of range
+      (k==0 || k==n  )? 1 :          // edge
+      (k==1 || k==n-1)? n :          // first
+      (     k+k < n  )?              // recursive:
+      (binom(n-1,k-1) * n)/k :       //  path to k=1   is faster
+      (binom(n-1,k) * n)/(n-k);      //  path to k=n-1 is faster
+}
+
+#define get_m_faces_on_n_simplex(m, n) (binom(n+1, m+1))
+
 #include <stdint.h>
 
 #include "FastFem/mesh/Geometry.hpp"
@@ -43,74 +54,121 @@ struct Vertex
 template <unsigned int dim, unsigned int spacedim=dim>
 class MeshSimplex
 {
+    /*
+     * Some static assertions to make sure that the template arguments are correct
+     * based on the following constraints:
+     *  - we don't want to have a simplex with a dimension greater than the space it lives in
+     *  - the dimension of the simplex must be greater than 0
+     *  - we don't handle spaces with dimension greater than 3
+     */
+    static_assert(dim > 0, "The dimension of the simplex must be greater than 0");
+    static_assert(dim <= spacedim, "The dimension of the simplex must be less or equal to the space it lives in");
+    static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
+
 
 public:
+
+    static constexpr unsigned int n_vertices = dim + 1;
+    static constexpr unsigned int n_edges = get_m_faces_on_n_simplex(1, dim);
+    static constexpr unsigned int n_faces = get_m_faces_on_n_simplex(2, dim);
+    static constexpr unsigned int n_cells = get_m_faces_on_n_simplex(3, dim);
+
     MeshSimplex(const size_t v[dim + 1])
     {
         std::copy(v, v + dim + 1, vertices.begin());
     }
 
-    // could be implemented with std::array
-    const std::vector<fastfem::types::simplex_index<0>> get_vertex_indices() const {
-        std::vector<fastfem::types::simplex_index<0>> v_indices;
+    /**
+     * Get the indices of the vertices of the simplex. 
+     */
+    const std::array<fastfem::types::simplex_index<0>, n_vertices> get_vertex_indices() const {
+        std::array<fastfem::types::simplex_index<0>, n_vertices> v_indices;
+
+        unsigned int vertex_count = 0;
+
         for (size_t i = 0; i < dim + 1; ++i)
         {
             std::array<size_t, 1> v = {vertices[i]};
-            v_indices.push_back(v);
+            v_indices[vertex_count++] = v;
         }
         return v_indices;
     }
 
-    const std::vector<fastfem::types::simplex_index<1>> get_edges_indices() const {
-        std::vector<fastfem::types::simplex_index<1>> e_indices;
+    /**
+     * Get the indices of the edges of the simplex. Each edge is represented by an
+     * ordered pair of indices of the vertices.
+     */
+    const std::array<fastfem::types::simplex_index<1>, n_edges> get_edges_indices() const {
+        std::array<fastfem::types::simplex_index<1>, n_edges> e_indices;
+        unsigned int edge_count = 0;
+
         for (size_t i = 0; i < dim + 1; ++i)
         {
             for (size_t j = i + 1; j < dim + 1; ++j)
             {
                 // always store the indices in ascending order
                 if(vertices[i] < vertices[j])
-                    e_indices.push_back({vertices[i], vertices[j]});
+                    e_indices[edge_count++] = {vertices[i], vertices[j]};
                 else
-                    e_indices.push_back({vertices[j], vertices[i]});
+                    e_indices[edge_count++] = {vertices[j], vertices[i]};
             }
         }
+        
+        assert(edge_count == n_edges);
+
         return e_indices;
     }    
 
-    // not tested
-    const std::vector<fastfem::types::simplex_index<2>> get_faces_indices() const {
-        std::vector<fastfem::types::simplex_index<2>> f_indices;
-        for (size_t i = 0; i < dim + 1; ++i)
-        {
-            for (size_t j = i + 1; j < dim + 1; ++j)
-            {
-                for (size_t k = j + 1; k < dim + 1; ++k)
-                {
-                    // always store the indices in ascending order
-                    if(vertices[i] < vertices[j] && vertices[j] < vertices[k])
-                        f_indices.push_back({vertices[i], vertices[j], vertices[k]});
-                    else if(vertices[i] < vertices[k] && vertices[k] < vertices[j])
-                        f_indices.push_back({vertices[i], vertices[k], vertices[j]});
-                    else if(vertices[j] < vertices[i] && vertices[i] < vertices[k])
-                        f_indices.push_back({vertices[j], vertices[i], vertices[k]});
-                    else if(vertices[j] < vertices[k] && vertices[k] < vertices[i])
-                        f_indices.push_back({vertices[j], vertices[k], vertices[i]});
-                    else if(vertices[k] < vertices[i] && vertices[i] < vertices[j])
-                        f_indices.push_back({vertices[k], vertices[i], vertices[j]});
-                    else if(vertices[k] < vertices[j] && vertices[j] < vertices[i])
-                        f_indices.push_back({vertices[k], vertices[j], vertices[i]});
+    /**
+     * Get the indices of the faces of the simplex. Each face is represented by an
+     * ordered triple of indices of the vertices. 
+     */
+    const std::array<fastfem::types::simplex_index<2>, n_faces> get_faces_indices() const {
+        if(n_faces == 0) return {}; // in 1D there are no faces
+
+        std::array<fastfem::types::simplex_index<2>, n_faces> f_indices;
+
+        unsigned int face_count = 0;
+
+        for (size_t i = 0; i < dim + 1; ++i){
+            for (size_t j = i + 1; j < dim + 1; ++j){
+                for (size_t k = j + 1; k < dim + 1; ++k){
+                    fastfem::types::simplex_index<2> face = {vertices[i], vertices[j], vertices[k]};
+                    std::sort(face.begin(), face.end());
+                    // copy starting from the face_count index
+                    f_indices[face_count++] = face;
                 }
             }
         }
+
+        assert(face_count == n_faces);
+
         return f_indices;
     }
 
-    const fastfem::types::simplex_index<dim> get_element_indices() const {
-        fastfem::types::simplex_index<dim> e_indices;
-        std::copy(vertices, vertices + dim + 1, e_indices.begin());
-        std::sort(e_indices.begin(), e_indices.end());
-        return e_indices;
-    } 
+    const std::array<fastfem::types::simplex_index<3>, n_cells> get_cell_indices() const {
+        if(n_cells == 0) return {}; // in 1D and 2D there are no cells
+        
+        std::array<fastfem::types::simplex_index<3>, n_cells> c_indices;
+
+        unsigned int cell_count = 0;
+
+        for (size_t i = 0; i < dim + 1; ++i){
+            for (size_t j = i + 1; j < dim + 1; ++j){
+                for (size_t k = j + 1; k < dim + 1; ++k){
+                    for (size_t l = k + 1; l < dim + 1; ++l){
+                        fastfem::types::simplex_index<3> cell = {vertices[i], vertices[j], vertices[k], vertices[l]};
+                        std::sort(cell.begin(), cell.end());
+                        c_indices[cell_count++] = cell;                        
+                    }
+                }
+            }
+        }
+
+        assert(cell_count == n_cells);
+
+        return c_indices;
+    }
 
     // just check if the vertices are the same
     bool operator==(const MeshSimplex<dim, spacedim> &s) const

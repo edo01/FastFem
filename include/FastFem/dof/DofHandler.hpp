@@ -74,7 +74,10 @@ public:
      * are visited. For each vertex, we assign a number of DoFs equal to the number of DoFs per vertex of
      * the finite element space. We then visit all the simplices of dimension 1 (edges) and we assign a number
      * of DoFs equal to the number of DoFs per edge of the finite element space. We then visit all the simplices
-     * of dimension 2 (faces)  
+     * of dimension 2 (faces) and finally all the simplices of dimension 3 (tetrahedra). 
+     * 
+     * The Dofs are uniquely identified by their position inside a list local to the simplex they belong to. Each
+     * simplex is identified by the couple in ascending order of the global indices of its vertices.
      * 
      */
     unsigned int distribute_dofs() {
@@ -155,6 +158,7 @@ public:
     std::vector<fastfem::types::dof_index_t> get_dofs_on_cell(const mesh::MeshSimplex<dim, spacedim> &T) const {
         std::vector<fastfem::types::dof_index_t> dofs;
         unsigned int dofs_per_cell = (*fe).get_n_dofs_per_cell();
+
         for(auto &v : T.get_vertex_indices()){
             for(auto &d : vertex_dofs.at(v)){
                 dofs.push_back(d);
@@ -171,7 +175,7 @@ public:
             }
         }
         for(auto &t : T.get_cells_indices()){
-            for(auto &d : tetrahedron_dofs.at(t)){
+            for(auto &d : cell_dofs.at(t)){
                 dofs.push_back(d);
             }
         }
@@ -197,7 +201,7 @@ private:
     fastfem::types::dof_table<0> vertex_dofs;
     fastfem::types::dof_table<1> edge_dofs;
     fastfem::types::dof_table<2> face_dofs;
-    fastfem::types::dof_table<3> tetrahedron_dofs;
+    fastfem::types::dof_table<3> cell_dofs;
 
     unsigned int n_dofs;
 

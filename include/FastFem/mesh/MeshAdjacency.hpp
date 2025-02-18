@@ -38,7 +38,7 @@ public:
 
     std::vector<MeshSimplex<dim, spacedim>> get_adjacent_simplices(MeshSimplex<dim, spacedim> &T) {
         std::vector<size_t> p_indices;
-        for (int j = 0; j < dim + 1; j++) {
+        for (unsigned int j = 0; j < dim + 1; j++) {
             std::vector<size_t> *adj_list = vtx_adjacency.get(T.get_vertex(j));
             // add only the elements that are not already in the list
             for (auto it = adj_list->begin(); it != adj_list->end(); ++it) {

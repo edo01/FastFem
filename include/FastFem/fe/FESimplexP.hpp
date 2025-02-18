@@ -27,10 +27,10 @@ public:
     virtual ~FESimplexP(){};
 
     // total number of degrees of freedom
+    unsigned int get_n_dofs_per_element() const { return n_dofs_per_element; }
+    
+    // number of degrees of freedom per cell, not including dofs on lower dimensional objects. 
     unsigned int get_n_dofs_per_cell() const { return n_dofs_per_cell; }
-
-    // number of degrees of freedom per tetrahedron (3D), not including dofs on lower dimensional objects. 
-    unsigned int get_n_dofs_per_tetrahedron() const { return n_dofs_per_tetrahedron; }
     
     // number of degrees of freedom per face, not including dofs on lower dimensional objects.
     unsigned int get_n_dofs_per_face() const { return n_dofs_per_face; }
@@ -50,14 +50,18 @@ public:
 
 protected:    
     unsigned int n_components;    // number of components of the finite element
-    unsigned int n_dofs_per_cell; // total number of degrees of freedom per cell
-    unsigned int n_dofs_per_tetrahedron; // number of degrees of freedom per tetrahedron
+    unsigned int n_dofs_per_element; // total number of degrees of freedom of the finite element
+    unsigned int n_dofs_per_cell; // number of degrees of freedom per cell
     unsigned int n_dofs_per_edge; // number of degrees of freedom per edge
     unsigned int n_dofs_per_face; // number of degrees of freedom per face
     unsigned int n_dofs_per_vertex; // number of degrees of freedom per vertex
     mesh::Simplex<dim> reference_simplex; // reference simplex
 
-    std::vector<mesh::Point<spacedim>> dofs; // degrees of freedom on the reference simplex
+    std::vector<mesh::Point<spacedim>> dofs; // points on the reference simplex that correspond to the dofs
+
+
+
+
 
 
 };
@@ -70,11 +74,11 @@ public:
 
     FESimplexP1(const unsigned int n_components) : FESimplexP<2>(n_components) {
         // compute the number of degrees of freedom
-        this->n_dofs_per_cell = 3*n_components;
+        this->n_dofs_per_element = 3*n_components;
+        this->n_dofs_per_vertex = n_components;
         this->n_dofs_per_edge = 0;
         this->n_dofs_per_face = 0;
-        this->n_dofs_per_tetrahedron = 0;
-        this->n_dofs_per_vertex = n_components;
+        this->n_dofs_per_cell = 0;
 
         // set the reference simplex
         /**
@@ -114,11 +118,11 @@ public:
 
     FESimplexP2(const unsigned int n_components) : FESimplexP<2>(n_components) {
         // compute the number of degrees of freedom
-        this->n_dofs_per_cell = 6*n_components;
+        this->n_dofs_per_element = 6*n_components;
+        this->n_dofs_per_vertex = n_components;
         this->n_dofs_per_edge = n_components;
         this->n_dofs_per_face = 0;
-        this->n_dofs_per_tetrahedron = 0;
-        this->n_dofs_per_vertex = n_components;
+        this->n_dofs_per_cell = 0;
 
         // set the reference simplex
         /**
@@ -164,11 +168,11 @@ public:
 
     FESimplexP3(const unsigned int n_components) : FESimplexP<2>(n_components) {
         // compute the number of degrees of freedom
-        this->n_dofs_per_cell = 10*n_components;
-        this->n_dofs_per_edge = 2*n_components;
-        this->n_dofs_per_face = n_components;
-        this->n_dofs_per_tetrahedron = 0;
-        this->n_dofs_per_vertex = n_components;
+        this->n_dofs_per_element = 10*n_components;
+        this->n_dofs_per_vertex  = n_components;
+        this->n_dofs_per_edge    = 2*n_components;
+        this->n_dofs_per_face    = n_components;
+        this->n_dofs_per_cell    = 0;
 
         // set the reference simplex
         /**
