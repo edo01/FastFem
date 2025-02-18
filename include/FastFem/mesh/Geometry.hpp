@@ -18,6 +18,9 @@ template <unsigned int dim, unsigned int spacedim=dim>
 class Simplex
 {
 public:
+
+    Simplex() = default;
+    
     Simplex(const Point<spacedim> v[dim + 1])
     {
         std::copy(v, v + dim + 1, vertices);

@@ -14,6 +14,7 @@
 #include "FastFem/mesh/Geometry.hpp"
 #include "FastFem/mesh/VertexHasher.hpp"
 #include "FastFem/common/hash_table.h"
+#include "FastFem/types/CommonTypes.hpp"
 
 namespace fastfem {
 namespace mesh {
@@ -42,11 +43,74 @@ struct Vertex
 template <unsigned int dim, unsigned int spacedim=dim>
 class MeshSimplex
 {
+
 public:
     MeshSimplex(const size_t v[dim + 1])
     {
-        std::copy(v, v + dim + 1, vertices);
+        std::copy(v, v + dim + 1, vertices.begin());
     }
+
+    // could be implemented with std::array
+    const std::vector<fastfem::types::simplex_index<0>> get_vertex_indices() const {
+        std::vector<fastfem::types::simplex_index<0>> v_indices;
+        for (size_t i = 0; i < dim + 1; ++i)
+        {
+            std::array<size_t, 1> v = {vertices[i]};
+            v_indices.push_back(v);
+        }
+        return v_indices;
+    }
+
+    const std::vector<fastfem::types::simplex_index<1>> get_edges_indices() const {
+        std::vector<fastfem::types::simplex_index<1>> e_indices;
+        for (size_t i = 0; i < dim + 1; ++i)
+        {
+            for (size_t j = i + 1; j < dim + 1; ++j)
+            {
+                // always store the indices in ascending order
+                if(vertices[i] < vertices[j])
+                    e_indices.push_back({vertices[i], vertices[j]});
+                else
+                    e_indices.push_back({vertices[j], vertices[i]});
+            }
+        }
+        return e_indices;
+    }    
+
+    // not tested
+    const std::vector<fastfem::types::simplex_index<2>> get_faces_indices() const {
+        std::vector<fastfem::types::simplex_index<2>> f_indices;
+        for (size_t i = 0; i < dim + 1; ++i)
+        {
+            for (size_t j = i + 1; j < dim + 1; ++j)
+            {
+                for (size_t k = j + 1; k < dim + 1; ++k)
+                {
+                    // always store the indices in ascending order
+                    if(vertices[i] < vertices[j] && vertices[j] < vertices[k])
+                        f_indices.push_back({vertices[i], vertices[j], vertices[k]});
+                    else if(vertices[i] < vertices[k] && vertices[k] < vertices[j])
+                        f_indices.push_back({vertices[i], vertices[k], vertices[j]});
+                    else if(vertices[j] < vertices[i] && vertices[i] < vertices[k])
+                        f_indices.push_back({vertices[j], vertices[i], vertices[k]});
+                    else if(vertices[j] < vertices[k] && vertices[k] < vertices[i])
+                        f_indices.push_back({vertices[j], vertices[k], vertices[i]});
+                    else if(vertices[k] < vertices[i] && vertices[i] < vertices[j])
+                        f_indices.push_back({vertices[k], vertices[i], vertices[j]});
+                    else if(vertices[k] < vertices[j] && vertices[j] < vertices[i])
+                        f_indices.push_back({vertices[k], vertices[j], vertices[i]});
+                }
+            }
+        }
+        return f_indices;
+    }
+
+    const fastfem::types::simplex_index<dim> get_element_indices() const {
+        fastfem::types::simplex_index<dim> e_indices;
+        std::copy(vertices, vertices + dim + 1, e_indices.begin());
+        std::sort(e_indices.begin(), e_indices.end());
+        return e_indices;
+    } 
 
     // just check if the vertices are the same
     bool operator==(const MeshSimplex<dim, spacedim> &s) const
@@ -64,7 +128,7 @@ public:
     int vertex_count() const { return dim + 1; }
 
 private:
-    size_t vertices[dim + 1];
+    std::array<size_t, dim + 1> vertices;
 };
 
 /**
@@ -100,6 +164,9 @@ public:
 
     auto elem_begin() { return elements.begin(); }
     auto elem_end() { return elements.end(); }
+
+    auto elem_begin() const { return elements.begin(); }
+    auto elem_end() const { return elements.end(); }
 
     void add_boundary(size_t i) { boundary.push_back(i); }
     size_t boundary_count() const { return boundary.size(); }
