@@ -1,6 +1,11 @@
 #ifndef MESHTOOLS_HPP
 #define MESHTOOLS_HPP
 
+/**
+ * Utility functions for mesh manipulation.
+ * No need to explicitly instantiate the functions.
+ */
+
 #include <stdint.h>
 #include "FastFem/common/hash_table.h"
 #include "FastFem/common/hash.h"
