@@ -114,7 +114,8 @@ int main()
 
   // Define the skyline structure for A
   std::vector<size_t> skyline = {0, 1, 3, 5, 7, 9};
-  SkylineMatrix A(5, skyline);
+  SkylinePattern pattern(skyline);
+  SkylineMatrix A(5, pattern);
 
   // Fill values (lower triangular part)
   /*std::vector<double> values = {4, 1, 4, 1, 4, 1, 4, 1, 4};

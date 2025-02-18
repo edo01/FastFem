@@ -3,15 +3,28 @@
 namespace fastfem{
 namespace linalg{
 
-SkylineMatrix::SkylineMatrix(size_t n_cols, const std::vector<size_t>& skyline) :
-  SparseMatrix(skyline.size() - 1, n_cols),
-    values(skyline.back()),
-    skyline(std::make_shared<std::vector<size_t>>(skyline))
+// SkylineMatrix::SkylineMatrix(size_t n_cols, const std::vector<size_t>& skyline) :
+//   SparseMatrix(skyline.size() - 1, n_cols),
+//     values(skyline.back()),
+//     skyline(std::make_shared<std::vector<size_t>>(skyline))
+//     {
+//         if(n_cols == 0 || skyline.size() < 2){
+//             throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): invalid dimensions");
+//         }
+//         if(skyline.size() - 1 != n_cols){
+//             throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): matrix must be square");
+//         }
+//     }
+
+SkylineMatrix::SkylineMatrix(size_t n_cols, const SkylinePattern& skyline) :
+  SparseMatrix(skyline.skyline_rows.size() - 1, n_cols),
+    values(skyline.skyline_rows.back()),
+    base_skyline(std::make_shared<SkylinePattern>(skyline))
     {
-        if(n_cols == 0 || skyline.size() < 2){
+        if(n_cols == 0 || skyline.skyline_rows.size() < 2){
             throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): invalid dimensions");
         }
-        if(skyline.size() - 1 != n_cols){
+        if(skyline.skyline_rows.size() - 1 != n_cols){
             throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): matrix must be square");
         }
     }
@@ -22,8 +35,8 @@ const double &SkylineMatrix::get_entry(size_t i, size_t j) const
     std::swap(i, j);
     }
 
-    size_t row_start = (*skyline)[i];
-    size_t row_end = (*skyline)[i + 1];
+    size_t row_start = (base_skyline->skyline_rows)[i];
+    size_t row_end = (base_skyline->skyline_rows)[i + 1];
     size_t row_length = row_end - row_start;
 
     // Compute the first column stored in row i
@@ -52,8 +65,10 @@ Vector SkylineMatrix::gemv(const Vector& x) const
 
     for (size_t i = 0; i < n_rows; ++i)
     {
-        row_start = skyline->at(i);
-        row_end = skyline->at(i + 1);
+        //row_start = skyline->at(i);
+        //row_end = skyline->at(i + 1);
+        row_start = base_skyline->skyline_rows[i];
+        row_end = base_skyline->skyline_rows[i + 1];
         row_length = row_end - row_start;
 
         // First column stored in row i
@@ -78,7 +93,8 @@ Vector SkylineMatrix::gemv(const Vector& x) const
 
 void SkylineMatrix::add_entry(size_t index, double value)
 {
-    if (index >= skyline->back()) {
+    //if (index >= skyline->back()) {
+    if (index >= base_skyline->skyline_rows.back()) {
         throw std::out_of_range("SkylineMatrix::add_entry(): index out of range");
     }
     values[index] = value;
@@ -91,9 +107,11 @@ void SkylineMatrix::print_pattern() const
         for (size_t j = 0; j <= i; ++j)
         {
             bool found = false;
-            for (size_t k = (*skyline)[i]; k < (*skyline)[i + 1]; ++k)
+            //for (size_t k = (*skyline)[i]; k < (*skyline)[i + 1]; ++k)
+            for (size_t k = (base_skyline->skyline_rows)[i]; k < (base_skyline->skyline_rows)[i + 1]; ++k)
             {
-                if (j == i - ((*skyline)[i + 1] - k - 1)) 
+                //if (j == i - ((*skyline)[i + 1] - k - 1))
+                if (j == i - ((base_skyline->skyline_rows)[i + 1] - k - 1))  
                 {
                     std::cout << "1 ";
                     found = true;
@@ -114,8 +132,10 @@ void SkylineMatrix::print_pattern() const
  */
 void SkylineMatrix::cholesky_factorize() {
     for (size_t i = 0; i < n_rows; ++i) {
-        size_t row_start = (*skyline)[i];
-        size_t row_end = (*skyline)[i + 1];
+        //size_t row_start = (*skyline)[i];
+        //size_t row_end = (*skyline)[i + 1];
+        size_t row_start = (base_skyline->skyline_rows)[i];
+        size_t row_end = (base_skyline->skyline_rows)[i + 1];
         size_t first_col = i - (row_end - row_start) + 1;
 
         // Compute L(i, i)
@@ -127,8 +147,10 @@ void SkylineMatrix::cholesky_factorize() {
         values[row_end - 1] = std::sqrt((*this)(i, i) - sum);
 
         for (size_t j = i + 1; j < n_rows; ++j) {
-            size_t row_start_j = (*skyline)[j];
-            size_t row_end_j = (*skyline)[j + 1];
+            // size_t row_start_j = (*skyline)[j];
+            // size_t row_end_j = (*skyline)[j + 1];
+            size_t row_start_j = (base_skyline->skyline_rows)[j];
+            size_t row_end_j = (base_skyline->skyline_rows)[j + 1];
             size_t row_length_j = row_end_j - row_start_j;  // Length of stored values in row j
             size_t first_col_j = j - row_length_j + 1;
         
@@ -158,8 +180,10 @@ Vector SkylineMatrix::cholesky_solve(const Vector& b) const {
 
     // Forward Substitution: Solve L * y = b
     for (size_t i = 0; i < n_rows; ++i) {
-        size_t row_start = (*skyline)[i];
-        size_t row_end = (*skyline)[i + 1];
+        // size_t row_start = (*skyline)[i];
+        // size_t row_end = (*skyline)[i + 1];
+        size_t row_start = (base_skyline->skyline_rows)[i];
+        size_t row_end = (base_skyline->skyline_rows)[i + 1];
         size_t first_col = i - (row_end - row_start) + 1;
 
         for (size_t k = row_start; k < row_end - 1; ++k) {
@@ -170,8 +194,10 @@ Vector SkylineMatrix::cholesky_solve(const Vector& b) const {
 
     // Backward Substitution: Solve L^T * x = y
     for (size_t i = n_rows; i > 0; --i) {       
-        size_t row_start = (*skyline)[i - 1];
-        size_t row_end = (*skyline)[i];
+        // size_t row_start = (*skyline)[i - 1];
+        // size_t row_end = (*skyline)[i];
+        size_t row_start = (base_skyline->skyline_rows)[i - 1];
+        size_t row_end = (base_skyline->skyline_rows)[i];
         size_t first_col = i - (row_end - row_start);
 
         x[i - 1] /= values[row_end - 1];
@@ -189,8 +215,10 @@ void SkylineMatrix::insert_entry(size_t i, size_t j, double value) {
         std::swap(i, j);
     }
 
-    size_t row_start = (*skyline)[i];
-    size_t row_end = (*skyline)[i + 1];
+    // size_t row_start = (*skyline)[i];
+    // size_t row_end = (*skyline)[i + 1];
+    size_t row_start = (base_skyline->skyline_rows)[i];
+    size_t row_end = (base_skyline->skyline_rows)[i + 1];
     size_t row_length = row_end - row_start;
     size_t first_col = i - row_length + 1;
 
