@@ -29,7 +29,7 @@ private:
 };
 
 template <unsigned int dim, unsigned int spacedim>
-void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim> & dof_handler, size_t tag);
+void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
 
 void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs);
 

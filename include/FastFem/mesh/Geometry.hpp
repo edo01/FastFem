@@ -48,7 +48,7 @@ class Simplex
 public:
     Simplex() = default;
     
-    Simplex(const Point<spacedim> v[dim + 1]);
+    Simplex(Point<spacedim> v[dim + 1]);
 
     template <typename... Args>
     Simplex(Args... args)

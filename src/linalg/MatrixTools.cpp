@@ -5,7 +5,7 @@ namespace linalg{
 namespace tools{
 
 template <unsigned int dim, unsigned int spacedim>
-void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim> & dof_handler, size_t tag)
+void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag)
 {
     if(A.get_n_rows() != A.get_n_cols())
     {
@@ -49,12 +49,12 @@ void add_local_vector_to_global(Vector& global_vector, const Vector& local_vecto
 
 // instantiate the templates
 
-template void apply_homogeneous_dirichlet<1,1>(SparseMatrix& A, Vector& rhs, const DoFHandler<1>& dof_handler, size_t tag);
-template void apply_homogeneous_dirichlet<1,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<1>& dof_handler, size_t tag);
-template void apply_homogeneous_dirichlet<1,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<1>& dof_handler, size_t tag);
-template void apply_homogeneous_dirichlet<2,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<2>& dof_handler, size_t tag);
-template void apply_homogeneous_dirichlet<2,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<2>& dof_handler, size_t tag);
-template void apply_homogeneous_dirichlet<3,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<3>& dof_handler, size_t tag);
+template void apply_homogeneous_dirichlet<1,1>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 1>& dof_handler, size_t tag);
+template void apply_homogeneous_dirichlet<1,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 2>& dof_handler, size_t tag);
+template void apply_homogeneous_dirichlet<1,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 3>& dof_handler, size_t tag);
+template void apply_homogeneous_dirichlet<2,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 2>& dof_handler, size_t tag);
+template void apply_homogeneous_dirichlet<2,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 3>& dof_handler, size_t tag);
+template void apply_homogeneous_dirichlet<3,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<3, 3>& dof_handler, size_t tag);
 
 } // namespace tools
 } // namespace linalg

@@ -138,16 +138,16 @@ bool MeshSimplex<dim, spacedim>::operator==(const MeshSimplex<dim, spacedim> &s)
 /*
  * ----------------------MESH------------------------------
  */
-template<unsigned int dim, unsigned int spacedim>
-Simplex<dim, spacedim> Mesh<dim, spacedim>::get_Simplex(MeshSimplex<dim, spacedim> s) const
-{
-    Point<spacedim> p[dim + 1];
-    for (size_t i = 0; i < dim + 1; ++i)
-    {
-        p[i] = vertices[s.get_vertex(i)];
-    }
-    return Simplex<dim, spacedim>(p);
-}
+// template<unsigned int dim, unsigned int spacedim>
+// Simplex<dim, spacedim> Mesh<dim, spacedim>::get_Simplex(MeshSimplex<dim, spacedim> s) const
+// {
+//     Point<spacedim> p[dim + 1];
+//     for (size_t i = 0; i < dim + 1; ++i)
+//     {
+//         p[i] = vertices[s.get_vertex(i)];
+//     }
+//     return Simplex<dim, spacedim>(p);
+// }
 
 
 /**
