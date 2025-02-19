@@ -67,6 +67,8 @@ class DoFHandler
     static_assert(dim <= spacedim, "The dimension must be less or equal to the space it lives in");
     static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 
+    using global_vertex_vertex_id = fastfem::types::global_vertex_id;
+
     using global_dof_index_t = fastfem::types::global_dof_index_t;
     using local_dof_index_t  = fastfem::types::local_dof_index_t;
 
@@ -114,6 +116,12 @@ public:
     inline size_t get_n_elements() const { return mesh.elem_count(); }
 
     void print_dofs() const;
+
+    /**
+     * This function is used to output the solution by DataIO. When we output the solution, 
+     * we only output the values of the DoFs on the vertices of the mesh.
+     */
+    inline std::vector<global_dof_index_t> get_dof_on_vertex(const global_vertex_vertex_id &vertex)  const { return vertex_dofs.at(vertex); }
 
 private:
     const mesh::Mesh<dim, spacedim> &mesh;
