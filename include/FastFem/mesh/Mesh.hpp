@@ -40,7 +40,7 @@ class MeshSimplex
      *  - the dimension of the simplex must be greater than 0
      *  - we don't handle spaces with dimension greater than 3
      */
-    static_assert(dim > 0, "The dimension of the simplex must be greater than 0");
+    static_assert(dim >= 0, "The dimension of the simplex must be equal or greater than 0");
     static_assert(dim <= spacedim, "The dimension of the simplex must be less or equal to the space it lives in");
     static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 

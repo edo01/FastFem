@@ -160,6 +160,9 @@ template struct Vertex<2>;
 template struct Vertex<3>;
 
 // mesh simplex
+template class MeshSimplex<0, 1>;
+template class MeshSimplex<0, 2>;
+template class MeshSimplex<0, 3>;
 template class MeshSimplex<1, 1>;
 template class MeshSimplex<1, 2>;
 template class MeshSimplex<1, 3>;
