@@ -55,73 +55,7 @@ private:
     friend class COOMatrix;
 };
 
-template <unsigned int dim, unsigned int spacedim>
-CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler)
-{
-    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.get_n_dofs());
-
-    for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
-        const auto& elem = *it;
-
-        const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
-
-        for(int j = 0; j < dofs.size(); ++j){
-            for(int k = j; k < dofs.size(); ++k){
-                dof_interactions[dofs[j]].insert(dofs[k]);
-                dof_interactions[dofs[k]].insert(dofs[j]);
-            }
-        }
-    }
-
-    std::vector<size_t> row_ptr(dof_handler.get_n_dofs() + 1);
-    std::vector<size_t> col_indices;
-
-    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
-        row_ptr[i + 1] = row_ptr[i] + dof_interactions[i].size();
-        col_indices.insert(col_indices.end(), dof_interactions[i].begin(), dof_interactions[i].end());
-    }
-
-    return CSRPattern(row_ptr, col_indices);
-}
-
-template <unsigned int dim, unsigned int spacedim>
-CSRPattern CSRPattern::create_symmetric_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler)
-{
-    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.get_n_dofs());
-
-    for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
-        const auto& elem = *it;
-        const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
-        for(int j = 0; j < dofs.size(); ++j){
-            for(int k = j; k < dofs.size(); ++k){
-                //stores only the lower triangular part
-                dofs[j] < dofs[k] ? dof_interactions[dofs[j]].insert(dofs[k]) : dof_interactions[dofs[k]].insert(dofs[j]); 
-            }
-        }
-    }
-
-    std::vector<size_t> row_ptr(dof_handler.get_n_dofs() + 1);
-    std::vector<size_t> col_indices;
-
-    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
-        row_ptr[i + 1] = row_ptr[i] + dof_interactions[i].size();
-        col_indices.insert(col_indices.end(), dof_interactions[i].begin(), dof_interactions[i].end());
-    }
-
-    return CSRPattern(row_ptr, col_indices);
-}
-
 } // namespace linalg
 } // namespace FastFem
 
 #endif // FASTFEM_CSRMATRIX_HPP
-
-
-// 0 1 0 2     0 1 0 2
-// 1 1 0 0       1 0 0
-// 0 0 1 0 -->     1 0
-// 2 0 0 2           2
-
-// row_ptr = {0, 2, 3, 4, 5}
-// col_indices = {1, 3, 1, 2, 3}
-

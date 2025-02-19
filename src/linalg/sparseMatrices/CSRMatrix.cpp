@@ -5,16 +5,6 @@
 namespace fastfem{
 namespace linalg{
 
-// CSRPattern::CSRPattern(std::initializer_list<size_t> row_ptr, std::initializer_list<size_t> col_indices) : row_ptr(row_ptr), col_indices(col_indices)
-// {
-//     if(this->row_ptr.size() < 2){
-//         throw std::invalid_argument("CSRPattern::CSRPattern(): invalid row_ptr size");
-//     }
-//     if(this->col_indices.size() != this->row_ptr.back()){
-//         throw std::invalid_argument("CSRPattern::CSRPattern(): invalid col_indices size");
-//     }
-// }
-
 CSRPattern::CSRPattern(const std::vector<size_t>& row_ptr, const std::vector<size_t>& col_indices) : row_ptr(row_ptr), col_indices(col_indices)
 {
     if(this->row_ptr.size() < 2){
@@ -152,6 +142,81 @@ void CSRMatrix::print_pattern() const
         std::cout << std::endl;
     }
 }        
+
+/**
+ * CSRPattern
+ */
+
+template <unsigned int dim, unsigned int spacedim>
+CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler)
+{
+    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.get_n_dofs());
+
+    for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
+        const auto& elem = *it;
+
+        const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
+
+        for(int j = 0; j < dofs.size(); ++j){
+            for(int k = j; k < dofs.size(); ++k){
+                dof_interactions[dofs[j]].insert(dofs[k]);
+                dof_interactions[dofs[k]].insert(dofs[j]);
+            }
+        }
+    }
+
+    std::vector<size_t> row_ptr(dof_handler.get_n_dofs() + 1);
+    std::vector<size_t> col_indices;
+
+    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
+        row_ptr[i + 1] = row_ptr[i] + dof_interactions[i].size();
+        col_indices.insert(col_indices.end(), dof_interactions[i].begin(), dof_interactions[i].end());
+    }
+
+    return CSRPattern(row_ptr, col_indices);
+}
+
+template <unsigned int dim, unsigned int spacedim>
+CSRPattern CSRPattern::create_symmetric_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler)
+{
+    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.get_n_dofs());
+
+    for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
+        const auto& elem = *it;
+        const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
+        for(int j = 0; j < dofs.size(); ++j){
+            for(int k = j; k < dofs.size(); ++k){
+                //stores only the lower triangular part
+                dofs[j] < dofs[k] ? dof_interactions[dofs[j]].insert(dofs[k]) : dof_interactions[dofs[k]].insert(dofs[j]); 
+            }
+        }
+    }
+
+    std::vector<size_t> row_ptr(dof_handler.get_n_dofs() + 1);
+    std::vector<size_t> col_indices;
+
+    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
+        row_ptr[i + 1] = row_ptr[i] + dof_interactions[i].size();
+        col_indices.insert(col_indices.end(), dof_interactions[i].begin(), dof_interactions[i].end());
+    }
+
+    return CSRPattern(row_ptr, col_indices);
+}
+
+// explicit instantiation
+template CSRPattern CSRPattern::create_from_dof_handler<1,1>(const fastfem::dof::DoFHandler<1,1>& dof_handler);
+template CSRPattern CSRPattern::create_from_dof_handler<1,2>(const fastfem::dof::DoFHandler<1,2>& dof_handler);
+template CSRPattern CSRPattern::create_from_dof_handler<1,3>(const fastfem::dof::DoFHandler<1,3>& dof_handler);
+template CSRPattern CSRPattern::create_from_dof_handler<2,2>(const fastfem::dof::DoFHandler<2,2>& dof_handler);
+template CSRPattern CSRPattern::create_from_dof_handler<2,3>(const fastfem::dof::DoFHandler<2,3>& dof_handler);
+template CSRPattern CSRPattern::create_from_dof_handler<3,3>(const fastfem::dof::DoFHandler<3,3>& dof_handler);
+
+template CSRPattern CSRPattern::create_symmetric_from_dof_handler<1,1>(const fastfem::dof::DoFHandler<1,1>& dof_handler);
+template CSRPattern CSRPattern::create_symmetric_from_dof_handler<1,2>(const fastfem::dof::DoFHandler<1,2>& dof_handler);
+template CSRPattern CSRPattern::create_symmetric_from_dof_handler<1,3>(const fastfem::dof::DoFHandler<1,3>& dof_handler);
+template CSRPattern CSRPattern::create_symmetric_from_dof_handler<2,2>(const fastfem::dof::DoFHandler<2,2>& dof_handler);
+template CSRPattern CSRPattern::create_symmetric_from_dof_handler<2,3>(const fastfem::dof::DoFHandler<2,3>& dof_handler);
+template CSRPattern CSRPattern::create_symmetric_from_dof_handler<3,3>(const fastfem::dof::DoFHandler<3,3>& dof_handler);
 
 } // namespace linalg
 } // namespace FastFem

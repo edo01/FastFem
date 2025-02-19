@@ -277,5 +277,39 @@ void SkylineMatrix::set_entry_to_zero(size_t i, size_t j)
     values[index] = 0.0;
 }
 
+
+template <unsigned int dim, unsigned int spacedim>
+SkylinePattern SkylinePattern::create_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler)
+{
+    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.get_n_dofs());
+    
+    for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
+        const auto& elem = *it;
+
+        const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
+        for(int j = 0; j < dofs.size(); ++j){
+            for(int k = j; k < dofs.size(); ++k){
+                dofs[j] > dofs[k] ? dof_interactions[dofs[j]].insert(dofs[k]) : dof_interactions[dofs[k]].insert(dofs[j]); 
+            }
+        }
+    }
+
+    std::vector<size_t> skyline_rows(dof_handler.get_n_dofs() + 1);
+
+    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
+        skyline_rows[i + 1] = skyline_rows[i] + (i - *dof_interactions[i].begin() + 1);
+    }
+
+    return SkylinePattern(skyline_rows);
+}
+
+// instantiate the templates
+template SkylinePattern SkylinePattern::create_from_dof_handler<1,1>(const fastfem::dof::DoFHandler<1,1>& dof_handler);
+template SkylinePattern SkylinePattern::create_from_dof_handler<1,2>(const fastfem::dof::DoFHandler<1,2>& dof_handler);
+template SkylinePattern SkylinePattern::create_from_dof_handler<1,3>(const fastfem::dof::DoFHandler<1,3>& dof_handler);
+template SkylinePattern SkylinePattern::create_from_dof_handler<2,2>(const fastfem::dof::DoFHandler<2,2>& dof_handler);
+template SkylinePattern SkylinePattern::create_from_dof_handler<2,3>(const fastfem::dof::DoFHandler<2,3>& dof_handler);
+template SkylinePattern SkylinePattern::create_from_dof_handler<3,3>(const fastfem::dof::DoFHandler<3,3>& dof_handler);
+
 } // namespace linalg
 } // namespace FastFem

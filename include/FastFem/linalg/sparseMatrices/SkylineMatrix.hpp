@@ -51,30 +51,6 @@ private:
     const double &get_entry(size_t i, size_t j) const override;
 };
 
-template <unsigned int dim, unsigned int spacedim>
-SkylinePattern SkylinePattern::create_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler)
-{
-    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.get_n_dofs());
-    
-    for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
-        const auto& elem = *it;
-
-        const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
-        for(int j = 0; j < dofs.size(); ++j){
-            for(int k = j; k < dofs.size(); ++k){
-                dofs[j] > dofs[k] ? dof_interactions[dofs[j]].insert(dofs[k]) : dof_interactions[dofs[k]].insert(dofs[j]); 
-            }
-        }
-    }
-
-    std::vector<size_t> skyline_rows(dof_handler.get_n_dofs() + 1);
-
-    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
-        skyline_rows[i + 1] = skyline_rows[i] + (i - *dof_interactions[i].begin() + 1);
-    }
-
-    return SkylinePattern(skyline_rows);
-}
 
 } // namespace linalg
 } // namespace FastFem   
