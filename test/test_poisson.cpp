@@ -14,6 +14,8 @@
 
 #include "FastFem/types/CommonTypes.hpp"
 
+#include "FastFem/mesh/MeshIO.hpp"
+
 using namespace fastfem;
 
 double dot(const mesh::Point<2> &v1, const mesh::Point<2> &v2, const mesh::Point<2> &w1, const mesh::Point<2> &w2)
@@ -21,12 +23,20 @@ double dot(const mesh::Point<2> &v1, const mesh::Point<2> &v2, const mesh::Point
     return (v2.coords[0] - v1.coords[0]) * (w2.coords[0] - w1.coords[0]) + (v2.coords[1] - v1.coords[1]) * (w2.coords[1] - w1.coords[1]);
 }
 
-int main()
-{
+#include <cstdlib>
 
+int main(int argc, char *argv[])
+{
+    if (argc != 2)
+    {
+        std::cerr << "Usage: " << argv[0] << " <N>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    unsigned int N = std::atoi(argv[1]);
     unsigned int dim = 2;
 
-    mesh::SquareMaker mesh_maker(5);
+    mesh::SquareMaker mesh_maker(N);
     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
 
     fe::FESimplexP1<2> fe;
@@ -75,30 +85,24 @@ int main()
         local_matrix(1, 2) += dot(v2, v0, v0, v1) / (4 * volume);
         local_matrix(2, 0) += dot(v0, v1, v1, v2) / (4 * volume);
         local_matrix(2, 1) += dot(v1, v0, v0, v2) / (4 * volume);
-    
-
 
         linalg::tools::add_local_matrix_to_global(A, local_matrix, local_dofs);
-
-    } 
-
-    for(unsigned int i = 0; i < n_dofs; ++i)
-    {
-        rhs[i] = std::sin(i);
     }
 
-    linalg::tools::apply_homogeneous_dirichlet(A, rhs, dof_handler, 0);
+    for (unsigned int i = 0; i < n_dofs; ++i)
+    {
+        rhs[i] = 1.0;
+    } 
 
-    A.print();
+    linalg::tools::apply_homogeneous_dirichlet(A, rhs, dof_handler, 0);
 
     linalg::CGSolver solver;
     linalg::Vector sol = solver.solve(A, rhs);
 
     linalg::Vector Av = A * sol;
 
-    sol.print("sol:");
-    
-
+    fastfem::mesh::DataIO<2, 2> data_io(mesh, dof_handler, sol);
+    data_io.save_vtx("solution.vtk");
 
     return EXIT_SUCCESS;
 }
