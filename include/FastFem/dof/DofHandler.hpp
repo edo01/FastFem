@@ -48,6 +48,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <algorithm>
 #include <cassert>
@@ -120,15 +121,15 @@ public:
         unsigned int dofs_per_edge = (*fe).get_n_dofs_per_edge();
 
         // we assume that if dofs_per_edge is 0, then the DoFs are only on the vertices
-        if(dofs_per_edge == 0) return n_dofs;
-
-        for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
-            mesh::MeshSimplex<dim, spacedim> T = *it;
-            for(const global_edge_id &e : T.get_edges_indices()){
-                if(edge_dofs.find(e) == edge_dofs.end()){
-                    edge_dofs[e] = std::vector<long unsigned int>(dofs_per_edge, -1);
-                    for(long unsigned int i = 0; i < dofs_per_edge; ++i){
-                        edge_dofs[e][i] = n_dofs++;
+        if(dofs_per_edge > 0){
+            for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
+                mesh::MeshSimplex<dim, spacedim> T = *it;
+                for(const global_edge_id &e : T.get_edges_indices()){
+                    if(edge_dofs.find(e) == edge_dofs.end()){
+                        edge_dofs[e] = std::vector<long unsigned int>(dofs_per_edge, -1);
+                        for(long unsigned int i = 0; i < dofs_per_edge; ++i){
+                            edge_dofs[e][i] = n_dofs++;
+                        }
                     }
                 }
             }
@@ -139,16 +140,16 @@ public:
          */     
         unsigned int dofs_per_face = (*fe).get_n_dofs_per_face();
 
-        if(dofs_per_face == 0) return n_dofs; 
-
-        for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
-            mesh::MeshSimplex<dim, spacedim> T = *it;
-            // distribute on the faces
-            for(const global_face_id &f : T.get_faces_indices()){
-                if(face_dofs.find(f) == face_dofs.end()){
-                    face_dofs[f] = std::vector<long unsigned int>(dofs_per_face, -1);
-                    for(long unsigned int i = 0; i < dofs_per_face; ++i){
-                        face_dofs[f][i] = n_dofs++;
+        if(dofs_per_face > 0){
+            for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
+                mesh::MeshSimplex<dim, spacedim> T = *it;
+                // distribute on the faces
+                for(const global_face_id &f : T.get_faces_indices()){
+                    if(face_dofs.find(f) == face_dofs.end()){
+                        face_dofs[f] = std::vector<long unsigned int>(dofs_per_face, -1);
+                        for(long unsigned int i = 0; i < dofs_per_face; ++i){
+                            face_dofs[f][i] = n_dofs++;
+                        }
                     }
                 }
             }
@@ -159,18 +160,37 @@ public:
          */
         unsigned int dofs_per_cell = (*fe).get_n_dofs_per_cell();
 
-        if(dofs_per_cell == 0) return n_dofs;
-
-        for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
-            mesh::MeshSimplex<dim, spacedim> T = *it;
-            for(const global_cell_id &c : T.get_cell_indices()){
-                if(cell_dofs.find(c) == cell_dofs.end()){
-                    cell_dofs[c] = std::vector<long unsigned int>(dofs_per_cell, -1);
-                    for(long unsigned int i = 0; i < dofs_per_cell; ++i){
-                        cell_dofs[c][i] = n_dofs++;
+        if(dofs_per_cell>0){
+            for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
+                mesh::MeshSimplex<dim, spacedim> T = *it;
+                for(const global_cell_id &c : T.get_cell_indices()){
+                    if(cell_dofs.find(c) == cell_dofs.end()){
+                        cell_dofs[c] = std::vector<long unsigned int>(dofs_per_cell, -1);
+                        for(long unsigned int i = 0; i < dofs_per_cell; ++i){
+                            cell_dofs[c][i] = n_dofs++;
+                        }
                     }
                 }
             }
+        }
+
+        /**
+         * FILL THE BOUNDARY DOFS
+         */
+        for(auto it = mesh.boundary_elem_begin(); it != mesh.boundary_elem_end(); ++it){
+            mesh::MeshSimplex<dim-1, spacedim> T = *it;
+            std::cout << "Boundary element: ";
+            for(int i=0; i<T.vertex_count(); ++i){
+                std::cout << T.get_vertex(i) << " ";
+            }
+            std::cout << " - ";
+            std::vector<global_dof_index_t> dofs = get_unordered_dofs_on_boundary(T);
+            boundary_dofs.insert(dofs.begin(), dofs.end());
+            std::cout << " DOFs: ";
+            for(auto &d : dofs){
+                std::cout << d << " ";
+            }
+            std::cout << std::endl;
         }
 
         return n_dofs; // number of DoFs
@@ -219,6 +239,39 @@ public:
 
         return dofs;
     }
+
+    std::vector<global_dof_index_t> get_unordered_dofs_on_boundary(const mesh::MeshSimplex<dim-1, spacedim> &T) const {
+        //unsigned int dofs_per_element = (*fe).get_n_dofs_per_element();
+        std::vector<global_dof_index_t> dofs;
+
+        /* 
+         * We get the global indices of all the subsimplices of the requested element
+         * and we retrieve the corresponding global dof indices from the tables
+         */
+
+        for(const global_vertex_id &v : T.get_vertex_indices()){
+            const std::vector<global_dof_index_t> &d = vertex_dofs.at(v);
+            dofs.insert(dofs.end(), d.begin(), d.end());
+        }
+        if((*fe).get_n_dofs_per_edge() == 0) return dofs;
+        
+        for(const global_edge_id &e : T.get_edges_indices()){
+            const std::vector<global_dof_index_t> &d = edge_dofs.at(e);
+            dofs.insert(dofs.end(), d.begin(), d.end());
+        }
+
+        if((*fe).get_n_dofs_per_face() == 0) return dofs;
+
+        for(const global_face_id &f : T.get_faces_indices()){
+            const std::vector<global_dof_index_t> &d = face_dofs.at(f);
+            dofs.insert(dofs.end(), d.begin(), d.end());
+        }
+        
+        // no cell on the boundary
+
+        return dofs;
+    }
+
 
     /**
      * Get the global indices of the DoFs of the given element. The ordering of the DoFs is coherent 
@@ -271,6 +324,7 @@ public:
         return dofs;
     }
 
+
     inline auto elem_begin() const { return mesh.elem_begin(); }
     inline auto elem_end() const { return mesh.elem_end(); }
 
@@ -292,7 +346,7 @@ public:
     }
 
     unsigned int get_n_dofs() const { return n_dofs; }
-    
+
     inline size_t get_n_elements() const { return mesh.elem_count(); }
 
 private:
@@ -306,7 +360,7 @@ private:
 
     unsigned int n_dofs;
 
-    std::vector<global_dof_index_t> boundary_dofs;
+    std::unordered_set<global_dof_index_t> boundary_dofs;
 
 };
 

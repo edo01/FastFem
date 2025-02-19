@@ -138,8 +138,8 @@ public:
     inline void reserve_boundary_elements(size_t n) { boundary_elements.reserve(n); }
     inline size_t boundary_elem_count() const { return boundary_elements.size(); }
 
-    inline auto boundary_elem_begin() { return boundary_elements.begin(); }
-    inline auto boundary_elem_end() { return boundary_elements.end(); }
+    inline auto boundary_elem_begin() const { return boundary_elements.begin(); }
+    inline auto boundary_elem_end() const { return boundary_elements.end(); }
 
     private:
     std::vector<Vertex<spacedim>> vertices;
