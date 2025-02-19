@@ -19,13 +19,11 @@ Vector IterativeSolver::solve(const SparseMatrix& A, const Vector& b)
     error = initialize(A, b, x);
 
     while(iter < maxIterations && error > tolerance){
-        std::cout << "----------- Iteration " << iter << ", error = " << error << " -----------" << std::endl;
-
         error = iterate(A, b, x);
         ++iter;
     }
 
-    std::cout << "IterativeSolver::solve(): " << iter << " iterations, error = " << error << std::endl;
+    std::cout << " Iteration reached: " << iter << ", final error = " << error << std::endl;
 
     if(iter == maxIterations){
         throw std::runtime_error("IterativeSolver::solve(): maximum number of iterations reached");
