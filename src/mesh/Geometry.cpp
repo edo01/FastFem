@@ -25,7 +25,7 @@ bool Point<spacedim>::operator==(const Point<spacedim> &p) const
  */
 
 template <unsigned int dim, unsigned int spacedim>
-Simplex<dim, spacedim>::Simplex(const Point<spacedim> v[dim + 1])
+Simplex<dim, spacedim>::Simplex(Point<spacedim> v[dim + 1])
 {
     std::copy(v, v + dim + 1, vertices);
 }

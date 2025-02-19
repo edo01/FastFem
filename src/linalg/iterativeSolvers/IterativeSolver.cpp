@@ -19,7 +19,7 @@ Vector IterativeSolver::solve(const SparseMatrix& A, const Vector& b)
     error = initialize(A, b, x);
 
     while(iter < maxIterations && error > tolerance){
-        //std::cout << "----------- Iteration " << iter << ", error = " << error << " -----------" << std::endl;
+        std::cout << "----------- Iteration " << iter << ", error = " << error << " -----------" << std::endl;
 
         error = iterate(A, b, x);
         ++iter;

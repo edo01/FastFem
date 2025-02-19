@@ -109,7 +109,18 @@ class Mesh
 public:
 
     // given a MeshSimplex in the mesh, we return the corresponding Simplex in the space
-    Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const;
+    Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const
+    {
+        Point<spacedim> p[dim + 1];
+        for (size_t i = 0; i < dim + 1; ++i)
+        {
+            //p[i] = vertices[s.get_vertex(i)];
+
+            p[i] = vertices[s.get_vertex(i)].point;
+
+        }
+        return Simplex<dim, spacedim>(p);
+    }
 
     inline size_t vtx_count() const { return vertices.size(); }
     inline size_t elem_count() const { return elements.size(); }
