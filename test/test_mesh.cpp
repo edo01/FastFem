@@ -45,16 +45,6 @@ int main(int argc, char** argv)
     assert(mesh3.vtx_count() == (size_t)((N + 1) * (N + 1)));
     assert(mesh3.boundary_elem_count(0) == (size_t)(4 * N));
 
-    MeshIO io1(mesh);
-    io1.save_vtu("cube.vtu");
-
-    MeshIO io2(mesh2);
-    io2.save_vtu("sphere.vtu");
-
-    MeshIO io3(mesh3);
-    io3.save_vtu("square.vtu");
-    io3.save_msh("square.msh");
-
     // skip the test if the mesh is too small
     if(N<100) return 0;
 
