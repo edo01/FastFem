@@ -7,9 +7,6 @@ namespace linalg{
 SymCSRMatrix::SymCSRMatrix(size_t n_cols, const CSRPattern& pattern) :
   CSRMatrix(n_cols, pattern){};
 
-SymCSRMatrix::SymCSRMatrix(CSRMatrix&& A) :
-  CSRMatrix(std::move(A)){};
-
 const double &SymCSRMatrix::get_entry(size_t i, size_t j) const
 {
     if(i > j){

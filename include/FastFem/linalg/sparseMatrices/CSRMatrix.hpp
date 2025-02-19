@@ -38,17 +38,21 @@ protected:
 public:
     CSRMatrix(size_t n_cols, const CSRPattern& pattern);
 
+    CSRMatrix(const CSRMatrix& A);
+
     Vector gemv(const Vector& x) const override;
-    void add_entry(size_t index, double value);
-    void insert_entry(size_t i, size_t j, double value);
-    void accumulate_entry(size_t i, size_t j, double value);
+    void set_entry(size_t i, size_t j, double value) override;
+    void accumulate_entry(size_t i, size_t j, double value) override;
 
     inline size_t nnz() const override { return base_pattern->col_indices.size(); }
+
     void print_pattern() const;
 
-
+    void set_row_col_to_zero(size_t i) override;
 private:
     const double &get_entry(size_t i, size_t j) const override;
+
+    friend class COOMatrix;
 };
 
 template <unsigned int dim, unsigned int spacedim>

@@ -17,7 +17,13 @@ public:
     virtual Vector gemv(const Vector& x) const = 0;
     Vector operator*(const Vector& x) const;
 
+    //read-only access with bounds checking
     const double &operator()(size_t i, size_t j) const;
+
+    //no bound checking, used in assembly
+    virtual void set_entry(size_t i, size_t j, double value) = 0;
+    virtual void accumulate_entry(size_t i, size_t j, double value) = 0;
+
     virtual inline size_t nnz() const = 0;
 
     void print(const std::string& name = "") const;
@@ -27,18 +33,12 @@ public:
 
     virtual inline bool is_symmetric() const { return false; } // override in symmetric matrices
 
+    virtual void set_row_col_to_zero(size_t i);
+
 private:
     virtual const double &get_entry(size_t i, size_t j) const = 0;
 
-protected:
     bool check_bounds(size_t i, size_t j) const;
-
-};
-
-// Marker class to enforce symmetry
-class SymmetricMatrix : public SparseMatrix {
-    // inherit constructors
-    using SparseMatrix::SparseMatrix;
 };
 
 } // namespace linalg

@@ -59,7 +59,7 @@
 namespace fastfem{
 namespace dof{
 
-template <unsigned int dim, unsigned int spacedim>
+template <unsigned int dim, unsigned int spacedim = dim>
 class DoFHandler
 {
     static_assert(dim > 0, "The dimension must be greater than 0");

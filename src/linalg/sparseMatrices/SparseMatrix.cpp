@@ -47,5 +47,10 @@ void SparseMatrix::print(const std::string& name) const
     }
 }
 
+void SparseMatrix::set_row_col_to_zero(size_t i)
+{
+    throw std::runtime_error("SparseMatrix::set_row_col_to_zero(): not implemented");
+}
+
 } // namespace linalg
 } // namespace FastFem

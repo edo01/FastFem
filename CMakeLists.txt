@@ -11,6 +11,9 @@ option(USE_OPENMP "Enable OpenMP support" ON)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+# Allow narrowing conversions
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
+
 # Enable optional fast math optimizations.
 option(USE_FAST_MATH "Enable fast math optimizations." OFF)
 

@@ -11,7 +11,7 @@ class SymCSRMatrix : public CSRMatrix
 public:
     SymCSRMatrix(size_t n_cols, const CSRPattern& pattern);
 
-    SymCSRMatrix(CSRMatrix&& A);
+    SymCSRMatrix(const CSRMatrix& A) : CSRMatrix(A) {}
 
     Vector gemv(const Vector& x) const override;
 

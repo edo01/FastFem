@@ -278,8 +278,6 @@
 void print_dense_matrix_from_dofhandler(const fastfem::dof::DoFHandler<2, 2>& dof_handler, size_t n_dofs) {
     std::vector<std::vector<double>> dense_matrix(n_dofs, std::vector<double>(n_dofs, 0.0));
 
-    const unsigned int num_elements = dof_handler.get_n_elements();
-
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
         const auto& elem = *it;
 
@@ -309,7 +307,6 @@ using namespace fastfem::fe;
 using namespace fastfem::dof;
 
 int main() {
-    const unsigned int num_elements = 4;
 
     SquareMaker square(1);
     Mesh<2, 2> mesh = square.make_mesh();

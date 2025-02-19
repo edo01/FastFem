@@ -19,9 +19,10 @@ const double &COOMatrix::get_entry(size_t i, size_t j) const {
         if(row_indices[k] == i && col_indices[k] == j){
             return values[k];
         }
-    }   
-    
+    }
+
     return dummy;
+    
 }
 
 Vector COOMatrix::gemv(const Vector& x) const{
@@ -38,10 +39,8 @@ Vector COOMatrix::gemv(const Vector& x) const{
     return y;
 }
 
-void COOMatrix::add_entry(size_t i, size_t j, double value){
-    if(!check_bounds(i, j)){
-        throw std::out_of_range("COOMatrix::add_entry(): index out of range");
-    }
+void COOMatrix::set_entry(size_t i, size_t j, double value){
+
     row_indices.push_back(i);
     col_indices.push_back(j);
     values.push_back(value);
@@ -113,12 +112,13 @@ CSRMatrix COOMatrix::to_CSR() const
     CSRMatrix A(n_cols, pattern);
 
     for(size_t k = 0; k < nnz(); ++k){
-        A.add_entry(k, values[k]);
+        A.values[k] = values[k];
     }
 
     return A;
 
 }
+
 void COOMatrix::print_pattern() const
 {
     for(size_t i = 0; i < n_rows; ++i){

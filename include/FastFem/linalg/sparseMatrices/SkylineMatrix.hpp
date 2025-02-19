@@ -14,7 +14,8 @@ struct SkylinePattern
 {
     std::vector<size_t> skyline_rows;
 
-private:
+// private:
+public:
     SkylinePattern(const std::vector<size_t>& skyline) : skyline_rows(skyline) {}
 
 public:
@@ -34,14 +35,17 @@ public:
     SkylineMatrix(size_t n_cols, const SkylinePattern& skyline);
     Vector gemv(const Vector& x) const override;
     inline size_t nnz() const override { return base_skyline->skyline_rows.back(); } 
-    void add_entry(size_t index, double value);
     void print_pattern() const;
     inline bool is_symmetric() const override { return true; }
     void cholesky_factorize();
     Vector cholesky_solve(const Vector& b) const;
-    void insert_entry(size_t i, size_t j, double value);
+    void set_entry(size_t i, size_t j, double value) override;
+    void accumulate_entry(size_t i, size_t j, double value) override;
     //TO BE CANCELLED
     void set_values(const std::vector<double>& values);
+
+    void set_entry_to_zero(size_t i, size_t j);
+    void set_row_col_to_zero(size_t i) override;
 
 private:
     const double &get_entry(size_t i, size_t j) const override;

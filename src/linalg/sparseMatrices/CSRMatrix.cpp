@@ -35,6 +35,12 @@ CSRMatrix::CSRMatrix(size_t n_cols, const CSRPattern& pattern) :
     }
 }
 
+CSRMatrix::CSRMatrix(const CSRMatrix& A) :
+  SparseMatrix(A.n_rows, A.n_cols),
+  values(A.values),
+  base_pattern(A.base_pattern)
+{}
+
 const double &CSRMatrix::get_entry(size_t i, size_t j) const
 {
     size_t row_start = base_pattern->row_ptr[i];
@@ -50,15 +56,7 @@ const double &CSRMatrix::get_entry(size_t i, size_t j) const
     return dummy;
 }
 
-void CSRMatrix::add_entry(size_t index, double value)
-{
-    if(index >= nnz()){
-        throw std::out_of_range("CSRMatrix::add_entry(): index out of range");
-    }
-    values[index] = value;
-}
-
-void CSRMatrix::insert_entry(size_t i, size_t j, double value)
+void CSRMatrix::set_entry(size_t i, size_t j, double value)
 {
     size_t row_start = base_pattern->row_ptr[i];
     size_t row_end = base_pattern->row_ptr[i + 1];
@@ -108,6 +106,30 @@ Vector CSRMatrix::gemv(const Vector& x) const {
     }
 
     return y;
+}
+
+void CSRMatrix::set_row_col_to_zero(size_t i)
+{
+    size_t row_start = base_pattern->row_ptr[i];
+    size_t row_end = base_pattern->row_ptr[i + 1];
+
+    #pragma omp parallel
+    {
+        // set row to zero
+        #pragma omp for
+        for(size_t k = row_start; k < row_end; ++k){
+            values[k] = 0.0;
+        }
+
+        // set column to zero
+        auto& col_idx = base_pattern->col_indices;
+        #pragma omp for
+        for(size_t j = 0; j < nnz(); ++j){
+            if(col_idx[j] == i){
+                values[j] = 0.0;
+            }
+        }
+    }
 }
 
 void CSRMatrix::print_pattern() const

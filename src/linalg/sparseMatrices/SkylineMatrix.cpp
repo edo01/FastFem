@@ -3,19 +3,6 @@
 namespace fastfem{
 namespace linalg{
 
-// SkylineMatrix::SkylineMatrix(size_t n_cols, const std::vector<size_t>& skyline) :
-//   SparseMatrix(skyline.size() - 1, n_cols),
-//     values(skyline.back()),
-//     skyline(std::make_shared<std::vector<size_t>>(skyline))
-//     {
-//         if(n_cols == 0 || skyline.size() < 2){
-//             throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): invalid dimensions");
-//         }
-//         if(skyline.size() - 1 != n_cols){
-//             throw std::invalid_argument("SkylineMatrix::SkylineMatrix(): matrix must be square");
-//         }
-//     }
-
 SkylineMatrix::SkylineMatrix(size_t n_cols, const SkylinePattern& skyline) :
   SparseMatrix(skyline.skyline_rows.size() - 1, n_cols),
     values(skyline.skyline_rows.back()),
@@ -32,7 +19,7 @@ SkylineMatrix::SkylineMatrix(size_t n_cols, const SkylinePattern& skyline) :
 const double &SkylineMatrix::get_entry(size_t i, size_t j) const
 {
     if (j > i) {
-    std::swap(i, j);
+        std::swap(i, j);
     }
 
     size_t row_start = (base_skyline->skyline_rows)[i];
@@ -91,15 +78,6 @@ Vector SkylineMatrix::gemv(const Vector& x) const
     return y;
 }
 
-void SkylineMatrix::add_entry(size_t index, double value)
-{
-    //if (index >= skyline->back()) {
-    if (index >= base_skyline->skyline_rows.back()) {
-        throw std::out_of_range("SkylineMatrix::add_entry(): index out of range");
-    }
-    values[index] = value;
-}
-
 //TO BE CANCELLED
 void SkylineMatrix::set_values(const std::vector<double>& values)
 {
@@ -107,6 +85,27 @@ void SkylineMatrix::set_values(const std::vector<double>& values)
         throw std::invalid_argument("SkylineMatrix::set_values(): incompatible dimensions");
     }
     this->values = values;
+}
+
+void SkylineMatrix::set_row_col_to_zero(size_t i)
+{
+    size_t row_start = (base_skyline->skyline_rows)[i];
+    size_t row_end = (base_skyline->skyline_rows)[i + 1];
+
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (size_t k = row_start; k < row_end; ++k)
+        {
+            values[k] = 0.0;
+        }
+
+        #pragma omp for
+        for(size_t j = 0; j < n_rows; ++j){
+            set_entry_to_zero(i, j);
+        }
+    }
+
 }
 
 void SkylineMatrix::print_pattern() const
@@ -131,11 +130,17 @@ void SkylineMatrix::print_pattern() const
             }
         }
         std::cout << std::endl;
+
     }
 
-    std::cout << "\nSkyline values: ";
+    std::cout << "\nSkyline rows: ";
     for(size_t i=0; i<this->base_skyline->skyline_rows.size(); i++){
         std::cout << this->base_skyline->skyline_rows[i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Values: ";
+    for(size_t i=0; i<this->values.size(); i++){
+        std::cout << this->values[i] << " ";
     }
     std::cout << std::endl;
 }
@@ -215,7 +220,7 @@ Vector SkylineMatrix::cholesky_solve(const Vector& b) const {
     return x;
 }
 
-void SkylineMatrix::insert_entry(size_t i, size_t j, double value) {
+void SkylineMatrix::set_entry(size_t i, size_t j, double value) {
     if (i < j) {
         std::swap(i, j);
     }
@@ -232,7 +237,44 @@ void SkylineMatrix::insert_entry(size_t i, size_t j, double value) {
     // Compute the index in the values array
     size_t index = row_start + (j - first_col);
 
-    add_entry(index, value);
+    values[index] = value;
+}
+
+void SkylineMatrix::accumulate_entry(size_t i, size_t j, double value) {
+    if (i < j) {
+        std::swap(i, j);
+    }
+
+    size_t row_start = (base_skyline->skyline_rows)[i];
+    size_t row_end = (base_skyline->skyline_rows)[i + 1];
+    size_t row_length = row_end - row_start;
+    size_t first_col = i - row_length + 1;
+
+    // Compute the index in the values array
+    size_t index = row_start + (j - first_col);
+
+    values[index] += value;
+}
+
+void SkylineMatrix::set_entry_to_zero(size_t i, size_t j)
+{
+    if (i < j) {
+        std::swap(i, j);
+    }
+
+    size_t row_start = (base_skyline->skyline_rows)[i];
+    size_t row_end = (base_skyline->skyline_rows)[i + 1];
+    size_t row_length = row_end - row_start;
+    size_t first_col = i - row_length + 1;
+
+    if (j < first_col) {
+        return;
+    }
+
+    // Compute the index in the values array
+    size_t index = row_start + (j - first_col);
+
+    values[index] = 0.0;
 }
 
 } // namespace linalg
