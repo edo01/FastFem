@@ -54,6 +54,9 @@ int main(int argc, char *argv[])
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
 
+    auto f_constant = [](double x, double y) { return 1; };
+    auto f = [](double x, double y) { return 4 - 2 * (x * x + y * y); };
+
     linalg::Vector rhs(n_dofs);
 
     linalg::CSRPattern csr_pattern = linalg::CSRPattern::create_from_dof_handler(dof_handler);
@@ -61,6 +64,7 @@ int main(int argc, char *argv[])
     linalg::CSRMatrix A(n_dofs, csr_pattern);
 
     linalg::tools::FullMatrix local_matrix(n_dofs_per_cell);
+    linalg::Vector local_rhs(n_dofs_per_cell);
 
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it)
     {
@@ -68,17 +72,20 @@ int main(int argc, char *argv[])
 
         mesh::Simplex<2, 2> triangle = mesh.get_Simplex(elem);
 
-        double volume = triangle.volume();
-
         mesh::Point<2> v0 = triangle.get_vertex(0);
         mesh::Point<2> v1 = triangle.get_vertex(1);
         mesh::Point<2> v2 = triangle.get_vertex(2);
+
+        mesh::Point<2> centroid = triangle.get_centroid();
+
+        double volume = triangle.volume();
 
         double lenght_01 = distance(v0, v1);
         double lenght_12 = distance(v1, v2);
         double lenght_20 = distance(v2, v0);
 
         local_matrix.set_to_zero();
+        local_rhs.fill(0.0);
 
         local_matrix(0, 0) += lenght_12 * lenght_12 / (4 * volume);
         local_matrix(1, 1) += lenght_20 * lenght_20 / (4 * volume);
@@ -91,22 +98,29 @@ int main(int argc, char *argv[])
         local_matrix(2, 0) += dot(v0, v1, v1, v2) / (4 * volume);
         local_matrix(2, 1) += dot(v1, v0, v0, v2) / (4 * volume);
     
+        local_rhs[0] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
+        local_rhs[1] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
+        local_rhs[2] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
+
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
         linalg::tools::add_local_matrix_to_global(A, local_matrix, local_dofs);
+        linalg::tools::add_local_vector_to_global(rhs, local_rhs, local_dofs);
 
     } 
 
     linalg::tools::apply_homogeneous_dirichlet(A, rhs, dof_handler, 0);
 
-    rhs[1443] = 2;
-    rhs[367] = 2;
-    rhs[1900] = -2;
+    // rhs[1443] = 2;
+    // rhs[367] = 2;
+    // rhs[1900] = -2;
 
     linalg::CGSolver solver;
     linalg::Vector sol = solver.solve(A, rhs);
 
     fastfem::mesh::DataIO<2, 2> data_io(mesh, dof_handler, sol);
     data_io.save_vtx("solution_csr.vtk");
+
+    std::cout << "Max of solution: " << sol.max() << std::endl;
 
     return EXIT_SUCCESS;
 }

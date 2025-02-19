@@ -24,6 +24,10 @@ public:
     inline double& operator[](std::size_t index) { return data[index]; }
     inline const double& operator[](std::size_t index) const { return data[index]; }
 
+    inline void fill(double value) { std::fill(data.begin(), data.end(), value); }
+
+    inline double max() const { return *std::max_element(data.begin(), data.end()); }
+
     // Arithmetic Operations
     Vector operator+(const Vector& other) const;
     Vector operator-(const Vector& other) const;
