@@ -14,6 +14,7 @@ public:
     SymCSRMatrix(const CSRMatrix& A) : CSRMatrix(A) {}
 
     Vector gemv(const Vector& x) const override;
+    void accumulate_entry(size_t i, size_t j, double value) override;
 
     inline bool is_symmetric() const override { return true; }
 
