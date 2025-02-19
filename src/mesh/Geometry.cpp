@@ -33,6 +33,10 @@ Simplex<dim, spacedim>::Simplex(Point<spacedim> v[dim + 1])
 template <unsigned int dim, unsigned int spacedim>
 double Simplex<dim, spacedim>::volume() const
 {
+    if(dim != spacedim)
+    {
+        throw std::runtime_error("volume(): The dimension of the simplex must be equal to the space it lives in");
+    }
     if(dim==0) return 0;
     if(dim==1) return vertices[1].coords[0] - vertices[0].coords[0];
     if(dim==2) return 0.5 * ((vertices[1].coords[0] - vertices[0].coords[0]) * (vertices[2].coords[1] - vertices[0].coords[1]) - (vertices[2].coords[0] - vertices[0].coords[0]) * (vertices[1].coords[1] - vertices[0].coords[1]));
