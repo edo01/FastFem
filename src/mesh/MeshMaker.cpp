@@ -138,26 +138,53 @@ void SquareMaker::build_square_triangles(Mesh<2,2>& mesh) const
 	assert(mesh.elem_count() == 2 * N * N);
 }
 
+void SquareMaker::build_square_boundary(Mesh<2,2>& mesh) const{
+
+	size_t indices[2]; // indices of the dofs of the edges on the boundary
+	int V = N + 1;
+
+	// we reserve space for 4 * N elements
+	mesh.reserve_boundary_elements(0,N);
+	
+	for(int i = 0; i < N; i++){
+		// top edge TAG 0
+		indices[0] = i; indices[1] = i + 1;
+		MeshSimplex<1,2> e1(indices);
+		mesh.add_boundary_element(0, e1);
+		
+		// left edge TAG 0
+		indices[0] = i * V; indices[1] = (i + 1) * V;
+		MeshSimplex<1,2> e2(indices);
+		mesh.add_boundary_element(0, e2);
+
+		// bottom edge TAG 0
+		indices[0] = V * (V - 1) + i; indices[1] = V * (V - 1) + i + 1;
+		MeshSimplex<1,2> e3(indices);
+		mesh.add_boundary_element(0, e3);
+
+		// right edge TAG 0
+		indices[0] = V * i + V - 1; indices[1] = V * (i+1) + V - 1;
+		MeshSimplex<1,2> e4(indices);
+		mesh.add_boundary_element(0, e4);
+	}
+
+	assert(mesh.boundary_elem_count(0) == 4 * N);
+	
+}
+
 Mesh<2,2> SquareMaker::make_mesh() const {
 	Mesh<2,2> mesh;
 
 	build_square_vertices(mesh);
 	build_square_triangles(mesh);
+	build_square_boundary(mesh);
 
 	// Rescale to unit cube centered at the origin
 	for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
 		v->point.coords[0] = 2 * v->point.coords[0] / N - 1;
 		v->point.coords[1] = 2 * v->point.coords[1] / N - 1;
 	}
-
-	// add boundary elements
-/* 	for (int i = 0; i < V; i++) {
-		mesh.add_boundary(i);
-		mesh.add_boundary(V * i);
-		mesh.add_boundary(V * (V - 1) + i);
-		mesh.add_boundary(V * i + V - 1);
-	}
- */
+	
 	return mesh;
 }
 

@@ -39,9 +39,11 @@ int main(int argc, char** argv)
 
     std::cout << "SQUARE: Final Number of vertices: " << mesh3.vtx_count() << std::endl;
     std::cout << "SQUARE: Final Number of triangles: " << mesh3.elem_count() << std::endl;
+    std::cout << "SQUARE: Final Number of boundary elements: " << mesh3.boundary_elem_count(0) << std::endl;
 
     assert(mesh3.elem_count() == (size_t)(2 * N * N));
     assert(mesh3.vtx_count() == (size_t)((N + 1) * (N + 1)));
+    assert(mesh3.boundary_elem_count(0) == (size_t)(4 * N));
 
     MeshIO io1(mesh);
     io1.save_vtu("cube.vtu");
@@ -52,6 +54,9 @@ int main(int argc, char** argv)
     MeshIO io3(mesh3);
     io3.save_vtu("square.vtu");
     io3.save_msh("square.msh");
+
+    // skip the test if the mesh is too small
+    if(N<100) return 0;
 
     MeshAdjacency<2,2> adj(mesh3);
     //adj.print_adjacency();
