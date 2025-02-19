@@ -271,7 +271,8 @@ public:
         return dofs;
     }
 
-
+    inline auto elem_begin() const { return mesh.elem_begin(); }
+    inline auto elem_end() const { return mesh.elem_end(); }
 
     void print_dofs() const {
         for(auto &v : vertex_dofs){
