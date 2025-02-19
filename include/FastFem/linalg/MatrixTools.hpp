@@ -10,7 +10,7 @@ using fastfem::types::global_dof_index_t;
 
 namespace fastfem{
 namespace linalg{
-namespace matrixtools{
+namespace tools{
 
 class FullMatrix
 {
@@ -23,18 +23,19 @@ public:
     inline void set_to_zero() { std::fill(data.begin(), data.end(), 0.0); }
 
 private:
-    std::vector<double> data;
     size_t n_rows;
     size_t n_cols;
+    std::vector<double> data;
 };
 
 template <unsigned int dim, unsigned int spacedim>
 void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim> & dof_handler, size_t tag);
 
-template <unsigned int dim, unsigned int spacedim>
 void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs);
 
-} // namespace matrixtools
+void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index_t>& local_dofs);
+
+} // namespace tools
 } // namespace linalg
 } // namespace FastFem
 
