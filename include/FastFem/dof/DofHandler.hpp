@@ -60,7 +60,7 @@
 namespace fastfem{
 namespace dof{
 
-template <unsigned int dim, unsigned int spacedim>
+template <unsigned int dim, unsigned int spacedim = dim>
 class DoFHandler
 {
     static_assert(dim > 0, "The dimension must be greater than 0");
@@ -106,11 +106,8 @@ public:
     inline auto elem_begin() const { return mesh.elem_begin(); }
     inline auto elem_end() const { return mesh.elem_end(); }
 
-    inline auto boundary_elem_begin() const { return mesh.boundary_elem_begin(); }
-    inline auto boundary_elem_end() const { return mesh.boundary_elem_end(); }
-
-    inline auto boundary_dofs_begin() const { return boundary_dofs.begin(); }
-    inline auto boundary_dofs_end() const { return boundary_dofs.end(); }
+    inline auto boundary_dofs_begin(size_t tag) const { return map_boundary_dofs.at(tag).begin(); }
+    inline auto boundary_dofs_end(size_t tag) const { return map_boundary_dofs.at(tag).end(); }
     
     unsigned int get_n_dofs() const { return n_dofs; }
 
@@ -129,7 +126,7 @@ private:
 
     unsigned int n_dofs;
 
-    std::unordered_set<global_dof_index_t> boundary_dofs;
+    std::unordered_map<size_t, std::unordered_set<global_dof_index_t>> map_boundary_dofs;
 
 };
 

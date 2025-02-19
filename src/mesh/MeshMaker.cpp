@@ -144,31 +144,32 @@ void SquareMaker::build_square_boundaries(Mesh<2,2>& mesh) const{
 	int V = N + 1;
 
 	// we reserve space for 4 * N elements
-	mesh.reserve_boundary_elements(4 * N);
+	mesh.reserve_boundary_elements(0,N);
 	
 	for(int i = 0; i < N; i++){
-		// top edge
+		// top edge TAG 0
 		indices[0] = i; indices[1] = i + 1;
 		MeshSimplex<1,2> e1(indices);
-		mesh.add_boundary_element(e1);
+		mesh.add_boundary_element(0, e1);
 		
-		// left edge
+		// left edge TAG 3
 		indices[0] = i * V; indices[1] = (i + 1) * V;
 		MeshSimplex<1,2> e2(indices);
-		mesh.add_boundary_element(e2);
+		mesh.add_boundary_element(0, e2);
 
 		// bottom edge
 		indices[0] = V * (V - 1) + i; indices[1] = V * (V - 1) + i + 1;
 		MeshSimplex<1,2> e3(indices);
-		mesh.add_boundary_element(e3);
+		mesh.add_boundary_element(0, e3);
 
 		// right edge
 		indices[0] = V * i + V - 1; indices[1] = V * (i+1) + V - 1;
 		MeshSimplex<1,2> e4(indices);
-		mesh.add_boundary_element(e4);
+		mesh.add_boundary_element(0, e4);
 	}
 
-	assert(mesh.boundary_elem_count() == 4 * N);
+	assert(mesh.boundary_elem_count(0) == 4 * N);
+	
 }
 
 Mesh<2,2> SquareMaker::make_mesh() const {

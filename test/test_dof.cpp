@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 
     int n_dofs_boundary = 0;
     // print the DoFs on the boundary
-    for(auto it= dof_handler4.boundary_dofs_begin(); it != dof_handler4.boundary_dofs_end(); ++it){
+    for(auto it= dof_handler4.boundary_dofs_begin(0); it != dof_handler4.boundary_dofs_end(0); ++it){
 
         fastfem::types::global_dof_index_t dofs = *it;
         std::cout << "Boundary elements: " << dofs << std::endl;

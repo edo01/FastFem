@@ -8,6 +8,7 @@
 #define MESH_HPP
 
 #include <stdint.h>
+#include <unordered_map>
 
 #include "FastFem/mesh/Geometry.hpp"
 #include "FastFem/mesh/VertexHasher.hpp"
@@ -96,6 +97,7 @@ private:
  *  and lives in _spacedim_ spatial dimensions, where dim and spacedim are the template 
  *  arguments of this class. For example the surface of a sphere is a 2-dimensional manifold
  *  that lives in 3-dimensional space.
+ * 
  */
 template <unsigned int dim, unsigned int spacedim = dim>
 class Mesh
@@ -105,6 +107,10 @@ class Mesh
     static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 
 public:
+
+    // given a MeshSimplex in the mesh, we return the corresponding Simplex in the space
+    Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const;
+
     inline size_t vtx_count() const { return vertices.size(); }
     inline size_t elem_count() const { return elements.size(); }
 
@@ -122,6 +128,15 @@ public:
     inline void reserve_vertices(size_t n) { vertices.reserve(n); }
     inline void reserve_elements(size_t n) { elements.reserve(n); }
 
+    inline void add_boundary_element(size_t tag, const MeshSimplex<dim - 1, spacedim> &e) { map_boundary_elements[tag].push_back(e); }
+    inline MeshSimplex<dim - 1, spacedim> &get_boundary_element(size_t tag, size_t i) { return map_boundary_elements[tag][i]; }
+    inline void reserve_boundary_elements(size_t tag, size_t n) { map_boundary_elements[tag].reserve(n); }
+    inline size_t boundary_elem_count(size_t tag) const { return map_boundary_elements.at(tag).size(); }
+    
+
+    /**
+     * ITERATORS
+     */
     inline auto vtx_begin() { return vertices.begin(); }
     inline auto vtx_end() { return vertices.end(); }
 
@@ -130,23 +145,20 @@ public:
 
     inline auto elem_begin() const { return elements.begin(); }
     inline auto elem_end() const { return elements.end(); }
-    
-    Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const;
 
-    inline void add_boundary_element(const MeshSimplex<dim - 1, spacedim> &e) { boundary_elements.push_back(e); }
-    inline MeshSimplex<dim - 1, spacedim> &get_boundary_element(size_t i) { return boundary_elements[i]; }
-    inline void reserve_boundary_elements(size_t n) { boundary_elements.reserve(n); }
-    inline size_t boundary_elem_count() const { return boundary_elements.size(); }
+    // iterator on the boundaries
+    inline auto boundary_begin() const { return map_boundary_elements.begin(); }
+    inline auto boundary_end() const { return map_boundary_elements.end(); }
 
-    inline auto boundary_elem_begin() const { return boundary_elements.begin(); }
-    inline auto boundary_elem_end() const { return boundary_elements.end(); }
-
-    private:
+private:
     std::vector<Vertex<spacedim>> vertices;
     std::vector<MeshSimplex<dim, spacedim>> elements;
 
-    // Pointer to the boundary vertices
-    std::vector<MeshSimplex<dim - 1, spacedim>> boundary_elements;
+    /*
+     * We now store the elements of the boundary. The boundary is partitioned in different tags, 
+     * each tag is associated to a set of simplices of dimension dim-1.
+     */
+    std::unordered_map<size_t, std::vector<MeshSimplex<dim - 1, spacedim>>> map_boundary_elements;
 
 };
 

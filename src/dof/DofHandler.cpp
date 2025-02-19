@@ -79,11 +79,22 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
         }
     }
 
-    for(auto it = mesh.boundary_elem_begin(); it != mesh.boundary_elem_end(); ++it){
-        mesh::MeshSimplex<dim-1, spacedim> T = *it;
-        std::vector<global_dof_index_t> dofs = get_unordered_dofs_on_boundary(T);
-        boundary_dofs.insert(dofs.begin(), dofs.end());
+    /*
+     * We now store the dofs of the boundary. The boundary is partitioned in different tags, 
+     * each tag is associated to a set of simplices. For each tag, we store the dofs of the boundary
+     * in a set in order to avoid duplicates.
+     */
+    for(auto it = mesh.boundary_begin(); it != mesh.boundary_end(); ++it){
+        size_t tag = it->first;
+        // for each boundary tag, we store the dofs of the boundary in a set
+        for(auto jt = it->second.begin(); jt != it->second.end(); ++jt){
+            mesh::MeshSimplex<dim-1, spacedim> T = *jt;
+            std::vector<global_dof_index_t> dofs = get_unordered_dofs_on_boundary(T);
+            map_boundary_dofs[tag].insert(dofs.begin(), dofs.end());
+        }
     }
+
+
 
     return n_dofs;
 }
