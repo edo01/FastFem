@@ -62,6 +62,7 @@ private:
 
     void build_square_vertices(Mesh<2, 2> &mesh) const;
     void build_square_triangles(Mesh<2, 2> &mesh) const;
+    void build_square_boundaries(Mesh<2, 2> &mesh) const;
 };
 
 } // namespace mesh

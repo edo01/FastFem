@@ -132,7 +132,12 @@ public:
     inline auto elem_end() const { return elements.end(); }
     
     Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const;
-    
+
+    inline void add_boundary_element(const MeshSimplex<dim - 1, spacedim> &e) { boundary_elements.push_back(e); }
+    inline MeshSimplex<dim - 1, spacedim> &get_boundary_element(size_t i) { return boundary_elements[i]; }
+    inline void reserve_boundary_elements(size_t n) { boundary_elements.reserve(n); }
+    inline size_t boundary_elem_count() const { return boundary_elements.size(); }
+
     inline auto boundary_elem_begin() { return boundary_elements.begin(); }
     inline auto boundary_elem_end() { return boundary_elements.end(); }
 
