@@ -130,19 +130,18 @@ public:
 
     inline auto elem_begin() const { return elements.begin(); }
     inline auto elem_end() const { return elements.end(); }
-
-    inline void add_boundary(size_t i) { boundary.push_back(i); }
-    inline size_t boundary_count() const { return boundary.size(); }
-    inline Vertex<spacedim> get_boundary_vertex(size_t i) const { return vertices[boundary[i]]; }
     
     Simplex<dim, spacedim> get_Simplex(MeshSimplex<dim, spacedim> s) const;
+    
+    inline auto boundary_elem_begin() { return boundary_elements.begin(); }
+    inline auto boundary_elem_end() { return boundary_elements.end(); }
 
     private:
     std::vector<Vertex<spacedim>> vertices;
     std::vector<MeshSimplex<dim, spacedim>> elements;
 
     // Pointer to the boundary vertices
-    std::vector<size_t> boundary;
+    std::vector<MeshSimplex<dim - 1, spacedim>> boundary_elements;
 
 };
 

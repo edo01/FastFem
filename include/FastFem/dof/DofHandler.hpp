@@ -274,6 +274,13 @@ public:
     inline auto elem_begin() const { return mesh.elem_begin(); }
     inline auto elem_end() const { return mesh.elem_end(); }
 
+    inline auto boundary_elem_begin() const { return mesh.boundary_elem_begin(); }
+    inline auto boundary_elem_end() const { return mesh.boundary_elem_end(); }
+
+    inline auto boundary_dofs_begin() const { return boundary_dofs.begin(); }
+    inline auto boundary_dofs_end() const { return boundary_dofs.end(); }
+
+
     void print_dofs() const {
         for(auto &v : vertex_dofs){
             std::cout << "Vertex: ";
@@ -285,7 +292,7 @@ public:
     }
 
     unsigned int get_n_dofs() const { return n_dofs; }
-
+    
     inline size_t get_n_elements() const { return mesh.elem_count(); }
 
 private:
@@ -298,6 +305,8 @@ private:
     fastfem::types::global_dof_table<3> cell_dofs;
 
     unsigned int n_dofs;
+
+    std::vector<global_dof_index_t> boundary_dofs;
 
 };
 

@@ -109,8 +109,8 @@ protected:
     unsigned int n_components;    // number of components of the finite element
     unsigned int n_dofs_per_element; // total number of degrees of freedom of the finite element
     unsigned int n_dofs_per_cell; // number of degrees of freedom per cell
-    unsigned int n_dofs_per_edge; // number of degrees of freedom per edge
     unsigned int n_dofs_per_face; // number of degrees of freedom per face
+    unsigned int n_dofs_per_edge; // number of degrees of freedom per edge
     unsigned int n_dofs_per_vertex; // number of degrees of freedom per vertex
     mesh::Simplex<dim> reference_simplex; // reference simplex
 
