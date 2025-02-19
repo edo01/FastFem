@@ -1,5 +1,7 @@
 #include "FastFem/mesh/Geometry.hpp"
 
+#include <stdexcept>
+
 namespace fastfem{
 namespace mesh{
 
