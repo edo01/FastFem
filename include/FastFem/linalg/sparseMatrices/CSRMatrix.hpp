@@ -24,6 +24,7 @@ private:
     CSRPattern(const std::vector<ff_index>& row_ptr, const std::vector<ff_index>& col_indices);
 
 public:
+    CSRPattern() = default;
     friend class COOMatrix;
 
     /**
@@ -46,6 +47,7 @@ protected:
     std::shared_ptr<CSRPattern> base_pattern;
 
 public:
+    using SparseMatrix::SparseMatrix;
     CSRMatrix(ff_index n_cols, const CSRPattern& pattern);
     CSRMatrix(const CSRMatrix& A);
 

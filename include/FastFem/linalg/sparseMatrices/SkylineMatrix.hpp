@@ -34,6 +34,7 @@ protected:
     std::shared_ptr<SkylinePattern> base_skyline;
 
 public:
+    using SparseMatrix::SparseMatrix;
     SkylineMatrix(ff_index n_cols, const SkylinePattern& skyline);
     Vector gemv(const Vector& x) const override;
     inline ff_index nnz() const override { return base_skyline->skyline_rows.back(); } 

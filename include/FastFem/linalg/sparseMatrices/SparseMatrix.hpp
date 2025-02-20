@@ -17,6 +17,7 @@ protected:
     ff_index n_cols;
 
 public:
+    SparseMatrix() = default;
     SparseMatrix(ff_index n_rows, ff_index n_cols);
     virtual ~SparseMatrix() = default;
 
