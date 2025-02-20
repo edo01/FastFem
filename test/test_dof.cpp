@@ -41,9 +41,9 @@ int main(int argc, char** argv)
      * TEST FE P1 
      * */    
     FESimplexP1<2, 2> fe(1);
-    DoFHandler<2, 2> dof_handler(mesh, std::make_unique<FESimplexP1<2, 2>>(fe));
+    DoFHandler<2, 2> dof_handler(mesh);
 
-    unsigned int n_dofs = dof_handler.distribute_dofs();
+    unsigned int n_dofs = dof_handler.distribute_dofs(std::make_shared<FESimplexP1<2, 2>>(fe));
 
     std::cout << "Number of DoFs using P1: " << n_dofs << std::endl;
 
@@ -54,9 +54,9 @@ int main(int argc, char** argv)
      * */
     int n_components = 1;
     FESimplexP2<2, 2> fe2(n_components);
-    DoFHandler<2, 2> dof_handler2(mesh, std::make_unique<FESimplexP2<2, 2>>(fe2));
+    DoFHandler<2, 2> dof_handler2(mesh);
 
-    unsigned int n_dofs2 = dof_handler2.distribute_dofs();
+    unsigned int n_dofs2 = dof_handler2.distribute_dofs(std::make_shared<FESimplexP2<2, 2>>(fe2));
 
     std::cout << "Number of DoFs using P2: " << n_dofs2 << std::endl;
 
@@ -67,9 +67,9 @@ int main(int argc, char** argv)
      */
     n_components = 1;
     FESimplexP3<2, 2> fe3(n_components);
-    DoFHandler<2, 2> dof_handler3(mesh, std::make_unique<FESimplexP3<2, 2>>(fe3));
+    DoFHandler<2, 2> dof_handler3(mesh);
 
-    unsigned int n_dofs3 = dof_handler3.distribute_dofs();
+    unsigned int n_dofs3 = dof_handler3.distribute_dofs(std::make_shared<FESimplexP3<2, 2>>(fe3));
 
     std::cout << "Number of DoFs using P3: " << n_dofs3 << std::endl;
 
@@ -82,9 +82,9 @@ int main(int argc, char** argv)
      * TEST FE P2 on a 2x2 mesh
      */
     FESimplexP2<2, 2> fe4(1);
-    DoFHandler<2, 2> dof_handler4(mesh3, std::make_unique<FESimplexP2<2, 2>>(fe4));
+    DoFHandler<2, 2> dof_handler4(mesh3);
 
-    unsigned int n_dofs4 = dof_handler4.distribute_dofs();
+    unsigned int n_dofs4 = dof_handler4.distribute_dofs(std::make_shared<FESimplexP2<2, 2>>(fe4));
 
     std::cout << " TEST mappping " << std::endl;
     std::cout << "Number of elements: " << mesh3.elem_count() << std::endl;

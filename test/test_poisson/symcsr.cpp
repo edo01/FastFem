@@ -46,9 +46,9 @@ int main(int argc, char *argv[])
     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
 
     fe::FESimplexP1<2> fe;
-    dof::DoFHandler<2> dof_handler(mesh, std::make_unique<fe::FESimplexP1<2>>());
+    dof::DoFHandler<2> dof_handler(mesh);
 
-    dof_handler.distribute_dofs();
+    dof_handler.distribute_dofs(std::make_shared<fe::FESimplexP1<2>>(fe));
 
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();

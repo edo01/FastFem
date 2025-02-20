@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
 
     auto start_dof = std::chrono::high_resolution_clock::now();
     fe::FESimplexP1<2> fe;
-    dof::DoFHandler<2> dof_handler(mesh, std::make_unique<fe::FESimplexP1<2>>());
-    dof_handler.distribute_dofs();
+    dof::DoFHandler<2> dof_handler(mesh);
+    dof_handler.distribute_dofs(std::make_shared<fe::FESimplexP1<2>>(fe));
     auto end_dof = std::chrono::high_resolution_clock::now();
 
     unsigned int n_dofs = dof_handler.get_n_dofs();

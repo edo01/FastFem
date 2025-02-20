@@ -24,9 +24,9 @@ int main() {
     Mesh<2, 2> mesh = square.make_mesh();
 
     FESimplexP3<2, 2> fe(1);
-    DoFHandler<2, 2> dof_handler(mesh, std::make_unique<FESimplexP3<2, 2>>(fe));
+    DoFHandler<2, 2> dof_handler(mesh);
 
-    dof_handler.distribute_dofs();
+    dof_handler.distribute_dofs(std::make_shared<FESimplexP3<2, 2>>(fe));
 
     fastfem::linalg::CSRPattern csr_pattern = fastfem::linalg::CSRPattern::create_from_dof_handler(dof_handler);
     fastfem::linalg::CSRPattern symmetric_pattern = fastfem::linalg::CSRPattern::create_symmetric_from_dof_handler(dof_handler);

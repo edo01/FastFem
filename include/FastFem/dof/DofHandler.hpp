@@ -74,7 +74,14 @@ class DoFHandler
     using global_element_index = fastfem::types::global_element_index;
 
 public:
-    DoFHandler(const mesh::Mesh<dim, spacedim> &mesh, std::unique_ptr<fe::FESimplexP<dim, spacedim>> fe);
+
+    DoFHandler() = default;
+
+    /**
+     * Constructor of the DoFHandler class. The constructor takes a reference to the mesh and a pointer to the finite element space.
+     */
+    DoFHandler(mesh::Mesh<dim, spacedim> &mesh) : 
+        mesh(std::make_shared<mesh::Mesh<dim, spacedim>>(mesh)) {}
 
     /**
      * Distribute the degrees of freedom on the mesh. We offer a default implementation that works for 
@@ -90,7 +97,7 @@ public:
      * simplex is identified by the couple in ascending order of the global indices of its vertices.
      * 
      */
-    unsigned int distribute_dofs();
+    global_dof_index distribute_dofs(std::shared_ptr<fe::FESimplexP<dim, spacedim>> fe);
 
     /**
      * Get the global indices of the DoFs of the given element. The ordering of the DoFs is not coherent 
@@ -106,17 +113,19 @@ public:
      */
     std::vector<global_dof_index> get_ordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
 
-    inline auto elem_begin() const { return mesh.elem_begin(); }
-    inline auto elem_end() const { return mesh.elem_end(); }
+    inline auto elem_begin() const { return mesh->elem_begin(); }
+    inline auto elem_end() const { return mesh->elem_end(); }
 
     inline auto boundary_dofs_begin(size_t tag) const { return map_boundary_dofs.at(tag).begin(); }
     inline auto boundary_dofs_end(size_t tag) const { return map_boundary_dofs.at(tag).end(); }
     
     global_dof_index get_n_dofs() const { return n_dofs; }
 
-    inline global_element_index get_n_elements() const { return mesh.elem_count(); }
+    inline global_element_index get_n_elements() const { return mesh->elem_count(); }
 
     void print_dofs() const;
+
+    inline void attach_mesh(mesh::Mesh<dim, spacedim> &mesh) { this->mesh = std::make_shared<mesh::Mesh<dim, spacedim>>(mesh); }
 
     /**
      * This function is used to output the solution by DataIO. When we output the solution, 
@@ -125,8 +134,8 @@ public:
     inline std::vector<global_dof_index> get_dof_on_vertex(const global_vertex_index &vertex)  const { return vertex_dofs.at(vertex); }
 
 private:
-    const mesh::Mesh<dim, spacedim> &mesh;
-    const std::unique_ptr<fe::FESimplexP<dim, spacedim>> fe;
+    std::shared_ptr<mesh::Mesh<dim, spacedim>> mesh;
+    std::shared_ptr<fe::FESimplexP<dim, spacedim>> fe;
 
     fastfem::types::global_vertex_dof_table vertex_dofs;
     fastfem::types::global_edge_dof_table edge_dofs;

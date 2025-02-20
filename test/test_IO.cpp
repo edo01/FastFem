@@ -46,9 +46,9 @@ int main(int argc, char** argv)
 
 
     FESimplexP1<2, 2> fe(1);
-    DoFHandler<2, 2> dof_handler(mesh, std::make_unique<FESimplexP1<2, 2>>(fe));
+    DoFHandler<2, 2> dof_handler(mesh);
 
-    unsigned int n_dofs = dof_handler.distribute_dofs();
+    unsigned int n_dofs = dof_handler.distribute_dofs(std::make_shared<FESimplexP1<2, 2>>(fe));
 
     std::cout << "Number of DoFs using P1: " << n_dofs << std::endl;
 
