@@ -24,6 +24,7 @@ private:
     CSRPattern(const std::vector<ff_index>& row_ptr, const std::vector<ff_index>& col_indices);
 
 public:
+    CSRPattern() = default;
     friend class COOMatrix;
 
     /**
