@@ -28,6 +28,8 @@ struct Point
     bool operator==(const Point<spacedim> &p) const;
 
     inline bool operator!=(const Point<spacedim> &p) const { return !(*this == p); }
+
+    inline double& operator[](size_t i) { return coords[i]; }
     
 };
 

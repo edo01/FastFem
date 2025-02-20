@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 namespace fastfem {
 namespace fe {
@@ -132,6 +133,32 @@ map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_ce
     assert(false);
 }
 
+template <unsigned int dim, unsigned int spacedim>
+mesh::Point<spacedim> FESimplexP<dim, spacedim>::get_dof_coords(mesh::Simplex<dim, spacedim> T, local_dof_index_t dof) const 
+{
+
+    mesh::Point<spacedim> v0 = T.get_vertex(0);
+    mesh::Point<spacedim> coords_ref = this->dofs[dof];
+    mesh::Point<spacedim> mapped_coords;  // Initialize with v0 directly
+
+    std::array<mesh::Point<spacedim>, dim + 1> vertices;
+    for (unsigned int j = 0; j < dim + 1; ++j) {
+        vertices[j] = T.get_vertex(j);  // Store vertices to avoid multiple calls
+    }
+
+    //this->
+
+    for(unsigned int i = 0; i < spacedim; ++i) {
+        mapped_coords[i] = v0[i];
+        for(unsigned int j = 0; j < spacedim; ++j) {
+            //std::cout << "(i, j): (" << i << ", " << j << ") = " << vertices[i + 1][j] - v0[j] << std::endl;
+            mapped_coords[i] += (vertices[j + 1][i] - v0[i]) * coords_ref[j];
+        }
+    }
+
+    return mapped_coords;
+
+}
 
 // Explicit instantiation
 template class FESimplexP<1, 1>;

@@ -66,6 +66,9 @@ public:
 
     mesh::Simplex<dim, spacedim> get_reference_simplex() const { return reference_simplex; }
 
+    //implements an affine map from the reference simplex to the physical simplex
+    mesh::Point<spacedim> get_dof_coords(mesh::Simplex<dim, spacedim> T, local_dof_index_t dof) const;
+
     virtual unsigned int get_degree() const = 0;
 
 protected:    

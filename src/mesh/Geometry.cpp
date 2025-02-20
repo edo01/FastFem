@@ -117,7 +117,6 @@ int Simplex<dim, spacedim>::n_vertices() const { return num_vertices; }
 template <unsigned int dim, unsigned int spacedim>
 int Simplex<dim, spacedim>::n_edges() const { return num_edges; }
 
-
 // Explicit instantiation
 
 template class Point<1>;
