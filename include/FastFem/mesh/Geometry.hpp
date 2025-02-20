@@ -86,7 +86,7 @@ public:
 private:
     Point<spacedim> vertices[dim + 1];
     int num_vertices = dim + 1;
-    int num_edges = (dim+1)*dim/2;
+    int num_edges = (dim+1) * dim/2;
 };
 
 } // namespace mesh
