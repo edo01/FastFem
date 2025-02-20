@@ -6,22 +6,24 @@
 namespace fastfem{
 namespace linalg{
 
+using types::ff_index;
+
 /**
  * @brief Symmetric CSR matrix exploting a symmetric CSRPattern and storing only the upper triangular part
  */
 class SymCSRMatrix : public CSRMatrix
 {
 public:
-    SymCSRMatrix(size_t n_cols, const CSRPattern& pattern);
+    SymCSRMatrix(ff_index n_cols, const CSRPattern& pattern);
     SymCSRMatrix(const CSRMatrix& A) : CSRMatrix(A) {}
 
     Vector gemv(const Vector& x) const override;
-    void accumulate_entry(size_t i, size_t j, double value) override;
+    void accumulate_entry(ff_index i, ff_index j, double value) override;
 
     inline bool is_symmetric() const override { return true; }
 
 private:
-    const double &get_entry(size_t i, size_t j) const override;
+    const double &get_entry(ff_index i, ff_index j) const override;
 };
 
 } // namespace linalg

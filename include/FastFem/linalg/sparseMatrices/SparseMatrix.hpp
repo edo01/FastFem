@@ -5,17 +5,19 @@
 namespace fastfem{
 namespace linalg{
 
+using types::ff_index;
+
 /**
  * @brief Abstract class for sparse matrices
  * 
  */
 class SparseMatrix {
 protected:
-    size_t n_rows;
-    size_t n_cols;
+    ff_index n_rows;
+    ff_index n_cols;
 
 public:
-    SparseMatrix(size_t n_rows, size_t n_cols);
+    SparseMatrix(ff_index n_rows, ff_index n_cols);
     virtual ~SparseMatrix() = default;
 
     /**
@@ -27,37 +29,37 @@ public:
     /**
      * @brief read-only access to the matrix entries with bounds checking
      */
-    const double &operator()(size_t i, size_t j) const;
+    const double &operator()(ff_index i, ff_index j) const;
 
     /**
      * @brief set an entry with no bound checking, used in assembly
      */
-    virtual void set_entry(size_t i, size_t j, double value) = 0;
+    virtual void set_entry(ff_index i, ff_index j, double value) = 0;
 
     /**
      * @brief accumulate an entry with no bound checking, used in assembly
      */
-    virtual void accumulate_entry(size_t i, size_t j, double value) = 0;
+    virtual void accumulate_entry(ff_index i, ff_index j, double value) = 0;
 
-    virtual inline size_t nnz() const = 0;
+    virtual inline ff_index nnz() const = 0;
     virtual inline bool is_symmetric() const { return false; } // override in symmetric matrices
     void print(const std::string& name = "") const;
 
     /**
      * @brief Set a row and a column to zero, used for the application of Dirichlet boundary conditions
      */
-    virtual void set_row_col_to_zero(size_t i);
+    virtual void set_row_col_to_zero(ff_index i);
 
-    size_t get_n_rows() const { return n_rows; }
-    size_t get_n_cols() const { return n_cols; }
+    ff_index get_n_rows() const { return n_rows; }
+    ff_index get_n_cols() const { return n_cols; }
 
 private:
     /**
      * @brief Read-only access to the matrix entries with no bound checking
      */
-    virtual const double &get_entry(size_t i, size_t j) const = 0;
+    virtual const double &get_entry(ff_index i, ff_index j) const = 0;
 
-    bool check_bounds(size_t i, size_t j) const;
+    bool check_bounds(ff_index i, ff_index j) const;
 };
 
 } // namespace linalg

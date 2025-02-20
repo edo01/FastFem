@@ -3,11 +3,16 @@
 namespace fastfem {
 namespace linalg {
 
+using types::ff_index;
+
 
 Vector Vector::operator+(const Vector& other) const {
     Vector result(data.size());
+
+#ifdef HAVE_OPENMP
     #pragma omp parallel for
-    for (std::size_t i = 0; i < data.size(); ++i) {
+#endif
+    for (ff_index i = 0; i < data.size(); ++i) {
         result.data[i] = data[i] + other.data[i];
     }
     return result;
@@ -15,8 +20,11 @@ Vector Vector::operator+(const Vector& other) const {
 
 Vector Vector::operator-(const Vector& other) const {
     Vector result(data.size());
+
+#ifdef HAVE_OPENMP
     #pragma omp parallel for
-    for (std::size_t i = 0; i < data.size(); ++i) {
+#endif
+    for (ff_index i = 0; i < data.size(); ++i) {
         result.data[i] = data[i] - other.data[i];
     }
     return result;
@@ -24,8 +32,12 @@ Vector Vector::operator-(const Vector& other) const {
 
 Vector Vector::operator*(double scalar) const {
     Vector result(data.size());
+
+#ifdef HAVE_OPENMP
     #pragma omp parallel for
-    for (std::size_t i = 0; i < data.size(); ++i) {
+#endif
+
+    for (ff_index i = 0; i < data.size(); ++i) {
         result.data[i] = data[i] * scalar;
     }
     return result;
@@ -34,8 +46,10 @@ Vector Vector::operator*(double scalar) const {
 // y = a*x + b*y
 void Vector::axpby(double a, const Vector& x, double b, Vector& y)
 {
+#ifdef HAVE_OPENMP
     #pragma omp parallel for
-    for (std::size_t i = 0; i < x.size(); ++i) {
+#endif
+    for (ff_index i = 0; i < x.size(); ++i) {
         y[i] = a * x[i] + b * y[i];
     }
 }
@@ -43,16 +57,20 @@ void Vector::axpby(double a, const Vector& x, double b, Vector& y)
 // y = a*x + y
 void Vector::axpy(double a, const Vector& x, Vector& y)
 {
+#ifdef HAVE_OPENMP
     #pragma omp parallel for
-    for (std::size_t i = 0; i < x.size(); ++i) {
+#endif
+    for (ff_index i = 0; i < x.size(); ++i) {
         y[i] = a * x[i] + y[i];
     }
 }
 
 double Vector::dot(const Vector& other) const {
     double result = 0.0;
+#ifdef HAVE_OPENMP
     #pragma omp parallel for reduction(+:result)
-    for (std::size_t i = 0; i < data.size(); ++i) {
+#endif
+    for (ff_index i = 0; i < data.size(); ++i) {
         result += data[i] * other.data[i];
     }
     return result;

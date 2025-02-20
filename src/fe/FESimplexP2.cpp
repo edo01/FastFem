@@ -17,9 +17,8 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<1, 1>(n_components) {
         throw std::invalid_argument("FESimplexP2: only scalar functions are supported");
     }
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
+    using local_vertex_index = fastfem::types::local_vertex_index;
+    using local_edge_index = fastfem::types::local_edge_index;
 
     this->n_dofs_per_element = 6*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -36,9 +35,9 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<1, 1>(n_components) {
      */
 
     // fill the vertex dofs (no dof on faces or cells)
-    vertex_dofs[(local_vertex_id){0}] = {0};
-    vertex_dofs[(local_vertex_id){1}] = {2};
-    edge_dofs[(local_edge_id){0,1}] = {1};
+    vertex_dofs[(local_vertex_index){0}] = {0};
+    vertex_dofs[(local_vertex_index){1}] = {2};
+    edge_dofs[(local_edge_index){0,1}] = {1};
 
     mesh::Point<1> p0 = {0};
     mesh::Point<1> p1 = {0.5};
@@ -63,9 +62,8 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<1, 2>(n_components) {
         throw std::invalid_argument("FESimplexP2: only scalar functions are supported");
     }
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
+    using local_vertex_index = fastfem::types::local_vertex_index;
+    using local_edge_index = fastfem::types::local_edge_index;
 
     this->n_dofs_per_element = 6*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -82,9 +80,9 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<1, 2>(n_components) {
      */
 
     // fill the vertex dofs (no dof on faces or cells)
-    vertex_dofs[(local_vertex_id){0}] = {0};
-    vertex_dofs[(local_vertex_id){1}] = {2};
-    edge_dofs[(local_edge_id){0,1}] = {1};
+    vertex_dofs[(local_vertex_index){0}] = {0};
+    vertex_dofs[(local_vertex_index){1}] = {2};
+    edge_dofs[(local_edge_index){0,1}] = {1};
 
     mesh::Point<2> p0 = {0, 0};
     mesh::Point<2> p1 = {0.5, 0};
@@ -109,9 +107,8 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<1, 3>(n_components) {
         throw std::invalid_argument("FESimplexP2: only scalar functions are supported");
     }
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
+    using local_vertex_index = fastfem::types::local_vertex_index;
+    using local_edge_index = fastfem::types::local_edge_index;
 
     this->n_dofs_per_element = 6*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -128,9 +125,9 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<1, 3>(n_components) {
      */
 
     // fill the vertex dofs (no dof on faces or cells)
-    vertex_dofs[(local_vertex_id){0}] = {0};
-    vertex_dofs[(local_vertex_id){1}] = {2};
-    edge_dofs[(local_edge_id){0,1}] = {1};
+    vertex_dofs[(local_vertex_index){0}] = {0};
+    vertex_dofs[(local_vertex_index){1}] = {2};
+    edge_dofs[(local_edge_index){0,1}] = {1};
 
     mesh::Point<3> p0 = {0, 0, 0};
     mesh::Point<3> p1 = {0.5, 0, 0};
@@ -154,9 +151,8 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<2, 2>(n_components) {
         throw std::invalid_argument("FESimplexP2: only scalar functions are supported");
     }
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
+    using local_vertex_index = fastfem::types::local_vertex_index;
+    using local_edge_index = fastfem::types::local_edge_index;
 
     this->n_dofs_per_element = 6*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -181,12 +177,12 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<2, 2>(n_components) {
      */
 
     // fill the vertex dofs (no dof on faces or cells)
-    vertex_dofs[(local_vertex_id){0}] = {0};
-    vertex_dofs[(local_vertex_id){1}] = {2};
-    vertex_dofs[(local_vertex_id){2}] = {4};
-    edge_dofs[(local_edge_id){0,2}] = {5};
-    edge_dofs[(local_edge_id){0,1}] = {1};
-    edge_dofs[(local_edge_id){1,2}] = {3};
+    vertex_dofs[(local_vertex_index){0}] = {0};
+    vertex_dofs[(local_vertex_index){1}] = {2};
+    vertex_dofs[(local_vertex_index){2}] = {4};
+    edge_dofs[(local_edge_index){0,2}] = {5};
+    edge_dofs[(local_edge_index){0,1}] = {1};
+    edge_dofs[(local_edge_index){1,2}] = {3};
 
     mesh::Point<2> p0 = {0, 0};
     mesh::Point<2> p1 = {0.5, 0};
@@ -217,9 +213,8 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<2, 3>(n_components) {
         throw std::invalid_argument("FESimplexP2: only scalar functions are supported");
     }
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
+    using local_vertex_index = fastfem::types::local_vertex_index;
+    using local_edge_index = fastfem::types::local_edge_index;
 
     this->n_dofs_per_element = 6*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -244,12 +239,12 @@ FESimplexP2(const unsigned int n_components) :  FESimplexP<2, 3>(n_components) {
      */
 
     // fill the vertex dofs (no dof on faces or cells)
-    vertex_dofs[(local_vertex_id){0}] = {0};
-    vertex_dofs[(local_vertex_id){1}] = {2};
-    vertex_dofs[(local_vertex_id){2}] = {4};
-    edge_dofs[(local_edge_id){0,2}] = {5};
-    edge_dofs[(local_edge_id){0,1}] = {1};
-    edge_dofs[(local_edge_id){1,2}] = {3};
+    vertex_dofs[(local_vertex_index){0}] = {0};
+    vertex_dofs[(local_vertex_index){1}] = {2};
+    vertex_dofs[(local_vertex_index){2}] = {4};
+    edge_dofs[(local_edge_index){0,2}] = {5};
+    edge_dofs[(local_edge_index){0,1}] = {1};
+    edge_dofs[(local_edge_index){1,2}] = {3};
 
     mesh::Point<3> p0 = {0, 0, 0};
     mesh::Point<3> p1 = {0.5, 0, 0};

@@ -18,7 +18,7 @@ void MatrixTools::apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, cons
 
     for(auto it = dof_handler.boundary_dofs_begin(tag); it != dof_handler.boundary_dofs_end(tag); ++it)
     {
-        global_dof_index_t dof = *it;
+        global_dof_index dof = *it;
         A.set_row_col_to_zero(dof);
         rhs[dof] = 0.0;
 
@@ -40,20 +40,18 @@ void MatrixTools::apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const D
         throw std::runtime_error("apply_homogeneous_dirichlet(): The matrix and the dof handler must have the same number of rows");
     }
 
-    std::cout << "Applying homogeneous Dirichlet boundary conditions with std::map" << std::endl;
+    // create a map that associates a column index to the indices of the values in the values array
+    std::map<global_dof_index, std::vector<ff_index>> col_to_values;
+    std::vector<ff_index> &col_indices = A.base_pattern->col_indices;
 
-    std::map<global_dof_index_t, std::vector<unsigned int>> col_to_values;
-    std::vector<double> &values = A.values;
-    std::vector<size_t> &col_indices = A.base_pattern->col_indices;
-
-    for(unsigned int i = 0; i < col_indices.size(); ++i)
+    for(ff_index i = 0; i < col_indices.size(); ++i)
     {
         col_to_values[col_indices[i]].push_back(i);
     }
 
     for(auto it = dof_handler.boundary_dofs_begin(tag); it != dof_handler.boundary_dofs_end(tag); ++it)
     {
-        global_dof_index_t dof = *it;
+        global_dof_index dof = *it;
         A.set_row_col_to_zero(dof, col_to_values);
         rhs[dof] = 0.0;
 
@@ -62,7 +60,7 @@ void MatrixTools::apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const D
     }
 }
 
-void MatrixTools::add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs)
+void MatrixTools::add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index>& local_dofs)
 {
     for(size_t i = 0; i < local_dofs.size(); ++i)
     {
@@ -73,7 +71,7 @@ void MatrixTools::add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& 
     }
 }
 
-void MatrixTools::add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index_t>& local_dofs)
+void MatrixTools::add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index>& local_dofs)
 {
     for(size_t i = 0; i < local_dofs.size(); ++i)
     {

@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
         mesh::Point<2> centroid = triangle.get_centroid();
         double f_value = f(centroid.coords[0], centroid.coords[1]);
-        for (int i = 0; i < n_dofs_per_cell; i++)
+        for (unsigned int i = 0; i < n_dofs_per_cell; i++)
             local_rhs[i] += f_value * volume / 3;
 
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);

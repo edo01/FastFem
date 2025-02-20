@@ -7,6 +7,7 @@
 #define MESHADJACENCY_HPP
 
 #include <FastFem/common/hash_table.h>
+#include <FastFem/types/CommonTypes.hpp>
 #include <FastFem/mesh/Mesh.hpp>
 #include <FastFem/mesh/Geometry.hpp>
 #include <FastFem/mesh/VertexHasher.hpp>
@@ -26,7 +27,7 @@ namespace mesh {
     private:
         Mesh<dim, spacedim> &mesh;
         VertexHasher<dim, spacedim> hasher;
-        HashTable<uint64_t, std::vector<size_t>, VertexHasher<dim, spacedim>> vtx_adjacency;
+        HashTable<uint64_t, std::vector<types::global_element_index>, VertexHasher<dim, spacedim>> vtx_adjacency;
     };
 
 } // namespace mesh

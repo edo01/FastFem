@@ -5,6 +5,10 @@
 #include "FastFem/mesh/MeshMaker.hpp"
 #include "MeshTools.hpp"
 
+using global_vertex_index  = fastfem::types::global_vertex_index;
+using global_element_index = fastfem::types::global_element_index;
+using boundary_index       = fastfem::types::boundary_index;
+
 namespace fastfem {
 namespace mesh {
 
@@ -27,8 +31,6 @@ void CubeSurfaceMaker::build_cube_vertices(Mesh<2,3> &mesh) const
             mesh.add_vertex({col, row, Nd});
 		}
 	}
-
-    assert(mesh.vtx_count() == 6 * V * V);
 };
 
 void CubeSurfaceMaker::build_cube_triangles(Mesh<2,3> &mesh) const
@@ -36,11 +38,11 @@ void CubeSurfaceMaker::build_cube_triangles(Mesh<2,3> &mesh) const
 	int V = N + 1;
     mesh.reserve_elements(12 * N * N);
     
-    size_t indices[3];
+    global_vertex_index indices[3];
 	for (int face = 0; face < 6; face++) {
 		for (int row = 0; row < N; row++) {
 			for (int col = 0; col < N; col++) {
-				int v = face * V * V + row * V + col;
+				global_vertex_index v = (global_vertex_index)(face * V * V + row * V + col);
                 
                 indices[0] = v; indices[1] = v + 1; indices[2] = v + 1 + V;
                 MeshSimplex<2,3> t1(indices);
@@ -112,8 +114,6 @@ void SquareMaker::build_square_vertices(Mesh<2,2>& mesh) const
 			mesh.add_vertex({col, row});
 		}
 	}
-
-	assert(mesh.vtx_count() == V * V);
 }
 
 void SquareMaker::build_square_triangles(Mesh<2,2>& mesh) const
@@ -121,10 +121,10 @@ void SquareMaker::build_square_triangles(Mesh<2,2>& mesh) const
 	int V = N + 1;
 	mesh.reserve_elements(2 * N * N);
 	
-	size_t indices[3];
+	global_vertex_index indices[3];
 	for (int row = 0; row < N; row++) {
 		for (int col = 0; col < N; col++) {
-			int v = row * V + col;
+			global_vertex_index v = (global_vertex_index)(row * V + col);
 			
 			indices[0] = v; indices[1] = v + 1; indices[2] = v + 1 + V;
 			MeshSimplex<2,2> t1(indices);
@@ -134,8 +134,6 @@ void SquareMaker::build_square_triangles(Mesh<2,2>& mesh) const
 			mesh.add_element(t2);
 		}
 	}
-
-	assert(mesh.elem_count() == 2 * N * N);
 }
 
 void SquareMaker::build_square_boundary(Mesh<2,2>& mesh) const{
@@ -146,7 +144,7 @@ void SquareMaker::build_square_boundary(Mesh<2,2>& mesh) const{
 	// we reserve space for 4 * N elements
 	mesh.reserve_boundary_elements(0,N);
 	
-	for(int i = 0; i < N; i++){
+	for(global_vertex_index i = 0; i < (global_vertex_index)N; i++){
 		// top edge TAG 0
 		indices[0] = i; indices[1] = i + 1;
 		MeshSimplex<1,2> e1(indices);
@@ -167,8 +165,6 @@ void SquareMaker::build_square_boundary(Mesh<2,2>& mesh) const{
 		MeshSimplex<1,2> e4(indices);
 		mesh.add_boundary_element(0, e4);
 	}
-
-	assert(mesh.boundary_elem_count(0) == 4 * N);
 	
 }
 

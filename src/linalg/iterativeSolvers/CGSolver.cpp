@@ -22,7 +22,7 @@ double CGSolver::initialize(const SparseMatrix& A, const Vector& b, Vector& x)
     return std::sqrt(r2 / b2);
 }
 
-double CGSolver::iterate(const SparseMatrix& A, const Vector& b, Vector& x)
+double CGSolver::iterate(const SparseMatrix& A, const Vector& /*b*/, Vector& x)
 {
     Ap = A * p;
 

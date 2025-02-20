@@ -7,7 +7,7 @@
 #include "FastFem/dof/DofHandler.hpp"
 
 using namespace fastfem::dof;
-using fastfem::types::global_dof_index_t;
+using fastfem::types::global_dof_index;
 
 namespace fastfem{
 namespace linalg{
@@ -42,9 +42,9 @@ public:
     template <unsigned int dim, unsigned int spacedim>
     static void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
 
-    static void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs);
+    static void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index>& local_dofs);
 
-    static void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index_t>& local_dofs);
+    static void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index>& local_dofs);
 };
 
 } // namespace linalg

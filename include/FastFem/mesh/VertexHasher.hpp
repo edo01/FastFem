@@ -2,7 +2,6 @@
 #define VERTEXHASHER_HPP
 
 #include <functional>
-//#include <FastFem/mesh/Mesh.hpp>
 
 namespace fastfem{
 namespace mesh{

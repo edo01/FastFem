@@ -41,8 +41,7 @@ int main(int argc, char *argv[])
     }
 
     unsigned int N = std::atoi(argv[1]);
-    unsigned int dim = 2;
-
+    
     mesh::SquareMaker mesh_maker(N);
     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
 

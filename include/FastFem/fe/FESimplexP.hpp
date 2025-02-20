@@ -2,6 +2,7 @@
 #define FESIMPLEXP_HPP
 
 #include <FastFem/mesh/Mesh.hpp>
+#include <FastFem/types/CommonTypes.hpp>
 #include <cassert>
 
 namespace fastfem{
@@ -18,17 +19,17 @@ class FESimplexP
     static_assert(dim <= spacedim, "The dimension of the FE must be less or equal to the space it lives in");
     static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 
-    using global_vertex_id = fastfem::types::global_vertex_id;
-    using global_edge_id = fastfem::types::global_edge_id;
-    using global_face_id = fastfem::types::global_face_id;
-    using global_cell_id = fastfem::types::global_cell_id;
+    using global_vertex_index  = fastfem::types::global_vertex_index;
+    using global_edge_index    = fastfem::types::global_edge_index;
+    using global_face_index    = fastfem::types::global_face_index;
+    using global_cell_index    = fastfem::types::global_cell_index;
 
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id   = fastfem::types::local_edge_id;
-    using local_face_id   = fastfem::types::local_face_id;
-    using local_cell_id   = fastfem::types::local_cell_id; 
+    using local_vertex_index   = fastfem::types::local_vertex_index;
+    using local_edge_index     = fastfem::types::local_edge_index;
+    using local_face_index     = fastfem::types::local_face_index;
+    using local_cell_index     = fastfem::types::local_cell_index;
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
+    using local_dof_index = fastfem::types::local_dof_index;
     
 public:
 
@@ -42,12 +43,12 @@ public:
      * 
      * @param T The simplex on which the degrees of freedom are defined.
      * @param v The global index of the sub-simplex
-     * @return std::vector<local_dof_index_t> The local numbering of the degrees of freedom on the sub-simplex.
+     * @return std::vector<local_dof_index> The local numbering of the degrees of freedom on the sub-simplex.
      */
-    std::vector<local_dof_index_t> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_vertex_id v) const;
-    std::vector<local_dof_index_t> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_edge_id e) const;
-    std::vector<local_dof_index_t> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_face_id f) const;
-    std::vector<local_dof_index_t> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_cell_id c) const;
+    std::vector<local_dof_index> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_vertex_index v) const;
+    std::vector<local_dof_index> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_edge_index e) const;
+    std::vector<local_dof_index> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_face_index f) const;
+    std::vector<local_dof_index> get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_cell_index c) const;
 
     // total number of degrees of freedom
     unsigned int get_n_dofs_per_element() const { return n_dofs_per_element; }
@@ -67,7 +68,7 @@ public:
     mesh::Simplex<dim, spacedim> get_reference_simplex() const { return reference_simplex; }
 
     //implements an affine map from the reference simplex to the physical simplex
-    mesh::Point<spacedim> get_dof_coords(mesh::Simplex<dim, spacedim> T, local_dof_index_t dof) const;
+    mesh::Point<spacedim> get_dof_coords(mesh::Simplex<dim, spacedim> T, local_dof_index dof) const;
 
     virtual unsigned int get_degree() const = 0;
 
@@ -85,18 +86,18 @@ protected:
     /**
      * @brief Tables that map a local sub-simplex to the local numbering of the degrees of freedom.
      */
-    fastfem::types::local_dof_table<0> vertex_dofs;
-    fastfem::types::local_dof_table<1> edge_dofs;
-    fastfem::types::local_dof_table<2> face_dofs;
-    fastfem::types::local_dof_table<3> cell_dofs;
+    fastfem::types::local_vertex_dof_table vertex_dofs;
+    fastfem::types::local_edge_dof_table edge_dofs;
+    fastfem::types::local_face_dof_table face_dofs;
+    fastfem::types::local_cell_dof_table cell_dofs;
 
     /**
      * @brief Map a global index of a sub-simplex to a local index.
      */
-    local_vertex_id map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_vertex_id v) const;
-    local_edge_id map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_edge_id e) const;
-    local_face_id map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_face_id f) const;
-    local_cell_id map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_cell_id c) const;
+    local_vertex_index map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_vertex_index v) const;
+    local_edge_index map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_edge_index e) const;
+    local_face_index map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_face_index f) const;
+    local_cell_index map_global_simplex_to_local(const mesh::MeshSimplex<dim, spacedim> &T, global_cell_index c) const;
 };
 
 /**

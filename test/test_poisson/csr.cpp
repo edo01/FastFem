@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
     }
 
     unsigned int N = std::atoi(argv[1]);
-    unsigned int dim = 2;
 
     mesh::SquareMaker mesh_maker(N);
     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
 
-    auto f_constant = [](double x, double y) { return 1; };
+    //auto f_constant = [](double x, double y) { return 1; };
     // auto f = [](double x, double y) { return 4 - 2 * (x * x + y * y); };
     auto f = [](double x, double y) { return 10*10*10*10 * std::exp(- ((x - 0.5) * (x - 0.5) - (y - 0.5) * (y - 0.5))/0.001); };
 
@@ -128,11 +127,11 @@ int main(int argc, char *argv[])
     {
         auto &elem = *it;
 
-        std::vector<fastfem::types::global_dof_index_t> global_dofs = dof_handler.get_ordered_dofs_on_element(elem);
+        std::vector<fastfem::types::global_dof_index> global_dofs = dof_handler.get_ordered_dofs_on_element(elem);
 
         mesh::Simplex<2, 2> triangle = mesh.get_Simplex(elem);
 
-        for(types::local_dof_index_t i = 0; i < global_dofs.size(); ++i)
+        for(types::local_dof_index i = 0; i < global_dofs.size(); ++i)
         {
             mesh::Point<2> p_dof = fe.get_dof_coords(triangle, i);
             exact_sol[global_dofs[i]] = exact_f(p_dof.coords[0], p_dof.coords[1]);

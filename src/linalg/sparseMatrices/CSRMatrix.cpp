@@ -5,7 +5,10 @@
 namespace fastfem{
 namespace linalg{
 
-CSRPattern::CSRPattern(const std::vector<size_t>& row_ptr, const std::vector<size_t>& col_indices) : row_ptr(row_ptr), col_indices(col_indices)
+using types::ff_index;
+using types::global_dof_index;
+
+CSRPattern::CSRPattern(const std::vector<ff_index>& row_ptr, const std::vector<ff_index>& col_indices) : row_ptr(row_ptr), col_indices(col_indices)
 {
     if(this->row_ptr.size() < 2){
         throw std::invalid_argument("CSRPattern::CSRPattern(): invalid row_ptr size");
@@ -15,10 +18,10 @@ CSRPattern::CSRPattern(const std::vector<size_t>& row_ptr, const std::vector<siz
     }
 }
 
-CSRMatrix::CSRMatrix(size_t n_cols, const CSRPattern& pattern) :
+CSRMatrix::CSRMatrix(ff_index n_cols, const CSRPattern& pattern) :
   SparseMatrix(pattern.row_ptr.size() - 1, n_cols),
-  base_pattern(std::make_shared<CSRPattern>(pattern)),
-  values(pattern.col_indices.size())
+  values(pattern.col_indices.size()),
+  base_pattern(std::make_shared<CSRPattern>(pattern))
 {
     if(nnz() > 0 && *std::max_element(pattern.col_indices.begin(), pattern.col_indices.end()) >= n_cols){
         throw std::invalid_argument("CSRMatrix::CSRMatrix(): invalid n_cols");
@@ -31,12 +34,12 @@ CSRMatrix::CSRMatrix(const CSRMatrix& A) :
   base_pattern(A.base_pattern)
 {}
 
-const double &CSRMatrix::get_entry(size_t i, size_t j) const
+const double &CSRMatrix::get_entry(ff_index i, ff_index j) const
 {
-    size_t row_start = base_pattern->row_ptr[i];
-    size_t row_end = base_pattern->row_ptr[i + 1];
+    ff_index row_start = base_pattern->row_ptr[i];
+    ff_index row_end = base_pattern->row_ptr[i + 1];
 
-    for(size_t k = row_start; k < row_end; ++k){
+    for(ff_index k = row_start; k < row_end; ++k){
         if(base_pattern->col_indices[k] == j){
             return values[k];
         }
@@ -46,12 +49,12 @@ const double &CSRMatrix::get_entry(size_t i, size_t j) const
     return dummy;
 }
 
-void CSRMatrix::set_entry(size_t i, size_t j, double value)
+void CSRMatrix::set_entry(ff_index i, ff_index j, double value)
 {
-    size_t row_start = base_pattern->row_ptr[i];
-    size_t row_end = base_pattern->row_ptr[i + 1];
+    ff_index row_start = base_pattern->row_ptr[i];
+    ff_index row_end = base_pattern->row_ptr[i + 1];
 
-    for(size_t k = row_start; k < row_end; ++k){
+    for(ff_index k = row_start; k < row_end; ++k){
         if(base_pattern->col_indices[k] == j){
             values[k] = value;
             return;
@@ -61,12 +64,12 @@ void CSRMatrix::set_entry(size_t i, size_t j, double value)
     throw std::invalid_argument("CSRMatrix::insert_entry(): entry not found");
 }
 
-void CSRMatrix::accumulate_entry(size_t i, size_t j, double value)
+void CSRMatrix::accumulate_entry(ff_index i, ff_index j, double value)
 {
-    size_t row_start = base_pattern->row_ptr[i];
-    size_t row_end = base_pattern->row_ptr[i + 1];
+    ff_index row_start = base_pattern->row_ptr[i];
+    ff_index row_end = base_pattern->row_ptr[i + 1];
 
-    for(size_t k = row_start; k < row_end; ++k){
+    for(ff_index k = row_start; k < row_end; ++k){
         if(base_pattern->col_indices[k] == j){
             values[k] += value;
             return;
@@ -86,11 +89,13 @@ Vector CSRMatrix::gemv(const Vector& x) const {
     const auto& row_ptr = base_pattern->row_ptr;
     const auto& col_indices = base_pattern->col_indices;
 
+#ifdef HAVE_OPENMP
     #pragma omp parallel for
-    for(size_t i = 0; i < n_rows; ++i){
-        size_t row_start = row_ptr[i];
-        size_t row_end = row_ptr[i + 1];
-        for(size_t k = row_start; k < row_end; ++k){
+#endif
+    for(ff_index i = 0; i < n_rows; ++i){
+        ff_index row_start = row_ptr[i];
+        ff_index row_end = row_ptr[i + 1];
+        for(ff_index k = row_start; k < row_end; ++k){
             y[i] += values[k] * x[col_indices[k]];
         }
     }
@@ -98,23 +103,30 @@ Vector CSRMatrix::gemv(const Vector& x) const {
     return y;
 }
 
-void CSRMatrix::set_row_col_to_zero(size_t i)
+void CSRMatrix::set_row_col_to_zero(global_dof_index i)
 {
-    size_t row_start = base_pattern->row_ptr[i];
-    size_t row_end = base_pattern->row_ptr[i + 1];
+    ff_index row_start = base_pattern->row_ptr[i];
+    ff_index row_end = base_pattern->row_ptr[i + 1];
 
+#ifdef HAVE_OPENMP
     #pragma omp parallel
+#endif
     {
         // set row to zero
+#ifdef HAVE_OPENMP
         #pragma omp for
-        for(size_t k = row_start; k < row_end; ++k){
+#endif
+        for(ff_index k = row_start; k < row_end; ++k){
             values[k] = 0.0;
         }
 
         // set column to zero
         auto& col_idx = base_pattern->col_indices;
+        
+#ifdef HAVE_OPENMP
         #pragma omp for
-        for(size_t j = 0; j < nnz(); ++j){
+#endif
+        for(ff_index j = 0; j < nnz(); ++j){
             if(col_idx[j] == i){
                 values[j] = 0.0;
             }
@@ -122,12 +134,12 @@ void CSRMatrix::set_row_col_to_zero(size_t i)
     }
 }
 
-void CSRMatrix::set_row_col_to_zero(size_t i, std::map<size_t, std::vector<unsigned int>>& col_to_values)
+void CSRMatrix::set_row_col_to_zero(global_dof_index i, std::map<ff_index, std::vector<ff_index>>& col_to_values)
 {
-    size_t row_start = base_pattern->row_ptr[i];
-    size_t row_end = base_pattern->row_ptr[i + 1];
+    ff_index row_start = base_pattern->row_ptr[i];
+    ff_index row_end = base_pattern->row_ptr[i + 1];
 
-    for(size_t k = row_start; k < row_end; ++k){
+    for(ff_index k = row_start; k < row_end; ++k){
         values[k] = 0.0;
     }
     
@@ -138,15 +150,14 @@ void CSRMatrix::set_row_col_to_zero(size_t i, std::map<size_t, std::vector<unsig
     }
 }
         
-
 void CSRMatrix::print_pattern() const
 {
-    for(size_t i = 0; i < n_rows; ++i)
+    for(ff_index i = 0; i < n_rows; ++i)
     {
-        for(size_t j = 0; j < n_cols; ++j)
+        for(ff_index j = 0; j < n_cols; ++j)
         {
             bool found = false;
-            for(size_t k = base_pattern->row_ptr[i]; k < base_pattern->row_ptr[i + 1]; ++k)
+            for(ff_index k = base_pattern->row_ptr[i]; k < base_pattern->row_ptr[i + 1]; ++k)
             {
                 if(base_pattern->col_indices[k] == j)
                 {
@@ -174,18 +185,18 @@ CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DoFHandler<di
 
         const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
 
-        for(int j = 0; j < dofs.size(); ++j){
-            for(int k = j; k < dofs.size(); ++k){
+        for(ff_index j = 0; j < (ff_index) dofs.size(); ++j){
+            for(ff_index k = j; k < (ff_index) dofs.size(); ++k){
                 dof_interactions[dofs[j]].insert(dofs[k]);
                 dof_interactions[dofs[k]].insert(dofs[j]);
             }
         }
     }
 
-    std::vector<size_t> row_ptr(dof_handler.get_n_dofs() + 1);
-    std::vector<size_t> col_indices;
+    std::vector<ff_index> row_ptr(dof_handler.get_n_dofs() + 1);
+    std::vector<ff_index> col_indices;
 
-    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
+    for(ff_index i = 0; i < (ff_index) dof_interactions.size(); ++i){
         row_ptr[i + 1] = row_ptr[i] + dof_interactions[i].size();
         col_indices.insert(col_indices.end(), dof_interactions[i].begin(), dof_interactions[i].end());
     }
@@ -196,23 +207,23 @@ CSRPattern CSRPattern::create_from_dof_handler(const fastfem::dof::DoFHandler<di
 template <unsigned int dim, unsigned int spacedim>
 CSRPattern CSRPattern::create_symmetric_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler)
 {
-    std::vector<std::set<unsigned int>> dof_interactions(dof_handler.get_n_dofs());
+    std::vector<std::set<ff_index>> dof_interactions(dof_handler.get_n_dofs());
 
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it) {
         const auto& elem = *it;
         const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
-        for(int j = 0; j < dofs.size(); ++j){
-            for(int k = j; k < dofs.size(); ++k){
+        for(ff_index j = 0; j < (ff_index) dofs.size(); ++j){
+            for(ff_index k = j; k < (ff_index) dofs.size(); ++k){
                 //stores only the lower triangular part
                 dofs[j] < dofs[k] ? dof_interactions[dofs[j]].insert(dofs[k]) : dof_interactions[dofs[k]].insert(dofs[j]); 
             }
         }
     }
 
-    std::vector<size_t> row_ptr(dof_handler.get_n_dofs() + 1);
-    std::vector<size_t> col_indices;
+    std::vector<ff_index> row_ptr(dof_handler.get_n_dofs() + 1);
+    std::vector<ff_index> col_indices;
 
-    for(unsigned int i = 0; i < dof_interactions.size(); ++i){
+    for(ff_index i = 0; i < dof_interactions.size(); ++i){
         row_ptr[i + 1] = row_ptr[i] + dof_interactions[i].size();
         col_indices.insert(col_indices.end(), dof_interactions[i].begin(), dof_interactions[i].end());
     }

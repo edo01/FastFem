@@ -12,16 +12,20 @@
 #include "FastFem/common/vec3.h"
 #include "FastFem/mesh/Mesh.hpp"
 #include "FastFem/mesh/VertexHasher.hpp"
+#include "FastFem/types/CommonTypes.hpp"
 
 namespace fastfem {
 namespace mesh {
 
+using global_vertex_index  = fastfem::types::global_vertex_index;
+using local_vertex_index   = fastfem::types::local_vertex_index;
+
 template <unsigned int dim, unsigned int spacedim>
 int dedup_mesh_vertices(Mesh<dim, spacedim> &mesh)
 {
-	size_t vtx_count = 0;
-	size_t V = mesh.vtx_count();
-    std::vector<int> remap(V);
+	global_vertex_index vtx_count = 0;
+	global_vertex_index V = mesh.vtx_count();
+    std::vector<global_vertex_index> remap(V);
     
 	/*
 	 * We have replaced the linear search (O(n^2)) with an
@@ -43,9 +47,9 @@ int dedup_mesh_vertices(Mesh<dim, spacedim> &mesh)
 	 *
 	 */
 	VertexHasher<dim, spacedim> hasher(mesh);
-	HashTable<uint64_t, size_t, VertexHasher<dim, spacedim>> vtx_remap(V, hasher);
+	HashTable<uint64_t, global_vertex_index, VertexHasher<dim, spacedim>> vtx_remap(V, hasher);
 
-	for (size_t i = 0; i < V; ++i) {
+	for (global_vertex_index i = 0; i < V; ++i) {
 		size_t *p = vtx_remap.get_or_set(i, vtx_count);
 		if (p) {
 			remap[i] = *p;
@@ -56,7 +60,7 @@ int dedup_mesh_vertices(Mesh<dim, spacedim> &mesh)
 	}
 
 	/* Remap vertices */
-	for (size_t i = 0; i < V; i++) {
+	for (global_vertex_index i = 0; i < V; i++) {
 		//m->vertices[remap[i]] = m->vertices[i];
         mesh.set_vertex(remap[i], mesh.get_vertex(i));
         
@@ -64,7 +68,7 @@ int dedup_mesh_vertices(Mesh<dim, spacedim> &mesh)
 	/* Remap triangle indices */
 	for (auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it) {
 		MeshSimplex<dim,spacedim> T = *it;
-        for(unsigned int j = 0; j < dim; j++){
+        for(local_vertex_index j = 0; j < dim; j++){
             T.set_vertex(j, remap[T.get_vertex(j)]);
             assert(T.get_vertex(j) < vtx_count);
         }

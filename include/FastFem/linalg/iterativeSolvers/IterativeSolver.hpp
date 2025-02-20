@@ -8,14 +8,14 @@ namespace linalg {
 
 class IterativeSolver {
 protected:
-    int maxIterations;
+    unsigned int maxIterations;
     double tolerance;
 
     Vector r;
     double error;
 
 public:
-    IterativeSolver(int maxIter = 1000, double tol = 1e-6)
+    IterativeSolver(unsigned int maxIter = 1000, double tol = 1e-6)
         : maxIterations(maxIter), tolerance(tol) {}
 
     virtual ~IterativeSolver() = default;

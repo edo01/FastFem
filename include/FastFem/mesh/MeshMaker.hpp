@@ -2,6 +2,7 @@
 #define MESHMAKER_HPP
 
 #include "FastFem/mesh/Mesh.hpp"
+#include "FastFem/types/CommonTypes.hpp"
 
 namespace fastfem {
 namespace mesh {
