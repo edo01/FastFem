@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
 
     //auto f_constant = [](double x, double y) { return 1; };
-    // auto f = [](double x, double y) { return 4 - 2 * (x * x + y * y); };
-    auto f = [](double x, double y) { return 10*10*10*10 * std::exp(- ((x - 0.5) * (x - 0.5) - (y - 0.5) * (y - 0.5))/0.001); };
+    auto f = [](double x, double y) { return 4 - 2 * (x * x + y * y); };
+    //auto f = [](double x, double y) { return 10*10*10*10 * std::exp(- ((x - 0.5) * (x - 0.5) - (y - 0.5) * (y - 0.5))/0.001); };
 
     linalg::Vector rhs(n_dofs);
 
