@@ -37,7 +37,9 @@ int main(int argc, char** argv)
     assert(mesh.elem_count() == (size_t)(2 * N * N));
     assert(mesh.vtx_count() == (size_t)((N + 1) * (N + 1)));
 
-    
+    /**
+     * TEST FE P1 
+     * */    
     FESimplexP1<2, 2> fe(1);
     DoFHandler<2, 2> dof_handler(mesh, std::make_unique<FESimplexP1<2, 2>>(fe));
 
@@ -47,7 +49,10 @@ int main(int argc, char** argv)
 
     assert(n_dofs == (size_t)(N + 1) * (N + 1));
 
-    int n_components = 2;
+    /**
+     * TEST FE P2 
+     * */
+    int n_components = 1;
     FESimplexP2<2, 2> fe2(n_components);
     DoFHandler<2, 2> dof_handler2(mesh, std::make_unique<FESimplexP2<2, 2>>(fe2));
 
@@ -57,6 +62,9 @@ int main(int argc, char** argv)
 
     assert(n_dofs2 == (size_t)(n_components*((N + 1) * (N + 1) + N*N + 2*N*(N+1))));
     
+    /**
+     * TEST FE P3
+     */
     n_components = 1;
     FESimplexP3<2, 2> fe3(n_components);
     DoFHandler<2, 2> dof_handler3(mesh, std::make_unique<FESimplexP3<2, 2>>(fe3));
@@ -70,6 +78,9 @@ int main(int argc, char** argv)
     SquareMaker square3(2);
     Mesh<2, 2> mesh3 = square3.make_mesh();
 
+    /**
+     * TEST FE P2 on a 2x2 mesh
+     */
     FESimplexP2<2, 2> fe4(1);
     DoFHandler<2, 2> dof_handler4(mesh3, std::make_unique<FESimplexP2<2, 2>>(fe4));
 
@@ -101,6 +112,10 @@ int main(int argc, char** argv)
         }
         std::cout << std::endl;
     }   
+
+    /**
+     * TEST boundary DoFs
+     */
 
     int n_dofs_boundary = 0;
     // print the DoFs on the boundary
