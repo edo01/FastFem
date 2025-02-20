@@ -48,6 +48,7 @@ protected:
 
 public:
     using SparseMatrix::SparseMatrix;
+    
     CSRMatrix(ff_index n_cols, const CSRPattern& pattern);
     CSRMatrix(const CSRMatrix& A);
 
@@ -55,6 +56,8 @@ public:
 
     void set_entry(ff_index i, ff_index j, double value) override;
     void accumulate_entry(ff_index i, ff_index j, double value) override;
+    virtual void operator=(const double& value) override;
+
 
     inline ff_index nnz() const override { return base_pattern->col_indices.size(); }
 

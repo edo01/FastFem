@@ -78,6 +78,10 @@ Vector SkylineMatrix::gemv(const Vector& x) const
     return y;
 }
 
+void SkylineMatrix::operator=(const double& value){
+    std::fill(values.begin(), values.end(), value);
+}
+
 void SkylineMatrix::set_row_col_to_zero(size_t i)
 {
     size_t row_start = (base_skyline->skyline_rows)[i];

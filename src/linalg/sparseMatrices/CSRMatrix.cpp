@@ -149,6 +149,11 @@ void CSRMatrix::set_row_col_to_zero(global_dof_index i, std::map<ff_index, std::
         }
     }
 }
+
+void CSRMatrix::operator=(const double& value)
+{
+    std::fill(values.begin(), values.end(), value);
+}
         
 void CSRMatrix::print_pattern() const
 {

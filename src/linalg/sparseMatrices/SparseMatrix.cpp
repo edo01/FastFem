@@ -25,6 +25,7 @@ bool SparseMatrix::check_bounds(ff_index i, ff_index j) const
     return i < n_rows && j < n_cols;
 }
 
+
 const double &SparseMatrix::operator()(ff_index i, ff_index j) const
 {
     if(!check_bounds(i, j))

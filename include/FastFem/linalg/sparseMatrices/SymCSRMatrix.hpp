@@ -21,6 +21,7 @@ public:
     void accumulate_entry(ff_index i, ff_index j, double value) override;
 
     inline bool is_symmetric() const override { return true; }
+    void operator=(const double& value) override;
 
 private:
     const double &get_entry(ff_index i, ff_index j) const override;

@@ -38,6 +38,7 @@ public:
     SkylineMatrix(ff_index n_cols, const SkylinePattern& skyline);
     Vector gemv(const Vector& x) const override;
     inline ff_index nnz() const override { return base_skyline->skyline_rows.back(); } 
+    void operator=(const double& value) override;
     void print_pattern(bool values_flag) const;
     inline bool is_symmetric() const override { return true; }
 

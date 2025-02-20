@@ -47,6 +47,10 @@ void SymCSRMatrix::accumulate_entry(ff_index i, ff_index j, double value)
     throw std::invalid_argument("SymCSRMatrix::accumulate_entry(): entry not found");
 }
 
+void SymCSRMatrix::operator=(const double& value){
+    std::fill(values.begin(), values.end(), value);
+}
+
 Vector SymCSRMatrix::gemv(const Vector& x) const {
 
     if(n_cols != x.size()){

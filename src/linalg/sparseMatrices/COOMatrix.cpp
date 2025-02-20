@@ -27,6 +27,11 @@ const double &COOMatrix::get_entry(ff_index i, ff_index j) const {
     
 }
 
+void COOMatrix::operator=(const double& value){
+
+    std::fill(values.begin(), values.end(), value);
+}
+
 Vector COOMatrix::gemv(const Vector& x) const{
 
     if(n_cols != x.size()){

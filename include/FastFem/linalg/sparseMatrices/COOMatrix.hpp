@@ -21,6 +21,7 @@ public:
     inline ff_index nnz() const override { return row_indices.size(); }
     void set_entry(ff_index i, ff_index j, double value) override;
     inline void accumulate_entry(ff_index i, ff_index j, double value) override { set_entry(i, j, value); }
+    void operator=(const double& value) override;
 
     static COOMatrix random(ff_index n_rows, ff_index n_cols, double sparsity, double min_value = -1.0, double max_value = 1.0, bool upper_triangular = false);
 

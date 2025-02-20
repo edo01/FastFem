@@ -27,6 +27,8 @@ public:
     virtual Vector gemv(const Vector& x) const = 0;
     Vector operator*(const Vector& x) const;
 
+    virtual void operator=(const double& value) = 0;
+
     /**
      * @brief read-only access to the matrix entries with bounds checking
      */
