@@ -5,17 +5,12 @@
 
 #include "FastFem/fe/FESimplexP.hpp"
 #include "FastFem/dof/DofHandler.hpp"
-
 #include "FastFem/linalg/Vector.hpp"
 #include "FastFem/linalg/sparseMatrices/CSRMatrix.hpp"
 #include "FastFem/linalg/MatrixTools.hpp"
-
 #include "FastFem/linalg/iterativeSolvers/CGSolver.hpp"
-
-#include "FastFem/mesh/MeshIO.hpp"
-
 #include "FastFem/types/CommonTypes.hpp"
-
+#include "FastFem/mesh/MeshIO.hpp"
 #include "FastFem/mesh/MeshIO.hpp"
 
 using namespace fastfem;

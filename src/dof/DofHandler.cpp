@@ -21,6 +21,9 @@ template <unsigned int dim, unsigned int spacedim>
 unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
     n_dofs = 0;
     
+    /**
+     * --------------------- VERTEX DOFS ---------------------
+     */
     unsigned int dofs_per_vertex = (*fe).get_n_dofs_per_vertex();
     for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
         mesh::MeshSimplex<dim, spacedim> T = *it;
@@ -34,6 +37,9 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
         }   
     }
     
+    /**
+     * --------------------- EDGE DOFS ---------------------
+     */
     unsigned int dofs_per_edge = (*fe).get_n_dofs_per_edge();
     if(dofs_per_edge > 0){
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
@@ -49,6 +55,9 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
         }
     }
 
+    /**
+     * --------------------- FACE DOFS ---------------------
+     */
     unsigned int dofs_per_face = (*fe).get_n_dofs_per_face();
     if(dofs_per_face > 0){
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
@@ -64,6 +73,9 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
         }
     }
 
+    /**
+     * --------------------- CELL DOFS ---------------------
+     */
     unsigned int dofs_per_cell = (*fe).get_n_dofs_per_cell();
     if(dofs_per_cell>0){
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
