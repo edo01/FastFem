@@ -17,29 +17,73 @@ namespace types{
  * usage of the application.
  */
 #ifdef USE_LONG_INDEX
-typedef unsigned long fastfem_index_t;
+/**
+ * Uniquely identifies a degree of freedom in the mesh
+ */
+typedef unsigned long global_dof_index;
+/**
+ * Uniquely identifies an element in the mesh
+ */
+typedef unsigned long global_element_index;
+/**
+ * Uniquely identifies a vertex in the mesh
+ */
+typedef unsigned long global_vertex_index;
 #else
-typedef unsigned int fastfem_index_t;
+/**
+ * Uniquely identifies a degree of freedom in the mesh
+ */
+typedef unsigned int global_dof_index;
+/**
+ * Uniquely identifies an element in the mesh
+ */
+typedef unsigned int global_element_index;
+/**
+ * Uniquely identifies a vertex in the mesh
+ */
+typedef unsigned int global_vertex_index;
 #endif
     
+/**
+ * Uniquely identifies a degree of freedom on the reference simplex
+ */
+typedef unsigned int local_dof_index;
+/**
+ * Uniquely identifies a vertex on the reference simplex
+ */
+typedef unsigned int local_vertex_index;
 
-typedef fastfem_index_t global_dof_index_t;
-typedef unsigned short local_dof_index_t;
 
 template <unsigned short D>
-using global_simplex_id = std::array<fastfem_index_t, D+1>;
+using global_simplex_id = std::array<global_vertex_index, D+1>;
 
 template <unsigned short D>
-using local_simplex_id = std::array<local_dof_index_t, D+1>;
+using local_simplex_id = std::array<local_vertex_index, D+1>;
 
-typedef global_simplex_id<0> global_vertex_id;
+/**
+ * A couple of ORDERED global_vertex_id that uniquely identifies an edge in the mesh
+ */
 typedef global_simplex_id<1> global_edge_id;
+/**
+ * A triplet of ORDERED global_vertex_id that uniquely identifies a face in the mesh
+ */
 typedef global_simplex_id<2> global_face_id;
+/**
+ * A quadruplet of ORDERED global_vertex_id that uniquely identifies a cell in the mesh
+ */
 typedef global_simplex_id<3> global_cell_id; 
 
-typedef local_simplex_id<0> local_vertex_id;
+/**
+ * A couple of ORDERED local_vertex_id that uniquely identifies an edge in the reference simplex
+ */
 typedef local_simplex_id<1> local_edge_id;
+/**
+ * A triplet of ORDERED local_vertex_id that uniquely identifies a face in the reference simplex
+ */
 typedef local_simplex_id<2> local_face_id;
+/**
+ * A quadruplet of ORDERED local_vertex_id that uniquely identifies a cell in the reference simplex
+ */
 typedef local_simplex_id<3> local_cell_id; 
 
 
@@ -64,12 +108,22 @@ struct LocalArrayHasher {
         return h;
     }
 };
-    
-template <unsigned short D>
-using global_dof_table = std::unordered_map<global_simplex_id<D>, std::vector<global_dof_index_t>, GlobalArrayHasher<D>>;
 
 template <unsigned short D>
-using local_dof_table = std::unordered_map<local_simplex_id<D>, std::vector<local_dof_index_t>, LocalArrayHasher<D>>;
+using global_dof_table = std::unordered_map<global_simplex_id<D>, std::vector<global_dof_index>, GlobalArrayHasher<D>>;
+
+template <unsigned short D>
+using local_dof_table = std::unordered_map<local_simplex_id<D>, std::vector<local_dof_index>, LocalArrayHasher<D>>;
+
+typedef std::unordered_map<global_vertex_index, std::vector<global_dof_index>, std::hash<global_vertex_index>> global_vertex_dof_table;
+typedef global_dof_table<1> global_edge_dof_table;
+typedef global_dof_table<2> global_face_dof_table;
+typedef global_dof_table<3> global_cell_dof_table;
+
+typedef std::unordered_map<local_vertex_index, std::vector<local_dof_index>, std::hash<local_vertex_index>> local_vertex_dof_table;
+typedef local_dof_table<1> local_edge_dof_table;
+typedef local_dof_table<2> local_face_dof_table;
+typedef local_dof_table<3> local_cell_dof_table;
 
 } // namespace types
 } // namespace fastfem
