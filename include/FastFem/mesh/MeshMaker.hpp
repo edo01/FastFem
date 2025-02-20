@@ -43,6 +43,8 @@ public:
     virtual ~SphereSurfaceMaker() = default;
     virtual Mesh<2, 3> make_mesh() const override;
 
+    inline int get_N() const { return N; }
+
 private:
     void sendPointsToSphere(Mesh<2,3> &mesh) const;
 

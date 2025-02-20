@@ -5,9 +5,12 @@
 #include "FastFem/linalg/sparseMatrices/CSRMatrix.hpp"
 #include "FastFem/linalg/Vector.hpp"
 #include "FastFem/dof/DofHandler.hpp"
+#include "FastFem/types/CommonTypes.hpp"
 
 using namespace fastfem::dof;
 using fastfem::types::global_dof_index;
+using fastfem::types::ff_index;
+using fastfem::types::boundary_index;
 
 namespace fastfem{
 namespace linalg{
@@ -18,16 +21,18 @@ class CSRMatrix;
 class FullMatrix
 {
 public:
-    FullMatrix(size_t n_rows, size_t n_cols) : n_rows(n_rows), n_cols(n_cols), data(n_rows * n_cols) {}
-    FullMatrix(size_t dim) : FullMatrix(dim, dim) {}
-    inline const double &operator()(size_t i, size_t j) const { return data[i * n_cols + j]; }
-    inline double &operator()(size_t i, size_t j) { return data[i * n_cols + j]; }
+    FullMatrix(ff_index n_rows, ff_index n_cols) : n_rows(n_rows), n_cols(n_cols), data(n_rows * n_cols) {}
+    FullMatrix(ff_index dim) : FullMatrix(dim, dim) {}
+    inline const double &operator()(ff_index i, ff_index j) const { return data[i * n_cols + j]; }
+    inline double &operator()(ff_index i, ff_index j) { return data[i * n_cols + j]; }
 
     inline void set_to_zero() { std::fill(data.begin(), data.end(), 0.0); }
 
+    inline ff_index get_n_rows() const { return n_rows; }
+    inline ff_index get_n_cols() const { return n_cols; }
 private:
-    size_t n_rows;
-    size_t n_cols;
+    ff_index n_rows;
+    ff_index n_cols;
     std::vector<double> data;
 };
 
@@ -37,10 +42,10 @@ public:
     MatrixTools() = delete;
 
     template <unsigned int dim, unsigned int spacedim>
-    static void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
+    static void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, boundary_index tag);
 
     template <unsigned int dim, unsigned int spacedim>
-    static void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
+    static void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, boundary_index tag);
 
     static void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index>& local_dofs);
 

@@ -4,7 +4,7 @@ namespace fastfem{
 namespace linalg{
 
 template <unsigned int dim, unsigned int spacedim>
-void MatrixTools::apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag)
+void MatrixTools::apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, boundary_index tag)
 {
     if(A.get_n_rows() != A.get_n_cols())
     {
@@ -28,7 +28,7 @@ void MatrixTools::apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, cons
 }
 
 template <unsigned int dim, unsigned int spacedim>
-void MatrixTools::apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag)
+void MatrixTools::apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, boundary_index tag)
 {
     if(A.get_n_rows() != A.get_n_cols())
     {
@@ -81,19 +81,19 @@ void MatrixTools::add_local_vector_to_global(Vector& global_vector, const Vector
 
 // instantiate the templates
 
-template void MatrixTools::apply_homogeneous_dirichlet<1,1>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 1>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<1,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 2>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<1,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 3>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<2,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 2>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<2,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 3>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<3,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<3, 3>& dof_handler, size_t tag);
+template void MatrixTools::apply_homogeneous_dirichlet<1,1>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 1>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<1,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 2>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<1,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<1, 3>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<2,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 2>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<2,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 3>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<3,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<3, 3>& dof_handler, boundary_index tag);
 
-template void MatrixTools::apply_homogeneous_dirichlet<1,1>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 1>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<1,2>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 2>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<1,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 3>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<2,2>(CSRMatrix& A, Vector& rhs, const DoFHandler<2, 2>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<2,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<2, 3>& dof_handler, size_t tag);
-template void MatrixTools::apply_homogeneous_dirichlet<3,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<3, 3>& dof_handler, size_t tag);
+template void MatrixTools::apply_homogeneous_dirichlet<1,1>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 1>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<1,2>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 2>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<1,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 3>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<2,2>(CSRMatrix& A, Vector& rhs, const DoFHandler<2, 2>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<2,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<2, 3>& dof_handler, boundary_index tag);
+template void MatrixTools::apply_homogeneous_dirichlet<3,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<3, 3>& dof_handler, boundary_index tag);
 
 } // namespace linalg
 } // namespace FastFem

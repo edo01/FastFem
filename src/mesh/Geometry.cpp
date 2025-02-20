@@ -119,9 +119,9 @@ int Simplex<dim, spacedim>::n_edges() const { return num_edges; }
 
 // Explicit instantiation
 
-template class Point<1>;
-template class Point<2>;
-template class Point<3>;
+template struct Point<1>;
+template struct Point<2>;
+template struct Point<3>;
 
 template class Simplex<0, 1>;
 template class Simplex<1, 1>;
