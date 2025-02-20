@@ -52,8 +52,6 @@ Vector SkylineMatrix::gemv(const Vector& x) const
 
     for (size_t i = 0; i < n_rows; ++i)
     {
-        //row_start = skyline->at(i);
-        //row_end = skyline->at(i + 1);
         row_start = base_skyline->skyline_rows[i];
         row_end = base_skyline->skyline_rows[i + 1];
         row_length = row_end - row_start;
@@ -78,15 +76,6 @@ Vector SkylineMatrix::gemv(const Vector& x) const
     return y;
 }
 
-//TO BE CANCELLED
-void SkylineMatrix::set_values(const std::vector<double>& values)
-{
-    if (values.size() != this->values.size()) {
-        throw std::invalid_argument("SkylineMatrix::set_values(): incompatible dimensions");
-    }
-    this->values = values;
-}
-
 void SkylineMatrix::set_row_col_to_zero(size_t i)
 {
     size_t row_start = (base_skyline->skyline_rows)[i];
@@ -108,7 +97,7 @@ void SkylineMatrix::set_row_col_to_zero(size_t i)
 
 }
 
-void SkylineMatrix::print_pattern() const
+void SkylineMatrix::print_pattern(bool values_flag) const
 {
     for (size_t i = 0; i < n_rows; ++i)
     {
@@ -138,11 +127,14 @@ void SkylineMatrix::print_pattern() const
         std::cout << this->base_skyline->skyline_rows[i] << " ";
     }
     std::cout << std::endl;
-    std::cout << "Values: ";
-    for(size_t i=0; i<this->values.size(); i++){
-        std::cout << this->values[i] << " ";
-    }
+
+    if(values_flag){
+        std::cout << "Values: ";
+        for(size_t i=0; i<this->values.size(); i++){
+            std::cout << this->values[i] << " ";
+        }
     std::cout << std::endl;
+    }
 }
 
 /**
@@ -276,6 +268,10 @@ void SkylineMatrix::set_entry_to_zero(size_t i, size_t j)
 
     values[index] = 0.0;
 }
+
+/*
+ * SkylinePattern
+ */
 
 
 template <unsigned int dim, unsigned int spacedim>

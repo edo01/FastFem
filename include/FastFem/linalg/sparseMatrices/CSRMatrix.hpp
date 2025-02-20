@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <map>
 
 namespace fastfem{
 namespace linalg{
@@ -16,15 +17,20 @@ struct CSRPattern
     std::vector<size_t> col_indices;
 
 private:
-    //CSRPattern(std::initializer_list<size_t> row_ptr, std::initializer_list<size_t> col_indices);
     CSRPattern(const std::vector<size_t>& row_ptr, const std::vector<size_t>& col_indices);
 
 public:
     friend class COOMatrix;
 
+    /**
+     * @brief Static factory method to create a CSR pattern from a DoFHandler
+     */
     template <unsigned int dim, unsigned int spacedim>
     static CSRPattern create_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler);
 
+    /**
+     * @brief Static factory method to create a symmetric CSR pattern, storing only the upper triangular part, from a DoFHandler
+     */
     template <unsigned int dim, unsigned int spacedim>
     static CSRPattern create_symmetric_from_dof_handler(const fastfem::dof::DoFHandler<dim, spacedim>& dof_handler);
 };
@@ -37,18 +43,25 @@ protected:
 
 public:
     CSRMatrix(size_t n_cols, const CSRPattern& pattern);
-
     CSRMatrix(const CSRMatrix& A);
 
     Vector gemv(const Vector& x) const override;
+
     void set_entry(size_t i, size_t j, double value) override;
     void accumulate_entry(size_t i, size_t j, double value) override;
 
     inline size_t nnz() const override { return base_pattern->col_indices.size(); }
+    // inline std::vector<double>& get_values() { return values; }
+    // inline std::vector<size_t>& get_col_indices() { return base_pattern->col_indices; }
 
     void print_pattern() const;
-
     void set_row_col_to_zero(size_t i) override;
+
+    /**
+     * @brief Optimized overloaded method to set a row and a column to zero,
+     * exploiting an ordered map that stores the column indices for each row and improves the setting of the column to zero.
+     */
+    //void set_row_col_to_zero(size_t i, std::map<size_t, std::vector<unsigned int>>& col_to_values);
 private:
     const double &get_entry(size_t i, size_t j) const override;
 

@@ -16,6 +16,9 @@ using namespace fastfem::fe;
 using namespace fastfem::dof;
 using namespace fastfem::types;
 
+/**
+ * @brief This test verifies the correct implementation of the IO of both the mesh and the solution 
+ */
 int main(int argc, char** argv)
 {
     if (argc < 2) {

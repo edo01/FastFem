@@ -49,6 +49,13 @@ template <unsigned int dim, unsigned int spacedim>
 Point<spacedim> Simplex<dim, spacedim>::get_centroid() const
 {
     Point<spacedim> centroid;
+    
+    //add a constructor to Point class or make coords a std::array
+    for(size_t i=0; i<spacedim; ++i)
+    {
+        centroid.coords[i] = 0;
+    }
+
     for (size_t i = 0; i < dim + 1; ++i)
     {
         for (size_t j = 0; j < spacedim; ++j)

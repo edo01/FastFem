@@ -6,11 +6,13 @@
 namespace fastfem{
 namespace linalg{
 
+/**
+ * @brief Symmetric CSR matrix exploting a symmetric CSRPattern and storing only the upper triangular part
+ */
 class SymCSRMatrix : public CSRMatrix
 {
 public:
     SymCSRMatrix(size_t n_cols, const CSRPattern& pattern);
-
     SymCSRMatrix(const CSRMatrix& A) : CSRMatrix(A) {}
 
     Vector gemv(const Vector& x) const override;
