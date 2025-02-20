@@ -7,10 +7,10 @@
 #include "FastFem/dof/DofHandler.hpp"
 #include "FastFem/types/CommonTypes.hpp"
 
-using namespace fastfem::dof;
 using fastfem::types::global_dof_index;
 using fastfem::types::ff_index;
 using fastfem::types::boundary_index;
+
 
 namespace fastfem{
 namespace linalg{
@@ -42,14 +42,22 @@ public:
     MatrixTools() = delete;
 
     template <unsigned int dim, unsigned int spacedim>
-    static void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, boundary_index tag);
+    static void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const dof::DoFHandler<dim, spacedim> & dof_handler, boundary_index tag);
 
     template <unsigned int dim, unsigned int spacedim>
-    static void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, boundary_index tag);
+    static void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const dof::DoFHandler<dim, spacedim> & dof_handler, boundary_index tag);
 
     static void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index>& local_dofs);
 
     static void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index>& local_dofs);
+
+    static void interpolate(Vector& f_interpolated, const dof::DoFHandler<1, 1>& dof_handler, const std::function<double(double)>& f);
+
+    template <unsigned int dim>
+    static void interpolate(Vector& f_interpolated, const dof::DoFHandler<dim, 2>& dof_handler, const std::function<double(double, double)>& f);
+    
+    template <unsigned int dim>
+    static void interpolate(Vector& f_interpolated, const dof::DoFHandler<dim, 3>& dof_handler, const std::function<double(double, double, double)>& f);
 };
 
 } // namespace linalg

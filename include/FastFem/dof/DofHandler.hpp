@@ -127,6 +127,9 @@ public:
 
     inline void attach_mesh(mesh::Mesh<dim, spacedim> &mesh) { this->mesh = std::make_shared<mesh::Mesh<dim, spacedim>>(mesh); }
 
+    inline const mesh::Mesh<dim, spacedim> &get_mesh() const { return *mesh; }
+    inline const fe::FESimplexP<dim, spacedim> &get_fe() const { return *fe; }
+
     /**
      * This function is used to output the solution by DataIO. When we output the solution, 
      * we only output the values of the DoFs on the vertices of the mesh.
@@ -135,8 +138,7 @@ public:
 
 private:
     std::shared_ptr<mesh::Mesh<dim, spacedim>> mesh;
-    std::shared_ptr<fe::FESimplexP<dim, spacedim>> fe;
-
+    std::shared_ptr<fe::FESimplexP<dim, spacedim>> fe;    
     fastfem::types::global_vertex_dof_table vertex_dofs;
     fastfem::types::global_edge_dof_table edge_dofs;
     fastfem::types::global_face_dof_table face_dofs;
