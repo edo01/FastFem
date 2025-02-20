@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
     }
 
     unsigned int N = std::atoi(argv[1]);
-    unsigned int dim = 2;
 
     mesh::SquareMaker mesh_maker(N);
     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
 
-    auto f_constant = [](double x, double y) { return 1; };
+    //auto f_constant = [](double /*x*/, double /*y*/) { return 1; };
     auto f = [](double x, double y) { return 4 - 2 * (x * x + y * y); };
 
     linalg::Vector rhs(n_dofs);

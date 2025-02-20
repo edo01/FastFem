@@ -10,13 +10,15 @@
 namespace fastfem{
 namespace linalg{
 
+using types::ff_index;
+
 struct SkylinePattern
 {
-    std::vector<size_t> skyline_rows;
+    std::vector<ff_index> skyline_rows;
 
 // private:
 public:
-    SkylinePattern(const std::vector<size_t>& skyline) : skyline_rows(skyline) {}
+    SkylinePattern(const std::vector<ff_index>& skyline) : skyline_rows(skyline) {}
 
 public:
     template <unsigned int dim, unsigned int spacedim>
@@ -32,9 +34,9 @@ protected:
     std::shared_ptr<SkylinePattern> base_skyline;
 
 public:
-    SkylineMatrix(size_t n_cols, const SkylinePattern& skyline);
+    SkylineMatrix(ff_index n_cols, const SkylinePattern& skyline);
     Vector gemv(const Vector& x) const override;
-    inline size_t nnz() const override { return base_skyline->skyline_rows.back(); } 
+    inline ff_index nnz() const override { return base_skyline->skyline_rows.back(); } 
     void print_pattern(bool values_flag) const;
     inline bool is_symmetric() const override { return true; }
 
@@ -49,14 +51,14 @@ public:
      * */
     Vector cholesky_solve(const Vector& b) const;
 
-    void set_entry(size_t i, size_t j, double value) override;
-    void accumulate_entry(size_t i, size_t j, double value) override;
-    void set_entry_to_zero(size_t i, size_t j);
+    void set_entry(ff_index i, ff_index j, double value) override;
+    void accumulate_entry(ff_index i, ff_index j, double value) override;
+    void set_entry_to_zero(ff_index i, ff_index j);
 
-    void set_row_col_to_zero(size_t i) override;
+    void set_row_col_to_zero(ff_index i) override;
 
 private:
-    const double &get_entry(size_t i, size_t j) const override;
+    const double &get_entry(ff_index i, ff_index j) const override;
 };
 
 

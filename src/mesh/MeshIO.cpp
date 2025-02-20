@@ -7,6 +7,9 @@ namespace mesh{
 using namespace fastfem::dof;
 using namespace fastfem::linalg;
 
+using local_vertex_index   = fastfem::types::local_vertex_index;
+using global_vertex_index  = fastfem::types::global_vertex_index;
+
 template<unsigned int dim, unsigned int spacedim>
 void MeshIO<dim,spacedim>::save_vtu(const std::string &filename) const{
     std::ofstream file;
@@ -17,10 +20,10 @@ void MeshIO<dim,spacedim>::save_vtu(const std::string &filename) const{
     file << "<Points>\n";
     file << "<DataArray type=\"Float64\" NumberOfComponents=\"" << 3 << "\" format=\"ascii\">\n"; 
     for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
-        for(unsigned int i = 0; i < spacedim; i++)
+        for(local_vertex_index i = 0; i < spacedim; i++)
             file << v->point.coords[i] << " ";
         if (spacedim < 3) {
-            for(unsigned int i = spacedim; i < 3; i++)
+            for(local_vertex_index i = spacedim; i < 3; i++)
                 file << "0 ";
         }
         file << "\n";
@@ -30,16 +33,16 @@ void MeshIO<dim,spacedim>::save_vtu(const std::string &filename) const{
     file << "<Cells>\n";
     file << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
     for (auto e = mesh.elem_begin(); e != mesh.elem_end(); ++e) {
-        for (int i = 0; i < e->vertex_count(); ++i) {
+        for (local_vertex_index i = 0; i < e->vertex_count(); ++i) {
             file << e->get_vertex(i) << " ";
         }
         file << "\n";
     }
     file << "</DataArray>\n";
     file << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    size_t offset = 0;
+    global_vertex_index offset = 0;
     for (auto e = mesh.elem_begin(); e != mesh.elem_end(); ++e) {
-        offset += e->vertex_count();
+        offset += (global_vertex_index) e->vertex_count();
         file << offset << "\n";
     }
     file << "</DataArray>\n";
@@ -64,13 +67,13 @@ void MeshIO<dim,spacedim>::save_msh(const std::string &filename) const{
     file << "$EndMeshFormat\n";
     file << "$Nodes\n";
     file << mesh.vtx_count() << "\n";
-    int id = 0;
+    global_vertex_index id = 0;
     for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
         file << id++ << " ";
-        for(unsigned int i = 0; i < spacedim; i++)
+        for(local_vertex_index i = 0; i < spacedim; i++)
             file << v->point.coords[i] << " ";
         if (spacedim < 3) {
-            for(unsigned int i = spacedim; i < 3; i++)
+            for(local_vertex_index i = spacedim; i < 3; i++)
                 file << "0 ";
         }
         file << "\n";
@@ -84,7 +87,7 @@ void MeshIO<dim,spacedim>::save_msh(const std::string &filename) const{
         file << "2 "; // 2 corresponds to VTK_TRIANGLE in Gmsh file format
         file << "3 "; // 3 corresponds to number of tags
         file << "1 1 1 "; // tags
-        for (int i = 0; i < e->vertex_count(); ++i) {
+        for (global_vertex_index i = 0; i < e->vertex_count(); ++i) {
             file << e->get_vertex(i) << " ";
         }
         file << "\n";
@@ -111,10 +114,10 @@ void DataIO<dim,spacedim>::save_vtx(const std::string &filename) const{
     file << "POINTS " << mesh.vtx_count() << " double\n";
 
     for (auto v = mesh.vtx_begin(); v != mesh.vtx_end(); ++v) {
-        for(unsigned int i = 0; i < spacedim; i++)
+        for(local_vertex_index i = 0; i < spacedim; i++)
             file << v->point.coords[i] << " ";
         if (spacedim < 3) {
-            for(unsigned int i = spacedim; i < 3; i++)
+            for(local_vertex_index i = spacedim; i < 3; i++)
                 file << "0 ";
         }
         file << "\n";
@@ -125,7 +128,7 @@ void DataIO<dim,spacedim>::save_vtx(const std::string &filename) const{
 
     for (auto e = mesh.elem_begin(); e != mesh.elem_end(); ++e) {
         file << e->vertex_count() << "\t";
-        for (int i = 0; i < e->vertex_count(); ++i) {
+        for (global_vertex_index i = 0; i < e->vertex_count(); ++i) {
             file << e->get_vertex(i) << "\t";
         }
         file << "\n";
@@ -145,9 +148,9 @@ void DataIO<dim,spacedim>::save_vtx(const std::string &filename) const{
     file << "SCALARS solution double 1\n";
     file << "LOOKUP_TABLE default\n";
     
-    for(unsigned int i = 0; i < mesh.vtx_count(); i++){
+    for(global_vertex_index i = 0; i < mesh.vtx_count(); i++){
         // make the global index of the DoF
-        fastfem::types::global_dof_index_t dof = dof_handler.get_dof_on_vertex({i})[0];
+        fastfem::types::global_dof_index dof = dof_handler.get_dof_on_vertex(i)[0];
         file << solution[dof] << " ";
     }
 }

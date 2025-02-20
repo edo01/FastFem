@@ -15,10 +15,6 @@ FESimplexP3(const unsigned int n_components) : FESimplexP<1, 1>(n_components) {
 
     if (n_components != 1) throw std::runtime_error("FESimplexP3 only supports scalar fields");
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
-
     // compute the number of degrees of freedom
     this->n_dofs_per_element = 10 * n_components;
     this->n_dofs_per_vertex = n_components;
@@ -59,10 +55,6 @@ FESimplexP3<1, 2>::
 FESimplexP3(const unsigned int n_components) : FESimplexP<1, 2>(n_components) {
 
     if (n_components != 1) throw std::runtime_error("FESimplexP3 only supports scalar fields");
-
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
 
     // compute the number of degrees of freedom
     this->n_dofs_per_element = 10 * n_components;
@@ -105,10 +97,6 @@ FESimplexP3(const unsigned int n_components) : FESimplexP<1, 3>(n_components) {
 
     if (n_components != 1) throw std::runtime_error("FESimplexP3 only supports scalar fields");
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
-
     // compute the number of degrees of freedom
     this->n_dofs_per_element = 10 * n_components;
     this->n_dofs_per_vertex = n_components;
@@ -149,10 +137,6 @@ FESimplexP3<2, 2>::
 FESimplexP3(const unsigned int n_components) : FESimplexP<2, 2>(n_components) {
 
     if (n_components != 1) throw std::runtime_error("FESimplexP3 only supports scalar fields");
-
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
 
     // compute the number of degrees of freedom
     this->n_dofs_per_element = 10 * n_components;
@@ -225,10 +209,6 @@ FESimplexP3<2, 3>::
 FESimplexP3(const unsigned int n_components) : FESimplexP<2, 3>(n_components) {
 
     if (n_components != 1) throw std::runtime_error("FESimplexP3 only supports scalar fields");
-
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
-    using local_edge_id = fastfem::types::local_edge_id;
 
     // compute the number of degrees of freedom
     this->n_dofs_per_element = 10 * n_components;

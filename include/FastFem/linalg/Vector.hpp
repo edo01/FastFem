@@ -7,8 +7,12 @@
 #include <initializer_list>
 #include <algorithm>
 
+#include "FastFem/types/CommonTypes.hpp"
+
 namespace fastfem{
 namespace linalg{
+
+using types::ff_index;
 
 class Vector {
 private:
@@ -17,13 +21,13 @@ private:
 public:
     // Constructors
     Vector() = default;
-    explicit Vector(std::size_t size, double value = 0.0) : data(size, value) {}
+    explicit Vector(ff_index size, double value = 0.0) : data(size, value) {}
     Vector(std::initializer_list<double> list) : data(list) {}
     
     // Utils
-    inline std::size_t size() const { return data.size(); }
-    inline double& operator[](std::size_t index) { return data[index]; }
-    inline const double& operator[](std::size_t index) const { return data[index]; }
+    inline ff_index size() const { return data.size(); }
+    inline double& operator[](ff_index index) { return data[index]; }
+    inline const double& operator[](ff_index index) const { return data[index]; }
     inline void fill(double value) { std::fill(data.begin(), data.end(), value); }
     inline double max() const { return *std::max_element(data.begin(), data.end()); }
 

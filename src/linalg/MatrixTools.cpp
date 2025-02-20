@@ -19,7 +19,7 @@ void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<
 
     for(auto it = dof_handler.boundary_dofs_begin(tag); it != dof_handler.boundary_dofs_end(tag); ++it)
     {
-        global_dof_index_t dof = *it;
+        global_dof_index dof = *it;
         A.set_row_col_to_zero(dof);
         rhs[dof] = 0.0;
 
@@ -43,7 +43,7 @@ void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<
 
 //     std::cout << "Applying homogeneous Dirichlet boundary conditions with std::map" << std::endl;
 
-//     std::map<global_dof_index_t, std::vector<unsigned int>> col_to_values;
+//     std::map<global_dof_index, std::vector<unsigned int>> col_to_values;
 //     std::vector<double> &values = A.get_values();
 //     std::vector<size_t> &col_indices = A.get_col_indices();
 
@@ -54,7 +54,7 @@ void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<
 
 //     for(auto it = dof_handler.boundary_dofs_begin(tag); it != dof_handler.boundary_dofs_end(tag); ++it)
 //     {
-//         global_dof_index_t dof = *it;
+//         global_dof_index dof = *it;
 //         A.set_row_col_to_zero(dof, col_to_values);
 //         rhs[dof] = 0.0;
 
@@ -63,7 +63,7 @@ void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<
 //     }
 // }
 
-void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs)
+void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index>& local_dofs)
 {
     for(size_t i = 0; i < local_dofs.size(); ++i)
     {
@@ -74,7 +74,7 @@ void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix,
     }
 }
 
-void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index_t>& local_dofs)
+void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index>& local_dofs)
 {
     for(size_t i = 0; i < local_dofs.size(); ++i)
     {

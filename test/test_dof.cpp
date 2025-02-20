@@ -93,21 +93,21 @@ int main(int argc, char** argv)
 
 
     // print all elements
-    for(int i=0; i<mesh3.elem_count(); ++i){
+    for(fastfem::types::global_element_index i=0; i< mesh3.elem_count(); ++i){
         MeshSimplex<2, 2> T = mesh3.get_mesh_element(i);
         std::cout << "Element " << i << ": ";
-        for(int j=0; j<T.vertex_count(); ++j){
+        for(fastfem::types::global_vertex_index j=0; j<T.vertex_count(); ++j){
             std::cout << T.get_vertex(j) << " ";
         }
         std::cout << std::endl;
     }
 
     // print the DoFs on all elements
-    for(int i=0; i<mesh3.elem_count(); ++i){
+    for(fastfem::types::global_element_index i=0; i<mesh3.elem_count(); ++i){
         MeshSimplex<2, 2> T = mesh3.get_mesh_element(i);
-        std::vector<fastfem::types::global_dof_index_t> ordered_dofs = dof_handler4.get_unordered_dofs_on_element(T);
+        std::vector<fastfem::types::global_dof_index> ordered_dofs = dof_handler4.get_unordered_dofs_on_element(T);
         std::cout << "DoFs on element " << i << ": ";
-        for(int j=0; j<ordered_dofs.size(); ++j){
+        for(size_t j=0; j<ordered_dofs.size(); ++j){
             std::cout << ordered_dofs[j] << " ";
         }
         std::cout << std::endl;
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
     // print the DoFs on the boundary
     for(auto it= dof_handler4.boundary_dofs_begin(0); it != dof_handler4.boundary_dofs_end(0); ++it){
 
-        fastfem::types::global_dof_index_t dofs = *it;
+        fastfem::types::global_dof_index dofs = *it;
         std::cout << "Boundary elements: " << dofs << std::endl;
         n_dofs_boundary ++;
     }

@@ -11,8 +11,8 @@ template<>
 FESimplexP1<1, 1>::
 FESimplexP1(const unsigned int n_components) : FESimplexP<1, 1>(n_components) {
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
+    using local_dof_index = fastfem::types::local_dof_index;
+    using local_vertex_index = fastfem::types::local_vertex_index;
 
     this->n_dofs_per_element = 2*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -29,12 +29,12 @@ FESimplexP1(const unsigned int n_components) : FESimplexP<1, 1>(n_components) {
      */
 
     // fill the vertex dofs (no dof on edges, faces or cells)
-    for(int v=0; v<2; ++v){
-        std::vector<local_dof_index_t> vertex_dofs_on_vertex(n_components);
-        for(int j=0; j<n_components; ++j){
-            vertex_dofs_on_vertex[j] = j*2 + v;
+    for(local_vertex_index v=0; v<2; ++v){
+        std::vector<local_dof_index> vertex_dofs_on_vertex(n_components);
+        for(unsigned int j=0; j<n_components; ++j){
+            vertex_dofs_on_vertex[j] = (local_dof_index) (j*2 + v);
         }
-        this->vertex_dofs[(local_vertex_id){v}] = vertex_dofs_on_vertex;
+        this->vertex_dofs[v] = vertex_dofs_on_vertex;
     }
 
     // set the reference simplex
@@ -54,8 +54,8 @@ template<>
 FESimplexP1<1, 2>::
 FESimplexP1(const unsigned int n_components) : FESimplexP<1, 2>(n_components) {
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
+    using local_dof_index = fastfem::types::local_dof_index;
+    using local_vertex_index = fastfem::types::local_vertex_index;
 
     this->n_dofs_per_element = 2*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -72,12 +72,12 @@ FESimplexP1(const unsigned int n_components) : FESimplexP<1, 2>(n_components) {
      */
 
     // fill the vertex dofs (no dof on edges, faces or cells)
-    for(int v=0; v<2; ++v){
-        std::vector<local_dof_index_t> vertex_dofs_on_vertex(n_components);
-        for(int j=0; j<n_components; ++j){
-            vertex_dofs_on_vertex[j] = j*2 + v;
+    for(local_vertex_index v=0; v<2; ++v){
+        std::vector<local_dof_index> vertex_dofs_on_vertex(n_components);
+        for(unsigned int j=0; j<n_components; ++j){
+            vertex_dofs_on_vertex[j] = (local_dof_index)j*2 + v;
         }
-        this->vertex_dofs[(local_vertex_id){v}] = vertex_dofs_on_vertex;
+        this->vertex_dofs[(local_vertex_index){v}] = vertex_dofs_on_vertex;
     }
 
     // set the reference simplex
@@ -98,8 +98,8 @@ template<>
 FESimplexP1<1, 3>::
 FESimplexP1(const unsigned int n_components) : FESimplexP<1, 3>(n_components) {
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
+    using local_dof_index = fastfem::types::local_dof_index;
+    using local_vertex_index = fastfem::types::local_vertex_index;
 
     this->n_dofs_per_element = 2*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -116,12 +116,12 @@ FESimplexP1(const unsigned int n_components) : FESimplexP<1, 3>(n_components) {
      */
 
     // fill the vertex dofs (no dof on edges, faces or cells)
-    for(int v=0; v<2; ++v){
-        std::vector<local_dof_index_t> vertex_dofs_on_vertex(n_components);
-        for(int j=0; j<n_components; ++j){
+    for(local_vertex_index v=0; v<2; ++v){
+        std::vector<local_dof_index> vertex_dofs_on_vertex(n_components);
+        for(unsigned int j=0; j<n_components; ++j){
             vertex_dofs_on_vertex[j] = j*2 + v;
         }
-        this->vertex_dofs[(local_vertex_id){v}] = vertex_dofs_on_vertex;
+        this->vertex_dofs[(local_vertex_index){v}] = vertex_dofs_on_vertex;
     }
 
     // set the reference simplex
@@ -141,8 +141,8 @@ template<>
 FESimplexP1<2, 2>::
 FESimplexP1(const unsigned int n_components) : FESimplexP<2, 2>(n_components) {
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
+    using local_dof_index = fastfem::types::local_dof_index;
+    using local_vertex_index = fastfem::types::local_vertex_index;
 
     this->n_dofs_per_element = 3*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -162,12 +162,12 @@ FESimplexP1(const unsigned int n_components) : FESimplexP<2, 2>(n_components) {
      */
 
     // fill the vertex dofs (no dof on edges, faces or cells)
-    for(int v=0; v<3; ++v){
-        std::vector<local_dof_index_t> vertex_dofs_on_vertex(n_components);
-        for(int j=0; j<n_components; ++j){
+    for(local_vertex_index v=0; v<3; ++v){
+        std::vector<local_dof_index> vertex_dofs_on_vertex(n_components);
+        for(unsigned int j=0; j<n_components; ++j){
             vertex_dofs_on_vertex[j] = j*3 + v;
         }
-        this->vertex_dofs[(local_vertex_id){v}] = vertex_dofs_on_vertex;
+        this->vertex_dofs[(local_vertex_index){v}] = vertex_dofs_on_vertex;
     }
 
     // set the reference simplex
@@ -189,8 +189,8 @@ template<>
 FESimplexP1<2, 3>::
 FESimplexP1(const unsigned int n_components) : FESimplexP<2, 3>(n_components) {
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
+    using local_dof_index = fastfem::types::local_dof_index;
+    using local_vertex_index = fastfem::types::local_vertex_index;
 
     this->n_dofs_per_element = 3*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -210,12 +210,12 @@ FESimplexP1(const unsigned int n_components) : FESimplexP<2, 3>(n_components) {
      */
 
     // fill the vertex dofs (no dof on edges, faces or cells)
-    for(int v=0; v<3; ++v){
-        std::vector<local_dof_index_t> vertex_dofs_on_vertex(n_components);
-        for(int j=0; j<n_components; ++j){
+    for(local_vertex_index v=0; v<3; ++v){
+        std::vector<local_dof_index> vertex_dofs_on_vertex(n_components);
+        for(unsigned int j=0; j<n_components; ++j){
             vertex_dofs_on_vertex[j] = j*3 + v;
         }
-        this->vertex_dofs[(local_vertex_id){v}] = vertex_dofs_on_vertex;
+        this->vertex_dofs[(local_vertex_index){v}] = vertex_dofs_on_vertex;
     }
 
     // set the reference simplex
@@ -237,8 +237,8 @@ template<>
 FESimplexP1<3, 3>::
 FESimplexP1(const unsigned int n_components) : FESimplexP<3, 3>(n_components) {
 
-    using local_dof_index_t = fastfem::types::local_dof_index_t;
-    using local_vertex_id = fastfem::types::local_vertex_id;
+    using local_dof_index = fastfem::types::local_dof_index;
+    using local_vertex_index = fastfem::types::local_vertex_index;
 
     this->n_dofs_per_element = 4*n_components;
     this->n_dofs_per_vertex = n_components;
@@ -259,12 +259,12 @@ FESimplexP1(const unsigned int n_components) : FESimplexP<3, 3>(n_components) {
      */
 
     // fill the vertex dofs (no dof on edges, faces or cells)
-    for(int v=0; v<4; ++v){
-        std::vector<local_dof_index_t> vertex_dofs_on_vertex(n_components);
-        for(int j=0; j<n_components; ++j){
+    for(local_vertex_index v=0; v<4; ++v){
+        std::vector<local_dof_index> vertex_dofs_on_vertex(n_components);
+        for(unsigned int j=0; j<n_components; ++j){
             vertex_dofs_on_vertex[j] = j*4 + v;
         }
-        this->vertex_dofs[(local_vertex_id){v}] = vertex_dofs_on_vertex;
+        this->vertex_dofs[(local_vertex_index){v}] = vertex_dofs_on_vertex;
     }
 
     // set the reference simplex

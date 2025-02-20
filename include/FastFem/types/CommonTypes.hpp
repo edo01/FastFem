@@ -29,6 +29,10 @@ typedef unsigned long global_element_index;
  * Uniquely identifies a vertex in the mesh
  */
 typedef unsigned long global_vertex_index;
+/**
+ * index used in linear algebra structures
+ */
+typedef unsigned long ff_index;
 #else
 /**
  * Uniquely identifies a degree of freedom in the mesh
@@ -42,54 +46,62 @@ typedef unsigned int global_element_index;
  * Uniquely identifies a vertex in the mesh
  */
 typedef unsigned int global_vertex_index;
+/**
+ * index used in linear algebra structures
+ */
+typedef unsigned int ff_index;
 #endif
     
 /**
- * Uniquely identifies a degree of freedom on the reference simplex
+ * Uniquely identifies a degree of freedom on the simplex
  */
 typedef unsigned int local_dof_index;
 /**
- * Uniquely identifies a vertex on the reference simplex
+ * Uniquely identifies a vertex on the simplex
  */
 typedef unsigned int local_vertex_index;
+/**
+ * Uniquely identifies a boundary on the mesh
+ */
+typedef unsigned int boundary_index;
 
 
 template <unsigned short D>
-using global_simplex_id = std::array<global_vertex_index, D+1>;
+using global_simplex_index = std::array<global_vertex_index, D+1>;
 
 template <unsigned short D>
-using local_simplex_id = std::array<local_vertex_index, D+1>;
+using local_simplex_index = std::array<local_vertex_index, D+1>;
 
 /**
  * A couple of ORDERED global_vertex_id that uniquely identifies an edge in the mesh
  */
-typedef global_simplex_id<1> global_edge_id;
+typedef global_simplex_index<1> global_edge_index;
 /**
  * A triplet of ORDERED global_vertex_id that uniquely identifies a face in the mesh
  */
-typedef global_simplex_id<2> global_face_id;
+typedef global_simplex_index<2> global_face_index;
 /**
  * A quadruplet of ORDERED global_vertex_id that uniquely identifies a cell in the mesh
  */
-typedef global_simplex_id<3> global_cell_id; 
+typedef global_simplex_index<3> global_cell_index; 
 
 /**
- * A couple of ORDERED local_vertex_id that uniquely identifies an edge in the reference simplex
+ * A couple of ORDERED local_vertex_id that uniquely identifies an edge in the simplex
  */
-typedef local_simplex_id<1> local_edge_id;
+typedef local_simplex_index<1> local_edge_index;
 /**
- * A triplet of ORDERED local_vertex_id that uniquely identifies a face in the reference simplex
+ * A triplet of ORDERED local_vertex_id that uniquely identifies a face in the simplex
  */
-typedef local_simplex_id<2> local_face_id;
+typedef local_simplex_index<2> local_face_index;
 /**
- * A quadruplet of ORDERED local_vertex_id that uniquely identifies a cell in the reference simplex
+ * A quadruplet of ORDERED local_vertex_id that uniquely identifies a cell in the simplex
  */
-typedef local_simplex_id<3> local_cell_id; 
+typedef local_simplex_index<3> local_cell_index; 
 
 
 template <unsigned short D>
 struct GlobalArrayHasher {
-    std::size_t operator()(const global_simplex_id<D>& arr) const {
+    std::size_t operator()(const global_simplex_index<D>& arr) const {
         std::size_t h = 0;
         for (const auto& elem : arr) {
             h ^= std::hash<std::size_t>()(elem) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
@@ -100,7 +112,7 @@ struct GlobalArrayHasher {
 
 template <unsigned short D>
 struct LocalArrayHasher {
-    std::size_t operator()(const local_simplex_id<D>& arr) const {
+    std::size_t operator()(const local_simplex_index<D>& arr) const {
         std::size_t h = 0;
         for (const auto& elem : arr) {
             h ^= std::hash<std::size_t>()(elem) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
@@ -110,10 +122,10 @@ struct LocalArrayHasher {
 };
 
 template <unsigned short D>
-using global_dof_table = std::unordered_map<global_simplex_id<D>, std::vector<global_dof_index>, GlobalArrayHasher<D>>;
+using global_dof_table = std::unordered_map<global_simplex_index<D>, std::vector<global_dof_index>, GlobalArrayHasher<D>>;
 
 template <unsigned short D>
-using local_dof_table = std::unordered_map<local_simplex_id<D>, std::vector<local_dof_index>, LocalArrayHasher<D>>;
+using local_dof_table = std::unordered_map<local_simplex_index<D>, std::vector<local_dof_index>, LocalArrayHasher<D>>;
 
 typedef std::unordered_map<global_vertex_index, std::vector<global_dof_index>, std::hash<global_vertex_index>> global_vertex_dof_table;
 typedef global_dof_table<1> global_edge_dof_table;

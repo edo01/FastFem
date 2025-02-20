@@ -3,6 +3,8 @@
 namespace fastfem{
 namespace linalg{
 
+using types::ff_index;
+
 SkylineMatrix::SkylineMatrix(size_t n_cols, const SkylinePattern& skyline) :
   SparseMatrix(skyline.skyline_rows.size() - 1, n_cols),
     values(skyline.skyline_rows.back()),
@@ -81,15 +83,21 @@ void SkylineMatrix::set_row_col_to_zero(size_t i)
     size_t row_start = (base_skyline->skyline_rows)[i];
     size_t row_end = (base_skyline->skyline_rows)[i + 1];
 
+#ifdef HAVE_OPENMP
     #pragma omp parallel
+#endif
     {
+#ifdef HAVE_OPENMP
         #pragma omp for
+#endif
         for (size_t k = row_start; k < row_end; ++k)
         {
             values[k] = 0.0;
         }
 
+#ifdef HAVE_OPENMP
         #pragma omp for
+#endif
         for(size_t j = 0; j < n_rows; ++j){
             set_entry_to_zero(i, j);
         }
@@ -283,8 +291,8 @@ SkylinePattern SkylinePattern::create_from_dof_handler(const fastfem::dof::DoFHa
         const auto& elem = *it;
 
         const auto& dofs = dof_handler.get_ordered_dofs_on_element(elem);
-        for(int j = 0; j < dofs.size(); ++j){
-            for(int k = j; k < dofs.size(); ++k){
+        for(ff_index j = 0; j < dofs.size(); ++j){
+            for(ff_index k = j; k < dofs.size(); ++k){
                 dofs[j] > dofs[k] ? dof_interactions[dofs[j]].insert(dofs[k]) : dof_interactions[dofs[k]].insert(dofs[j]); 
             }
         }

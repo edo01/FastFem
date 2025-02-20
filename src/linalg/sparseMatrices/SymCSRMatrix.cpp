@@ -4,19 +4,21 @@
 namespace fastfem{
 namespace linalg{
 
-SymCSRMatrix::SymCSRMatrix(size_t n_cols, const CSRPattern& pattern) :
+using types::ff_index;
+
+SymCSRMatrix::SymCSRMatrix(ff_index n_cols, const CSRPattern& pattern) :
   CSRMatrix(n_cols, pattern){};
 
-const double &SymCSRMatrix::get_entry(size_t i, size_t j) const
+const double &SymCSRMatrix::get_entry(ff_index i, ff_index j) const
 {
     if(i > j){
         std::swap(i, j);
     }
 
-    size_t row_start = base_pattern->row_ptr[i];
-    size_t row_end = base_pattern->row_ptr[i + 1];
+    ff_index row_start = base_pattern->row_ptr[i];
+    ff_index row_end = base_pattern->row_ptr[i + 1];
 
-    for(size_t k = row_start; k < row_end; ++k){
+    for(ff_index k = row_start; k < row_end; ++k){
         if(base_pattern->col_indices[k] == j){
             return values[k];
         }
@@ -26,16 +28,16 @@ const double &SymCSRMatrix::get_entry(size_t i, size_t j) const
     return dummy;
 }
 
-void SymCSRMatrix::accumulate_entry(size_t i, size_t j, double value)
+void SymCSRMatrix::accumulate_entry(ff_index i, ff_index j, double value)
 {
     if(i > j){
         std::swap(i, j);
     }
 
-    size_t row_start = base_pattern->row_ptr[i];
-    size_t row_end = base_pattern->row_ptr[i + 1];
+    ff_index row_start = base_pattern->row_ptr[i];
+    ff_index row_end = base_pattern->row_ptr[i + 1];
 
-    for(size_t k = row_start; k < row_end; ++k){
+    for(ff_index k = row_start; k < row_end; ++k){
         if(base_pattern->col_indices[k] == j){
             values[k] += value;
             return;
@@ -55,14 +57,14 @@ Vector SymCSRMatrix::gemv(const Vector& x) const {
     const auto& row_ptr = base_pattern->row_ptr;
     const auto& col_indices = base_pattern->col_indices;
 
-    for(size_t i = 0; i < n_rows; ++i){
-        size_t row_start = row_ptr[i];
-        size_t row_end = row_ptr[i + 1];
-        for(size_t k = row_start; k < row_end; ++k){
+    for(ff_index i = 0; i < n_rows; ++i){
+        ff_index row_start = row_ptr[i];
+        ff_index row_end = row_ptr[i + 1];
+        for(ff_index k = row_start; k < row_end; ++k){
             y[i] += values[k] * x[col_indices[k]];
         }
-        for(size_t k = row_start; k < row_end; ++k){
-            size_t j = col_indices[k];
+        for(ff_index k = row_start; k < row_end; ++k){
+            ff_index j = col_indices[k];
             if(i != j){
                 y[j] += values[k] * x[i];
             }

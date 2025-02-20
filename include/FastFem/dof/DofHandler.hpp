@@ -67,10 +67,11 @@ class DoFHandler
     static_assert(dim <= spacedim, "The dimension must be less or equal to the space it lives in");
     static_assert(spacedim <= 3, "The space dimension must be less or equal to 3");
 
-    using global_vertex_vertex_id = fastfem::types::global_vertex_id;
+    using global_vertex_index = fastfem::types::global_vertex_index;
 
-    using global_dof_index_t = fastfem::types::global_dof_index_t;
-    using local_dof_index_t  = fastfem::types::local_dof_index_t;
+    using global_dof_index = fastfem::types::global_dof_index;
+    using local_dof_index  = fastfem::types::local_dof_index;
+    using global_element_index = fastfem::types::global_element_index;
 
 public:
     DoFHandler(const mesh::Mesh<dim, spacedim> &mesh, std::unique_ptr<fe::FESimplexP<dim, spacedim>> fe);
@@ -95,15 +96,15 @@ public:
      * Get the global indices of the DoFs of the given element. The ordering of the DoFs is not coherent 
      * with the ordering of the local DoFs of the element. 
      */
-    std::vector<global_dof_index_t> get_unordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
+    std::vector<global_dof_index> get_unordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
     
-    std::vector<global_dof_index_t> get_unordered_dofs_on_boundary(const mesh::MeshSimplex<dim-1, spacedim> &T) const;
+    std::vector<global_dof_index> get_unordered_dofs_on_boundary(const mesh::MeshSimplex<dim-1, spacedim> &T) const;
 
     /**
      * Get the global indices of the DoFs of the given element. The ordering of the DoFs is coherent 
      * with the ordering of the local DoFs of the element. 
      */
-    std::vector<global_dof_index_t> get_ordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
+    std::vector<global_dof_index> get_ordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
 
     inline auto elem_begin() const { return mesh.elem_begin(); }
     inline auto elem_end() const { return mesh.elem_end(); }
@@ -111,9 +112,9 @@ public:
     inline auto boundary_dofs_begin(size_t tag) const { return map_boundary_dofs.at(tag).begin(); }
     inline auto boundary_dofs_end(size_t tag) const { return map_boundary_dofs.at(tag).end(); }
     
-    unsigned int get_n_dofs() const { return n_dofs; }
+    global_dof_index get_n_dofs() const { return n_dofs; }
 
-    inline size_t get_n_elements() const { return mesh.elem_count(); }
+    inline global_element_index get_n_elements() const { return mesh.elem_count(); }
 
     void print_dofs() const;
 
@@ -121,20 +122,20 @@ public:
      * This function is used to output the solution by DataIO. When we output the solution, 
      * we only output the values of the DoFs on the vertices of the mesh.
      */
-    inline std::vector<global_dof_index_t> get_dof_on_vertex(const global_vertex_vertex_id &vertex)  const { return vertex_dofs.at(vertex); }
+    inline std::vector<global_dof_index> get_dof_on_vertex(const global_vertex_index &vertex)  const { return vertex_dofs.at(vertex); }
 
 private:
     const mesh::Mesh<dim, spacedim> &mesh;
     const std::unique_ptr<fe::FESimplexP<dim, spacedim>> fe;
 
-    fastfem::types::global_dof_table<0> vertex_dofs;
-    fastfem::types::global_dof_table<1> edge_dofs;
-    fastfem::types::global_dof_table<2> face_dofs;
-    fastfem::types::global_dof_table<3> cell_dofs;
+    fastfem::types::global_vertex_dof_table vertex_dofs;
+    fastfem::types::global_edge_dof_table edge_dofs;
+    fastfem::types::global_face_dof_table face_dofs;
+    fastfem::types::global_cell_dof_table cell_dofs;
 
-    unsigned int n_dofs;
+    global_dof_index n_dofs;
 
-    std::unordered_map<size_t, std::unordered_set<global_dof_index_t>> map_boundary_dofs;
+    std::unordered_map<size_t, std::unordered_set<global_dof_index>> map_boundary_dofs;
 
 };
 

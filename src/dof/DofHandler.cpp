@@ -5,13 +5,14 @@
 namespace fastfem {
 namespace dof {
 
-using global_vertex_id = fastfem::types::global_vertex_id;
-using global_edge_id = fastfem::types::global_edge_id;
-using global_face_id = fastfem::types::global_face_id;
-using global_cell_id = fastfem::types::global_cell_id;
+using global_vertex_index = fastfem::types::global_vertex_index;
+using global_edge_index = fastfem::types::global_edge_index;
+using global_face_index = fastfem::types::global_face_index;
+using global_cell_index = fastfem::types::global_cell_index;
 
-using global_dof_index_t = fastfem::types::global_dof_index_t;
-using local_dof_index_t  = fastfem::types::local_dof_index_t;
+using global_dof_index = fastfem::types::global_dof_index;
+using local_dof_index  = fastfem::types::local_dof_index;
+using global_element_index = fastfem::types::global_element_index;
 
 template <unsigned int dim, unsigned int spacedim>
 DoFHandler<dim, spacedim>::DoFHandler(const mesh::Mesh<dim, spacedim> &mesh, std::unique_ptr<fe::FESimplexP<dim, spacedim>> fe)
@@ -27,13 +28,16 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
     unsigned int dofs_per_vertex = (*fe).get_n_dofs_per_vertex();
     for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
         mesh::MeshSimplex<dim, spacedim> T = *it;
-        for(const global_vertex_id &v : T.get_vertex_indices()){
-            if(vertex_dofs.find(v) == vertex_dofs.end()){
-                vertex_dofs[v] = std::vector<long unsigned int>(dofs_per_vertex, -1);
+
+        for(const global_vertex_index &v : T.get_vertex_indices()){
+            // if the vertex is not already in the map, we add it
+            auto [it, inserted] = vertex_dofs.emplace(v, std::vector<global_dof_index>(dofs_per_vertex, -1));
+            // if the vertex was not already in the map, we assign the dofs to it
+            if(inserted){
                 for(long unsigned int i = 0; i < dofs_per_vertex; ++i){
-                    vertex_dofs[v][i] = n_dofs++;
+                    it->second[i] = n_dofs++;
                 }
-            }
+            }  
         }   
     }
     
@@ -44,11 +48,12 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
     if(dofs_per_edge > 0){
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
             mesh::MeshSimplex<dim, spacedim> T = *it;
-            for(const global_edge_id &e : T.get_edges_indices()){
-                if(edge_dofs.find(e) == edge_dofs.end()){
-                    edge_dofs[e] = std::vector<long unsigned int>(dofs_per_edge, -1);
+
+            for(const global_edge_index &e : T.get_edges_indices()){
+                auto [it, inserted] = edge_dofs.emplace(e, std::vector<global_dof_index>(dofs_per_edge, -1));
+                if(inserted){
                     for(long unsigned int i = 0; i < dofs_per_edge; ++i){
-                        edge_dofs[e][i] = n_dofs++;
+                        it->second[i] = n_dofs++;
                     }
                 }
             }
@@ -62,11 +67,12 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
     if(dofs_per_face > 0){
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
             mesh::MeshSimplex<dim, spacedim> T = *it;
-            for(const global_face_id &f : T.get_faces_indices()){
-                if(face_dofs.find(f) == face_dofs.end()){
-                    face_dofs[f] = std::vector<long unsigned int>(dofs_per_face, -1);
+            
+            for(const global_face_index &f : T.get_faces_indices()){
+                auto [it, inserted] = face_dofs.emplace(f, std::vector<global_dof_index>(dofs_per_face, -1));
+                if(inserted){
                     for(long unsigned int i = 0; i < dofs_per_face; ++i){
-                        face_dofs[f][i] = n_dofs++;
+                        it->second[i] = n_dofs++;
                     }
                 }
             }
@@ -80,11 +86,12 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
     if(dofs_per_cell>0){
         for(auto it = mesh.elem_begin(); it != mesh.elem_end(); ++it){
             mesh::MeshSimplex<dim, spacedim> T = *it;
-            for(const global_cell_id &c : T.get_cell_indices()){
-                if(cell_dofs.find(c) == cell_dofs.end()){
-                    cell_dofs[c] = std::vector<long unsigned int>(dofs_per_cell, -1);
+            
+            for(const global_cell_index &c : T.get_cell_indices()){
+                auto [it, inserted] = cell_dofs.emplace(c, std::vector<global_dof_index>(dofs_per_cell, -1));
+                if(inserted){
                     for(long unsigned int i = 0; i < dofs_per_cell; ++i){
-                        cell_dofs[c][i] = n_dofs++;
+                        it->second[i] = n_dofs++;
                     }
                 }
             }
@@ -97,48 +104,45 @@ unsigned int DoFHandler<dim, spacedim>::distribute_dofs() {
      * in a set in order to avoid duplicates.
      */
     for(auto it = mesh.boundary_begin(); it != mesh.boundary_end(); ++it){
-        size_t tag = it->first;
+        types::boundary_index tag = it->first;
         // for each boundary tag, we store the dofs of the boundary in a set
         for(auto jt = it->second.begin(); jt != it->second.end(); ++jt){
             mesh::MeshSimplex<dim-1, spacedim> T = *jt;
-            std::vector<global_dof_index_t> dofs = get_unordered_dofs_on_boundary(T);
+            std::vector<global_dof_index> dofs = get_unordered_dofs_on_boundary(T);
             map_boundary_dofs[tag].insert(dofs.begin(), dofs.end());
         }
     }
-
-
 
     return n_dofs;
 }
 
 template <unsigned int dim, unsigned int spacedim>
-std::vector<global_dof_index_t> DoFHandler<dim, spacedim>::get_unordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const {
+std::vector<global_dof_index> DoFHandler<dim, spacedim>::get_unordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const {
+    
     unsigned int dofs_per_element = (*fe).get_n_dofs_per_element();
-    std::vector<global_dof_index_t> dofs;
+    std::vector<global_dof_index> dofs;
     dofs.reserve(dofs_per_element);
 
-    for(const global_vertex_id &v : T.get_vertex_indices()){
-        const std::vector<global_dof_index_t> &d = vertex_dofs.at(v);
+    for(const global_vertex_index &v : T.get_vertex_indices()){
+        const std::vector<global_dof_index> &d = vertex_dofs.at(v);
         dofs.insert(dofs.end(), d.begin(), d.end());
     }
+
     if((*fe).get_n_dofs_per_edge() == 0) return dofs;
-    
-    for(const global_edge_id &e : T.get_edges_indices()){
-        const std::vector<global_dof_index_t> &d = edge_dofs.at(e);
+    for(const global_edge_index &e : T.get_edges_indices()){
+        const std::vector<global_dof_index> &d = edge_dofs.at(e);
         dofs.insert(dofs.end(), d.begin(), d.end());
     }
 
     if((*fe).get_n_dofs_per_face() == 0) return dofs;
-
-    for(const global_face_id &f : T.get_faces_indices()){
-        const std::vector<global_dof_index_t> &d = face_dofs.at(f);
+    for(const global_face_index &f : T.get_faces_indices()){
+        const std::vector<global_dof_index> &d = face_dofs.at(f);
         dofs.insert(dofs.end(), d.begin(), d.end());
     }
 
     if((*fe).get_n_dofs_per_cell() == 0) return dofs;
-
-    for(const global_cell_id &t : T.get_cell_indices()){
-        const std::vector<global_dof_index_t> &d = cell_dofs.at(t);
+    for(const global_cell_index &t : T.get_cell_indices()){
+        const std::vector<global_dof_index> &d = cell_dofs.at(t);
         dofs.insert(dofs.end(), d.begin(), d.end());
     }
 
@@ -148,24 +152,24 @@ std::vector<global_dof_index_t> DoFHandler<dim, spacedim>::get_unordered_dofs_on
 }
 
 template <unsigned int dim, unsigned int spacedim>
-std::vector<global_dof_index_t> DoFHandler<dim, spacedim>::get_unordered_dofs_on_boundary(const mesh::MeshSimplex<dim-1, spacedim> &T) const {
-    std::vector<global_dof_index_t> dofs;
+std::vector<global_dof_index> DoFHandler<dim, spacedim>::get_unordered_dofs_on_boundary(const mesh::MeshSimplex<dim-1, spacedim> &T) const {
+    std::vector<global_dof_index> dofs;
 
-    for(const global_vertex_id &v : T.get_vertex_indices()){
-        const std::vector<global_dof_index_t> &d = vertex_dofs.at(v);
+    for(const global_vertex_index &v : T.get_vertex_indices()){
+        const std::vector<global_dof_index> &d = vertex_dofs.at(v);
         dofs.insert(dofs.end(), d.begin(), d.end());
     }
     if((*fe).get_n_dofs_per_edge() == 0) return dofs;
     
-    for(const global_edge_id &e : T.get_edges_indices()){
-        const std::vector<global_dof_index_t> &d = edge_dofs.at(e);
+    for(const global_edge_index &e : T.get_edges_indices()){
+        const std::vector<global_dof_index> &d = edge_dofs.at(e);
         dofs.insert(dofs.end(), d.begin(), d.end());
     }
 
     if((*fe).get_n_dofs_per_face() == 0) return dofs;
 
-    for(const global_face_id &f : T.get_faces_indices()){
-        const std::vector<global_dof_index_t> &d = face_dofs.at(f);
+    for(const global_face_index &f : T.get_faces_indices()){
+        const std::vector<global_dof_index> &d = face_dofs.at(f);
         dofs.insert(dofs.end(), d.begin(), d.end());
     }
 
@@ -173,40 +177,38 @@ std::vector<global_dof_index_t> DoFHandler<dim, spacedim>::get_unordered_dofs_on
 }
 
 template <unsigned int dim, unsigned int spacedim>
-std::vector<global_dof_index_t> DoFHandler<dim, spacedim>::get_ordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const {
+std::vector<global_dof_index> DoFHandler<dim, spacedim>::get_ordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const {
     unsigned int dofs_per_element = (*fe).get_n_dofs_per_element();
-    std::vector<global_dof_index_t> dofs(dofs_per_element);
+    std::vector<global_dof_index> dofs(dofs_per_element);
 
-    for(const global_vertex_id &v : T.get_vertex_indices()){
-        std::vector<local_dof_index_t> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, v);
-        for(int i = 0; i < local_dofs.size(); ++i){
+    for(const global_vertex_index &v : T.get_vertex_indices()){
+        std::vector<local_dof_index> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, v);
+        for(unsigned int i=0; i < local_dofs.size(); ++i){
             dofs[local_dofs[i]] = vertex_dofs.at(v)[i];
         }
     }
 
     if((*fe).get_n_dofs_per_edge() == 0) return dofs;
 
-    for(const global_edge_id &e : T.get_edges_indices()){
-        std::vector<local_dof_index_t> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, e);
-        for(int i = 0; i < local_dofs.size(); ++i){
+    for(const global_edge_index &e : T.get_edges_indices()){
+        std::vector<local_dof_index> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, e);
+        for(unsigned int i=0; i < local_dofs.size(); ++i){
             dofs[local_dofs[i]] = edge_dofs.at(e)[i];
         }
     }
 
     if((*fe).get_n_dofs_per_face() == 0) return dofs;
-
-    for(const global_face_id &f : T.get_faces_indices()){
-        std::vector<local_dof_index_t> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, f);
-        for(int i = 0; i < local_dofs.size(); ++i){
+    for(const global_face_index &f : T.get_faces_indices()){
+        std::vector<local_dof_index> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, f);
+        for(unsigned int i=0; i < local_dofs.size(); ++i){
             dofs[local_dofs[i]] = face_dofs.at(f)[i];
         }
     }
     
     if((*fe).get_n_dofs_per_cell() == 0) return dofs;
-
-    for(const global_cell_id &t : T.get_cell_indices()){
-        std::vector<local_dof_index_t> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, t);
-        for(int i = 0; i < local_dofs.size(); ++i){
+    for(const global_cell_index &t : T.get_cell_indices()){
+        std::vector<local_dof_index> local_dofs = (*fe).get_local_dofs_on_subsimplex(T, t);
+        for(unsigned int i=0; i < local_dofs.size(); ++i){
             dofs[local_dofs[i]] = cell_dofs.at(t)[i];
         }
     }
