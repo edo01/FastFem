@@ -2,6 +2,7 @@
 #define FASTFEM_MATRIXTOOLS_HPP
 
 #include "FastFem/linalg/sparseMatrices/SparseMatrix.hpp"
+#include "FastFem/linalg/sparseMatrices/CSRMatrix.hpp"
 #include "FastFem/linalg/Vector.hpp"
 #include "FastFem/dof/DofHandler.hpp"
 
@@ -30,6 +31,9 @@ private:
 
 template <unsigned int dim, unsigned int spacedim>
 void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
+
+// template <unsigned int dim, unsigned int spacedim>
+// void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
 
 void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs);
 

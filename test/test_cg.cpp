@@ -7,6 +7,11 @@
 
 using namespace fastfem::linalg;
 
+/**
+ * @brief This test verifies the correct functioning of the CG algorithm
+ * 
+ * @return int 
+ */
 int main()
 {
 

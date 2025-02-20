@@ -8,6 +8,10 @@
 #include "FastFem/mesh/MeshIO.hpp"
 #include "FastFem/mesh/MeshAdjacency.hpp"
 
+/**
+ * @brief Test the mesh generation for different geometries
+ * 
+ */
 using namespace fastfem::mesh;
 int main(int argc, char** argv)
 {

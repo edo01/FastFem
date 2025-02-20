@@ -15,6 +15,11 @@ using namespace fastfem::fe;
 using namespace fastfem::dof;
 using namespace fastfem::types;
 
+/**
+ * @brief This test controls that the DoFHandler class correctly distributes the nodes.
+ * It checks the correct functioning of dof distribution for P1 elements both scalar and vectorial
+ * and for P2 and P3 elements just scalar.
+ */
 int main(int argc, char** argv)
 {
     if (argc < 2) {

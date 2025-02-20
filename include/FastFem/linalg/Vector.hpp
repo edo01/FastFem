@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <initializer_list>
+#include <algorithm>
 
 namespace fastfem{
 namespace linalg{
@@ -23,9 +24,7 @@ public:
     inline std::size_t size() const { return data.size(); }
     inline double& operator[](std::size_t index) { return data[index]; }
     inline const double& operator[](std::size_t index) const { return data[index]; }
-
     inline void fill(double value) { std::fill(data.begin(), data.end(), value); }
-
     inline double max() const { return *std::max_element(data.begin(), data.end()); }
 
     // Arithmetic Operations
@@ -34,7 +33,6 @@ public:
     Vector operator*(double scalar) const;
     double dot(const Vector& other) const;
     double norm() const;
-
     static void axpby(double a, const Vector& x, double b, Vector& y);  // y = a*x + b*y
     static void axpy(double a, const Vector& x, Vector& y);  // y = a*x + y
 

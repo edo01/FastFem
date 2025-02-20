@@ -6,6 +6,11 @@
 
 using namespace fastfem::linalg;
 
+/**
+ * @brief This test verifies the correct functioning of the COO to CSR converter
+ * 
+ * @return int 
+ */
 int main()
 {
 
@@ -13,6 +18,5 @@ int main()
     M.print("COO Matrix");
 
     CSRMatrix A = M.to_CSR();
-    // A.set_row_col_to_zero(1);
     A.print("CSR Matrix");
 }

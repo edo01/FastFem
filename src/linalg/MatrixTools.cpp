@@ -28,6 +28,41 @@ void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<
     }
 }
 
+// template <unsigned int dim, unsigned int spacedim>
+// void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag)
+// {
+//     if(A.get_n_rows() != A.get_n_cols())
+//     {
+//         throw std::runtime_error("apply_homogeneous_dirichlet(): The matrix must be square");
+//     }
+
+//     if(A.get_n_rows() != dof_handler.get_n_dofs())
+//     {
+//         throw std::runtime_error("apply_homogeneous_dirichlet(): The matrix and the dof handler must have the same number of rows");
+//     }
+
+//     std::cout << "Applying homogeneous Dirichlet boundary conditions with std::map" << std::endl;
+
+//     std::map<global_dof_index_t, std::vector<unsigned int>> col_to_values;
+//     std::vector<double> &values = A.get_values();
+//     std::vector<size_t> &col_indices = A.get_col_indices();
+
+//     for(unsigned int i = 0; i < col_indices.size(); ++i)
+//     {
+//         col_to_values[col_indices[i]].push_back(i);
+//     }
+
+//     for(auto it = dof_handler.boundary_dofs_begin(tag); it != dof_handler.boundary_dofs_end(tag); ++it)
+//     {
+//         global_dof_index_t dof = *it;
+//         A.set_row_col_to_zero(dof, col_to_values);
+//         rhs[dof] = 0.0;
+
+//         //maybe we should set the diagonal entry to something different than one to keep the matrix well conditioned
+//         A.set_entry(dof, dof, 1.0);
+//     }
+// }
+
 void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs)
 {
     for(size_t i = 0; i < local_dofs.size(); ++i)
@@ -55,6 +90,13 @@ template void apply_homogeneous_dirichlet<1,3>(SparseMatrix& A, Vector& rhs, con
 template void apply_homogeneous_dirichlet<2,2>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 2>& dof_handler, size_t tag);
 template void apply_homogeneous_dirichlet<2,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<2, 3>& dof_handler, size_t tag);
 template void apply_homogeneous_dirichlet<3,3>(SparseMatrix& A, Vector& rhs, const DoFHandler<3, 3>& dof_handler, size_t tag);
+
+// template void apply_homogeneous_dirichlet<1,1>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 1>& dof_handler, size_t tag);
+// template void apply_homogeneous_dirichlet<1,2>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 2>& dof_handler, size_t tag);
+// template void apply_homogeneous_dirichlet<1,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<1, 3>& dof_handler, size_t tag);
+// template void apply_homogeneous_dirichlet<2,2>(CSRMatrix& A, Vector& rhs, const DoFHandler<2, 2>& dof_handler, size_t tag);
+// template void apply_homogeneous_dirichlet<2,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<2, 3>& dof_handler, size_t tag);
+// template void apply_homogeneous_dirichlet<3,3>(CSRMatrix& A, Vector& rhs, const DoFHandler<3, 3>& dof_handler, size_t tag);
 
 } // namespace tools
 } // namespace linalg
