@@ -47,6 +47,7 @@ protected:
     std::shared_ptr<CSRPattern> base_pattern;
 
 public:
+    using SparseMatrix::SparseMatrix;
     CSRMatrix(ff_index n_cols, const CSRPattern& pattern);
     CSRMatrix(const CSRMatrix& A);
 
