@@ -3,6 +3,7 @@
 
 #include <FastFem/linalg/sparseMatrices/SparseMatrix.hpp>
 #include <FastFem/dof/DofHandler.hpp>
+#include <FastFem/linalg/MatrixTools.hpp>
 #include <vector>
 #include <memory>
 #include <set>
@@ -49,23 +50,22 @@ public:
 
     void set_entry(size_t i, size_t j, double value) override;
     void accumulate_entry(size_t i, size_t j, double value) override;
-
     inline size_t nnz() const override { return base_pattern->col_indices.size(); }
-    // inline std::vector<double>& get_values() { return values; }
-    // inline std::vector<size_t>& get_col_indices() { return base_pattern->col_indices; }
-
     void print_pattern() const;
+
     void set_row_col_to_zero(size_t i) override;
 
     /**
      * @brief Optimized overloaded method to set a row and a column to zero,
      * exploiting an ordered map that stores the column indices for each row and improves the setting of the column to zero.
      */
-    //void set_row_col_to_zero(size_t i, std::map<size_t, std::vector<unsigned int>>& col_to_values);
-private:
+    void set_row_col_to_zero(size_t i, std::map<size_t, std::vector<unsigned int>>& col_to_values);
+
+    private:
     const double &get_entry(size_t i, size_t j) const override;
 
     friend class COOMatrix;
+    friend class MatrixTools;
 };
 
 } // namespace linalg

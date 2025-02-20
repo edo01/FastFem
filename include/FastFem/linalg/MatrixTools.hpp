@@ -11,7 +11,9 @@ using fastfem::types::global_dof_index_t;
 
 namespace fastfem{
 namespace linalg{
-namespace tools{
+
+// Forward declarations needed for the friend declaration
+class CSRMatrix;
 
 class FullMatrix
 {
@@ -29,17 +31,22 @@ private:
     std::vector<double> data;
 };
 
-template <unsigned int dim, unsigned int spacedim>
-void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
+class MatrixTools
+{
+public:
+    MatrixTools() = delete;
 
-// template <unsigned int dim, unsigned int spacedim>
-// void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
+    template <unsigned int dim, unsigned int spacedim>
+    static void apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
 
-void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs);
+    template <unsigned int dim, unsigned int spacedim>
+    static void apply_homogeneous_dirichlet(CSRMatrix& A, Vector& rhs, const DoFHandler<dim, spacedim> & dof_handler, size_t tag);
 
-void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index_t>& local_dofs);
+    static void add_local_matrix_to_global(SparseMatrix& A, const FullMatrix& local_matrix, const std::vector<global_dof_index_t>& local_dofs);
 
-} // namespace tools
+    static void add_local_vector_to_global(Vector& global_vector, const Vector& local_vector, const std::vector<global_dof_index_t>& local_dofs);
+};
+
 } // namespace linalg
 } // namespace FastFem
 

@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     linalg::SkylineMatrix A_sky(n_dofs, skyline_pattern);
 
-    linalg::tools::FullMatrix local_matrix(n_dofs_per_cell);
+    linalg::FullMatrix local_matrix(n_dofs_per_cell);
 
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it)
     {
@@ -89,10 +89,10 @@ int main(int argc, char *argv[])
         local_matrix(1, 2) += dot(v2, v0, v0, v1) / (4 * volume);
     
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
-        linalg::tools::add_local_matrix_to_global(A_sky, local_matrix, local_dofs);
+        linalg::MatrixTools::add_local_matrix_to_global(A_sky, local_matrix, local_dofs);
     } 
 
-    linalg::tools::apply_homogeneous_dirichlet(A_sky, rhs, dof_handler, 0);
+    linalg::MatrixTools::apply_homogeneous_dirichlet(A_sky, rhs, dof_handler, 0);
 
     rhs[1443] = 2;
     rhs[367] = 2;

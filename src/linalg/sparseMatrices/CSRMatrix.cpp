@@ -122,21 +122,21 @@ void CSRMatrix::set_row_col_to_zero(size_t i)
     }
 }
 
-// void CSRMatrix::set_row_col_to_zero(size_t i, std::map<size_t, std::vector<unsigned int>>& col_to_values)
-// {
-//     size_t row_start = base_pattern->row_ptr[i];
-//     size_t row_end = base_pattern->row_ptr[i + 1];
+void CSRMatrix::set_row_col_to_zero(size_t i, std::map<size_t, std::vector<unsigned int>>& col_to_values)
+{
+    size_t row_start = base_pattern->row_ptr[i];
+    size_t row_end = base_pattern->row_ptr[i + 1];
 
-//     for(size_t k = row_start; k < row_end; ++k){
-//         values[k] = 0.0;
-//     }
+    for(size_t k = row_start; k < row_end; ++k){
+        values[k] = 0.0;
+    }
     
-//     if(col_to_values.find(i) != col_to_values.end()){
-//         for(auto& j : col_to_values[i]){
-//             values[j] = 0.0;
-//         }
-//     }
-// }
+    if(col_to_values.find(i) != col_to_values.end()){
+        for(auto& j : col_to_values[i]){
+            values[j] = 0.0;
+        }
+    }
+}
         
 
 void CSRMatrix::print_pattern() const
