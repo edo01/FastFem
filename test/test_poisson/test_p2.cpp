@@ -18,14 +18,75 @@
 
 #include "FastFem/mesh/MeshIO.hpp"
 
-#define x 0.1666666666
-#define y 0.1666666666
-#define x2 0.0833333333
-#define y2 0.0833333333
-#define xy 0.0416666666
-#define area 0.5
-
 using namespace fastfem;
+
+#define SQUARE(x) ((x) * (x))
+
+double compute_den(double xa, double ya, double xb, double yb, double xc, double yc) {
+    return SQUARE(xc * (-ya + yb) + xb * (ya - yc) + xa * (-yb + yc));
+}
+
+void compute_stiffness_loc(mesh::Simplex<2, 2> triangle, double matrix[6][6]) {
+
+    double xa = triangle.get_vertex(0).coords[0];
+    double ya = triangle.get_vertex(0).coords[1];
+    double xb = triangle.get_vertex(1).coords[0];
+    double yb = triangle.get_vertex(1).coords[1];
+    double xc = triangle.get_vertex(2).coords[0];
+    double yc = triangle.get_vertex(2).coords[1];
+
+    matrix[0][0] = (SQUARE(xb - xc) + SQUARE(yb - yc)) / 2.;
+    matrix[0][1] = (-2 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix[0][2] = ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc)) / 6.;
+    matrix[0][3] = 0;
+    matrix[0][4] = (-1 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 6.;
+    matrix[0][5] = (2 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+
+    matrix[1][0] = (-2 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix[1][1] = (4 * (SQUARE(xa) + SQUARE(xb) - xb * xc + SQUARE(xc) - xa * (xb + xc) + SQUARE(ya) - ya * yb + SQUARE(yb) - (ya + yb) * yc + SQUARE(yc))) / 3.;
+    matrix[1][2] = (-2 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix[1][3] = (4 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+    matrix[1][4] = 0;
+    matrix[1][5] = (-4 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+
+    matrix[2][0] = ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc)) / 6.;
+    matrix[2][1] = (-2 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix[2][2] = (SQUARE(xa - xc) + SQUARE(ya - yc)) / 2.;
+    matrix[2][3] = (-2 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix[2][4] = (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc)) / 6.;
+    matrix[2][5] = 0;
+
+    matrix[3][0] = 0;
+    matrix[3][1] = (4 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+    matrix[3][2] = (-2 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix[3][3] = (4 * (SQUARE(xa) + SQUARE(xb) - xb * xc + SQUARE(xc) - xa * (xb + xc) + SQUARE(ya) - ya * yb + SQUARE(yb) - (ya + yb) * yc + SQUARE(yc))) / 3.;
+    matrix[3][4] = (-2 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix[3][5] = (-4 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+
+    matrix[4][0] = (-1 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 6.;
+    matrix[4][1] = 0;
+    matrix[4][2] = (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc)) / 6.;
+    matrix[4][3] = (-2 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix[4][4] = (SQUARE(xa - xb) + SQUARE(ya - yb)) / 2.;
+    matrix[4][5] = (2 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+
+    matrix[5][0] = (2 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+    matrix[5][1] = (-4 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix[5][2] = 0;
+    matrix[5][3] = (-4 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix[5][4] = (2 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+    matrix[5][5] = (4 * (SQUARE(xa) + SQUARE(xb) - xb * xc + SQUARE(xc) - xa * (xb + xc) + SQUARE(ya) - ya * yb + SQUARE(yb) - (ya + yb) * yc + SQUARE(yc))) / 3.;
+
+    // multiply by jacobian
+    double jacobian = triangle.volume() * 2;
+    for (size_t i = 0; i < 6; ++i)
+    {
+        for (size_t j = 0; j < 6; ++j)
+        {
+            matrix[i][j] *= jacobian/compute_den(xa, ya, xb, yb, xc, yc);
+        }
+    }
+}
 
 double distance(const mesh::Point<2> &v1, const mesh::Point<2> &v2)
 {
@@ -60,9 +121,7 @@ int main(int argc, char *argv[])
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
 
-    // auto f = [](double x, double y) { return 20; };
     auto f = [](double var1, double var2) { return 4 - 2 * (var1 * var1 + var2 * var2); };
-    //auto f = [](double x, double y) { return 10*10*10*10 * std::exp(- ((x - 0.5) * (x - 0.5) - (y - 0.5) * (y - 0.5))/0.001); };
 
     linalg::Vector rhs(n_dofs);
 
@@ -72,74 +131,6 @@ int main(int argc, char *argv[])
 
     linalg::FullMatrix local_matrix(n_dofs_per_cell);
     linalg::Vector local_rhs(n_dofs_per_cell);
-
-    static double stiffness_ref[6][6] = {
-        {1.0, -2.0/3.0, 1.0/6.0, 0.0, 1.0/6.0, -2.0/3.0},
-        {-2.0/3.0, 8.0/3.0, -2.0/3.0, -4.0/3.0, 0.0, 0.0},
-        {1.0/6.0, -2.0/3.0, 1.0/2.0, 0.0, 0.0, 0.0},
-        {0.0, -4.0/3.0, 0.0, 8.0/3.0, 0.0, -4.0/3.0},
-        {1.0/6.0, 0.0, 0.0, 0.0, 1.0/2.0, -2.0/3.0},
-        {-2.0/3.0, 0.0, 0.0, -4.0/3.0, -2.0/3.0, 8.0/3.0}
-    };
-/*   static double stiffness_ref[6][6] = {
-        {1.33333, -0.333333,  0.166667, -0.333333, -0.166667, -0.333333},
-        {-0.333333,  2.66667, -0.666667, -1.33333,  0.0,       0.0},
-        { 0.166667, -0.666667,  0.5,      0.0,      0.0,       0.0},
-        {-0.333333, -1.33333,   0.0,      2.66667,  0.0,      -1.33333},
-        {-0.166667,  0.0,       0.0,      0.0,      0.5,      -0.666667},
-        {-0.333333,  0.0,       0.0,     -1.33333, -0.666667,  2.66667}
-    }; */
-
-/*     static double stiffness_ref[6][6];
-
-    stiffness_ref[0][0] = 32*x2 + 20*y2 + 48*xy - 48*x - 36*y + 18*area;
-    stiffness_ref[0][1] = -48*x2 - 56*xy - 16*y2 + 52*x + 28*y - 12*area;
-    stiffness_ref[1][0] = -48*x2 - 56*xy - 16*y2 + 52*x + 28*y - 12*area;
-    stiffness_ref[0][2] = 16*x2 + 16*xy - 16*x - 4*y + 3*area;
-    stiffness_ref[2][0] = 16*x2 + 16*xy - 16*x - 4*y + 3*area;
-    stiffness_ref[0][3] = 16*x2 + 16*y2 + 24*xy - 12*x - 12*y;
-    stiffness_ref[3][0] = 16*x2 + 16*y2 + 24*xy - 12*x - 12*y;
-    stiffness_ref[0][4] = 8*y2 + 16*xy - 4*x - 14*y + 3*area;
-    stiffness_ref[4][0] = 8*y2 + 16*xy - 4*x - 14*y + 3*area;
-    stiffness_ref[0][5] = -16*x2 - 32*y2 - 56*xy + 28*x + 44*y - 12*area;
-    stiffness_ref[5][0] = -16*x2 - 32*y2 - 56*xy + 28*x + 44*y - 12*area;
-    stiffness_ref[1][1] = 80*x2 + 16*y2 + 64*xy - 64*x - 32*y + 16*area;
-    stiffness_ref[1][2] = -32*x2 - 16*xy + 24*x + 4*y - 4*area;
-    stiffness_ref[2][1] = -32*x2 - 16*xy + 24*x + 4*y - 4*area;
-    stiffness_ref[1][3] = -16*x2 - 32*xy - 16*y2 + 16*y;
-    stiffness_ref[3][1] = -16*x2 - 32*xy - 16*y2 + 16*y;
-    stiffness_ref[1][4] = 4*x - 16*xy;
-    stiffness_ref[4][1] = 4*x - 16*xy;
-    stiffness_ref[1][5] = 16*x2 + 16*y2 + 64*xy - 16*x - 16*y;
-    stiffness_ref[5][1] = 16*x2 + 16*y2 + 64*xy - 16*x - 16*y;
-    stiffness_ref[2][2] = 16*x2 - 8*x + 1*area;
-    stiffness_ref[2][3] = 16*xy - 4*y;
-    stiffness_ref[3][2] = 16*xy - 4*y;
-    stiffness_ref[2][4] = 0;
-    stiffness_ref[4][2] = 0;
-    stiffness_ref[2][5] = 4*y - 16*xy;
-    stiffness_ref[5][2] = 4*y - 16*xy;
-    stiffness_ref[3][3] = 16*x2 + 16*y2;
-    stiffness_ref[3][4] = -4*x + 16*xy;
-    stiffness_ref[4][3] = -4*x + 16*xy;
-    stiffness_ref[3][5] = -16*x2 - 16*y2 - 32*xy + 16*x;
-    stiffness_ref[5][3] = -16*x2 - 16*y2 - 32*xy + 16*x;
-    stiffness_ref[4][4] = 16*y2 - 8*y + 1*area;
-    stiffness_ref[4][5] = -32*y2 - 16*xy + 4*x + 24*y - 4*area;
-    stiffness_ref[5][4] = -32*y2 - 16*xy + 4*x + 24*y - 4*area;
-    stiffness_ref[5][5] = 16*x2 + 80*y2 + 64*xy - 32*x - 64*y + 16*area; */
-
-    //print stiffness matrix
-    for(size_t i = 0; i < n_dofs_per_cell; ++i)
-    {
-        for(size_t j = 0; j < n_dofs_per_cell; ++j)
-        {
-            std::cout << "(" << i << "," << j << ")" << stiffness_ref[i][j] << "\t";
-        }
-        std::cout << std::endl;
-    }
-
-
 
     static double mass_matrix[6][6] = {
         0.0611078, -0.0111113,  0.00277811, -0.0444454, -0.019444,  -0.0333353,
@@ -152,7 +143,6 @@ int main(int argc, char *argv[])
 
     //dubious about f term, it has too many zeroes. if the rhs is manually filled at random, the solution obtained doesnt look that bad. maybe we need to interpolate f better. rhs has always norm very close to zero
     static double shape_integral_on_ref[6] = {0, 1.0/6, 0, 1.0/6, 0, 1.0/6};
-    //static double shape_integral_on_ref[6] = {1.0/6, 0, 1.0/6, 0, 1.0/6, 0};
 
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it)
     {
@@ -171,42 +161,45 @@ int main(int argc, char *argv[])
         local_matrix.set_to_zero();
         local_rhs.fill(0.0);
 
+        double stiffness[6][6];
+        compute_stiffness_loc(triangle, stiffness);
 
-        for(types::local_dof_index i = 0; i < n_dofs_per_cell; ++i)
-        {
-            for(types::local_dof_index j = 0; j < n_dofs_per_cell; ++j)
-            {
-                //local_matrix(i, j) += stiffness_ref[i][j] * 2 / (volume);
-                local_matrix(i, j) = stiffness_ref[i][j] * 2 * volume;
-            }
-            // avarage of the function f over the element
-            double avg = f(v0[0], v0[1]) + f(v1[0], v1[1]) + f(v2[0], v2[1]);
-            avg /= 3.0;
 
-            local_rhs[i] += avg * shape_integral_on_ref[i] * 2 * volume;
-            
-            //local_rhs[i] += f(centroid.coords[0], centroid.coords[1]) * shape_integral_on_ref[i] * 2 * volume;
-        }
-
-        /* linalg::Vector f_local(n_dofs_per_cell);
+        linalg::Vector f_local(n_dofs_per_cell);
 
         for(types::local_dof_index dof_i = 0; dof_i < n_dofs_per_cell; ++dof_i)
         {
             mesh::Point<2> dof_coords = fe.get_dof_coords(triangle, dof_i);
             f_local[dof_i] = f(dof_coords.coords[0], dof_coords.coords[1]);
         }
-        
-        
-        // multiply local rhs by the mass matrix
+
         for(types::local_dof_index i = 0; i < n_dofs_per_cell; ++i)
         {
             for(types::local_dof_index j = 0; j < n_dofs_per_cell; ++j)
             {
-                local_rhs[i] += mass_matrix[i][j] * f_local[j] * volume *2;
-            } 
-        }*/
+                //local_matrix(i, j) += stiffness_ref[i][j] * 2 / (volume);
+                local_matrix(i, j) += stiffness[i][j];
+            }
+            // avarage of the function f over the element
+            /* double avg = f(v0[0], v0[1]) + f(v1[0], v1[1]) + f(v2[0], v2[1]);
+            avg /= 3.0; */
+
+            //local_rhs[i] += avg * shape_integral_on_ref[i] * 2 * volume/7;
+            //local_rhs[i] += f_local[i] * shape_integral_on_ref[i] * 2 * volume;
+
+            /**
+             * TO CHECK
+             */
+            local_rhs[i] += f(centroid.coords[0], centroid.coords[1]) * shape_integral_on_ref[i] * 2 * volume;
+        }
 
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
+        std::cout << "Local dofs: ";
+        for(auto dof : local_dofs)
+        {
+            std::cout << dof << " ";
+        }
+        std::cout << std::endl;
         linalg::MatrixTools::add_local_matrix_to_global(A, local_matrix, local_dofs);
         linalg::MatrixTools::add_local_vector_to_global(rhs, local_rhs, local_dofs);
 
@@ -215,7 +208,8 @@ int main(int argc, char *argv[])
 
     linalg::MatrixTools::apply_homogeneous_dirichlet(A, rhs, dof_handler, 0);
 
-    //A.print();
+    /* A.print();
+    rhs.print(); */
 
     std::cout << "norm of rhs: " << rhs.norm() << std::endl;
     //output the rhs to see if it is correct

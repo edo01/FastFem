@@ -102,6 +102,23 @@ int main(int argc, char *argv[])
         local_rhs[1] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
         local_rhs[2] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
 
+        //print local matrix
+        std::cout << "local matrix" << std::endl;
+        for(size_t i = 0; i < n_dofs_per_cell; ++i)
+        {
+            for(size_t j = 0; j < n_dofs_per_cell; ++j)
+            {
+                printf("(%d,%d)%f \t", i, j,  local_matrix(i, j));
+            }
+            printf("\n");
+        }
+
+        std::cout << "rhs[" << 0 << "]: " << local_rhs[0] << std::endl;
+        std::cout << "rhs[" << 1 << "]: " << local_rhs[1] << std::endl;
+        std::cout << "rhs[" << 2 << "]: " << local_rhs[2] << std::endl;
+        std::cout << "volume: " << volume << std::endl;
+        std::cout << "avg: " << f(centroid.coords[0], centroid.coords[1]) << std::endl;
+
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
         linalg::MatrixTools::add_local_matrix_to_global(A, local_matrix, local_dofs);
         linalg::MatrixTools::add_local_vector_to_global(rhs, local_rhs, local_dofs);
@@ -116,6 +133,11 @@ int main(int argc, char *argv[])
     fastfem::mesh::DataIO<2, 2> data_io(mesh, dof_handler, sol);
     data_io.save_vtx("solution_csr.vtk");
 
+
+    fastfem::mesh::DataIO<2, 2> rhs_io(mesh, dof_handler, rhs);
+    rhs_io.save_vtx("rhs.vtk");
+
+    std::cout << "norm of rhs: " << rhs.norm() << std::endl;
     std::cout << "Max of solution: " << sol.max() << std::endl;
 
     auto exact_f = [](double x, double y) { return (1 - x * x) * (1 - y * y); };
@@ -123,20 +145,7 @@ int main(int argc, char *argv[])
     linalg::Vector exact_sol(n_dofs);
 
     // Questa può diventare una funzione di utility
-    for(auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it)
-    {
-        auto &elem = *it;
-
-        std::vector<fastfem::types::global_dof_index> global_dofs = dof_handler.get_ordered_dofs_on_element(elem);
-
-        mesh::Simplex<2, 2> triangle = mesh.get_Simplex(elem);
-
-        for(types::local_dof_index i = 0; i < global_dofs.size(); ++i)
-        {
-            mesh::Point<2> p_dof = fe.get_dof_coords(triangle, i);
-            exact_sol[global_dofs[i]] = exact_f(p_dof.coords[0], p_dof.coords[1]);
-        }
-    }
+    linalg::MatrixTools::interpolate(exact_sol, dof_handler, exact_f);
 
     std::cout << "Norm of difference: " << (sol - exact_sol).norm() << std::endl;
 
