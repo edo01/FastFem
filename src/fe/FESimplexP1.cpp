@@ -3,7 +3,6 @@
 namespace fastfem{
 namespace fe{
 
-
 /**
  * @brief Constructor for the 1D case, in 1D space.
  */

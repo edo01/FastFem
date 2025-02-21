@@ -23,7 +23,8 @@ Vector IterativeSolver::solve(const SparseMatrix& A, const Vector& b)
         ++iter;
     }
 
-    std::cout << " Iteration reached: " << iter << ", final error = " << error << std::endl;
+    lastStep = iter;
+    
 
     if(iter == maxIterations){
         throw std::runtime_error("IterativeSolver::solve(): maximum number of iterations reached");

@@ -20,6 +20,12 @@ using local_cell_index     = fastfem::types::local_cell_index;
 using local_dof_index = fastfem::types::local_dof_index;
 
 template <unsigned int dim, unsigned int spacedim>
+void FESimplexP<dim, spacedim>::
+compute_stiffness_loc(const mesh::Simplex<dim, spacedim> &/*elem*/, linalg::FullMatrix &/*matrix*/) const {
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template <unsigned int dim, unsigned int spacedim>
 std::vector<local_dof_index> FESimplexP<dim, spacedim>::
 get_local_dofs_on_subsimplex(const mesh::MeshSimplex<dim, spacedim> &T, global_vertex_index v) const {
     std::vector<local_dof_index> local_dofs_on_vertex(n_dofs_per_vertex);

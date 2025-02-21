@@ -231,7 +231,6 @@ double run_p2_simulation(unsigned int N) {
         mesh::Point<2> v1 = triangle.get_vertex(1);
         mesh::Point<2> v2 = triangle.get_vertex(2);
 
-        mesh::Point<2> centroid = triangle.get_centroid();
         double volume = triangle.volume();
 
         double average = f(v0[0], v0[1]) + f(v1[0], v1[1]) + f(v2[0], v2[1]);
