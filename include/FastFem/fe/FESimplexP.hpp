@@ -1,13 +1,13 @@
 #ifndef FESIMPLEXP_HPP
 #define FESIMPLEXP_HPP
 
-#include <FastFem/mesh/Mesh.hpp>
-#include <FastFem/types/CommonTypes.hpp>
 #include <cassert>
+#include "FastFem/mesh/Mesh.hpp"
+#include "FastFem/types/CommonTypes.hpp"
+#include "FastFem/linalg/FullMatrix.hpp"
 
 namespace fastfem{
 namespace fe{
-
 
 /**
  * @brief Base class for Simplicial Lagrange finite elements.
@@ -72,6 +72,8 @@ public:
 
     virtual unsigned int get_degree() const = 0;
 
+    virtual void compute_stiffness_loc(const mesh::Simplex<dim, spacedim> &elem, linalg::FullMatrix &matrix) const;
+
 protected:    
     unsigned int n_components;    // number of components of the finite element
     unsigned int n_dofs_per_element; // total number of degrees of freedom of the finite element
@@ -101,9 +103,7 @@ protected:
 };
 
 /**
- * @brief Basic simplician P1 elements. At the moment we provide the support for:
- *  - 1D space
- *  - 2D space
+ * @brief Basic simplician P1 elements.
  */
 template <unsigned int dim, unsigned int spacedim=dim>
 class FESimplexP1 : public FESimplexP<dim, spacedim>
@@ -116,10 +116,12 @@ public:
 
     unsigned int get_degree() const override { return 1; }
 
-};
+    //void compute_stiffness_loc(mesh::Simplex<dim, spacedim> elem, double **matrix) const override;
+
+    };
 
 
-// Basic simplician P2 elements in 2D space
+// Basic simplician P2 elements
 template <unsigned int dim, unsigned int spacedim=dim>
 class FESimplexP2 : public FESimplexP<dim, spacedim>
 {
@@ -132,10 +134,11 @@ public:
 
     unsigned int get_degree() const override { return 2; }
 
+    void compute_stiffness_loc(const mesh::Simplex<dim, spacedim> &elem, linalg::FullMatrix &matrix) const override;
 };
 
 
-// Basic simplician P3 elements in 2D space
+// Basic simplician P3 elements 
 template <unsigned int dim, unsigned int spacedim=dim>
 class FESimplexP3 : public FESimplexP<dim, spacedim>
 {
@@ -147,6 +150,8 @@ public:
     FESimplexP3() : FESimplexP3(1){};
 
     unsigned int get_degree() const override { return 3; }
+
+    void compute_stiffness_loc(const mesh::Simplex<dim, spacedim> &elem, linalg::FullMatrix &matrix) const override;
 };
 
 } // namespace fe

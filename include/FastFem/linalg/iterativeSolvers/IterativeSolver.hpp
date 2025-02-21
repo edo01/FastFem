@@ -12,6 +12,7 @@ protected:
     double tolerance;
 
     Vector r;
+    unsigned int lastStep;
     double error;
 
 public:
@@ -21,6 +22,9 @@ public:
     virtual ~IterativeSolver() = default;
 
     virtual Vector solve(const SparseMatrix& A, const Vector& b);
+
+    inline double get_error() const { return error; }
+    inline unsigned int get_last_step() const { return lastStep; }
 
 private:
     virtual double initialize(const SparseMatrix& A, const Vector& b, Vector& x) = 0;

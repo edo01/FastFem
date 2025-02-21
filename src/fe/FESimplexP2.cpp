@@ -6,6 +6,84 @@
 namespace fastfem{
 namespace fe{
 
+inline double SQUARE(double x) { return x * x; }
+
+inline double compute_den(double xa, double ya, double xb, double yb, double xc, double yc) {
+    return SQUARE(xc * (-ya + yb) + xb * (ya - yc) + xa * (-yb + yc));
+}
+
+template<>
+void FESimplexP2<2, 2>::
+compute_stiffness_loc(const mesh::Simplex<2, 2> &elem, linalg::FullMatrix& matrix) const{
+
+    double xa = elem.get_vertex(0).coords[0];
+    double ya = elem.get_vertex(0).coords[1];
+    double xb = elem.get_vertex(1).coords[0];
+    double yb = elem.get_vertex(1).coords[1];
+    double xc = elem.get_vertex(2).coords[0];
+    double yc = elem.get_vertex(2).coords[1];
+
+    matrix(0,0) = (SQUARE(xb - xc) + SQUARE(yb - yc)) / 2.;
+    matrix(0,1) = (-2 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix(0,2) = ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc)) / 6.;
+    matrix(0,3) = 0;
+    matrix(0,4) = (-1 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 6.;
+    matrix(0,5) = (2 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+    matrix(1,1) = (4 * (SQUARE(xa) + SQUARE(xb) - xb * xc + SQUARE(xc) - xa * (xb + xc) + SQUARE(ya) - ya * yb + SQUARE(yb) - (ya + yb) * yc + SQUARE(yc))) / 3.;
+    matrix(1,2) = (-2 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix(1,3) = (4 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+    matrix(1,4) = 0;
+    matrix(1,5) = (-4 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix(2,2) = (SQUARE(xa - xc) + SQUARE(ya - yc)) / 2.;
+    matrix(2,3) = (-2 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix(2,4) = (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc)) / 6.;
+    matrix(2,5) = 0;
+    matrix(3,3) = (4 * (SQUARE(xa) + SQUARE(xb) - xb * xc + SQUARE(xc) - xa * (xb + xc) + SQUARE(ya) - ya * yb + SQUARE(yb) - (ya + yb) * yc + SQUARE(yc))) / 3.;
+    matrix(3,4) = (-2 * (SQUARE(xa) + xb * xc - xa * (xb + xc) + (ya - yb) * (ya - yc))) / 3.;
+    matrix(3,5) = (-4 * ((xa - xc) * (xb - xc) + (ya - yc) * (yb - yc))) / 3.;
+    matrix(4,4) = (SQUARE(xa - xb) + SQUARE(ya - yb)) / 2.;
+    matrix(4,5) = (2 * ((xa - xb) * (xb - xc) + (ya - yb) * (yb - yc))) / 3.;
+    matrix(5,5) = (4 * (SQUARE(xa) + SQUARE(xb) - xb * xc + SQUARE(xc) - xa * (xb + xc) + SQUARE(ya) - ya * yb + SQUARE(yb) - (ya + yb) * yc + SQUARE(yc))) / 3.;
+
+    // multiply by jacobian
+    double den = compute_den(xa, ya, xb, yb, xc, yc);
+    double jacobian = elem.volume() * 2;
+
+    for (size_t i = 0; i < 6; ++i)
+    {
+        for (size_t j = i; j < 6; ++j)
+        {
+            matrix(i,j) *= jacobian/den;
+            
+            if (i != j) // fill the lower part of the matrix
+                matrix(j,i) = matrix(i,j);
+        }
+    }   
+}
+
+template<>
+void FESimplexP2<1, 1>::
+compute_stiffness_loc(const mesh::Simplex<1, 1> &, linalg::FullMatrix&) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template<>
+void FESimplexP2<1, 2>::
+compute_stiffness_loc(const mesh::Simplex<1, 2> &, linalg::FullMatrix &) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template<>
+void FESimplexP2<1, 3>::
+compute_stiffness_loc(const mesh::Simplex<1, 3> &, linalg::FullMatrix&) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template<>
+void FESimplexP2<2, 3>::
+compute_stiffness_loc(const mesh::Simplex<2, 3> &, linalg::FullMatrix&) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
 /**
  * @brief Constructor for the 1D case, in any space dimension.
  */
