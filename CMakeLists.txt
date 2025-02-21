@@ -43,17 +43,21 @@ if(USE_OPENMP)
     endif()
 endif()
 
-# Add tests
-foreach(TEST_FILE ${TEST_SOURCES})
-    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
-    add_executable(${TEST_NAME} ${TEST_FILE})
-    target_link_libraries(${TEST_NAME} FastFem)
-    
-    if(OpenMP_CXX_FOUND AND USE_OPENMP)
-        target_link_libraries(${TEST_NAME} OpenMP::OpenMP_CXX)
-    endif()
-endforeach()
+# Option to enable/disable building tests
+option(BUILD_TESTS "Build tests for FastFem" ON)
 
-# Enable testing support
-include(CTest)
-add_test(NAME RunAllTests COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
+# Build tests only if BUILD_TESTS is ON
+if(BUILD_TESTS)
+    message(STATUS "Building tests for FastFem")
+    foreach(TEST_FILE ${TEST_SOURCES})
+        get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+        add_executable(${TEST_NAME} ${TEST_FILE})
+        target_link_libraries(${TEST_NAME} FastFem)
+        
+        if(OpenMP_CXX_FOUND AND USE_OPENMP)
+            target_link_libraries(${TEST_NAME} OpenMP::OpenMP_CXX)
+        endif()
+    endforeach()
+else()
+    message(STATUS "Skipping tests for FastFem")
+endif()
