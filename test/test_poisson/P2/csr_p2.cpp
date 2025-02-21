@@ -180,26 +180,18 @@ int main(int argc, char *argv[])
                 //local_matrix(i, j) += stiffness_ref[i][j] * 2 / (volume);
                 local_matrix(i, j) += stiffness[i][j];
             }
-            // avarage of the function f over the element
+            // average of the function f over the element
             /* double avg = f(v0[0], v0[1]) + f(v1[0], v1[1]) + f(v2[0], v2[1]);
             avg /= 3.0; */
 
             //local_rhs[i] += avg * shape_integral_on_ref[i] * 2 * volume/7;
             //local_rhs[i] += f_local[i] * shape_integral_on_ref[i] * 2 * volume;
 
-            /**
-             * TO CHECK
-             */
             local_rhs[i] += f(centroid.coords[0], centroid.coords[1]) * shape_integral_on_ref[i] * 2 * volume;
         }
 
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
-        std::cout << "Local dofs: ";
-        for(auto dof : local_dofs)
-        {
-            std::cout << dof << " ";
-        }
-        std::cout << std::endl;
+
         linalg::MatrixTools::add_local_matrix_to_global(A, local_matrix, local_dofs);
         linalg::MatrixTools::add_local_vector_to_global(rhs, local_rhs, local_dofs);
 

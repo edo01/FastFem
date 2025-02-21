@@ -15,9 +15,7 @@ using namespace fastfem::dof;
 
 /**
  * @brief This test visually compares the skyline pattern with the CSR pattern 
- * 
- * @return int 
- */
+*/
 int main() {
 
     SquareMaker square(1);
