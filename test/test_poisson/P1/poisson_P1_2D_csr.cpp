@@ -20,6 +20,7 @@
 
 using namespace fastfem;
 
+
 #include <cstdlib>
 
 int main(int argc, char *argv[])
@@ -32,29 +33,28 @@ int main(int argc, char *argv[])
 
     unsigned int N = std::atoi(argv[1]);
 
-    // f(x, y) = 4 - 2 * (x^2 + y^2), rhs of the Poisson equations
     auto f = [](double var1, double var2) { return 4 - 2 * (var1 * var1 + var2 * var2); };
     auto exact_f = [](double var1, double var2) { return (1 - var1 * var1) * (1 - var2 * var2); };
-
+    
     /**
      * CREATE THE MESH
      */
-    mesh::SquareMaker mesh_maker(N);
-    mesh::Mesh<2> mesh = mesh_maker.make_mesh();
-
+     mesh::SquareMaker mesh_maker(N);
+     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
+ 
     /**
      * CREATE THE FE AND DOF HANDLER
      */
-    fe::FESimplexP2<2> fe;
+    fe::FESimplexP1<2> fe;
     dof::DoFHandler<2> dof_handler(mesh);
 
     // create the solver
     linalg::CGSolver solver(1000, 1e-7);
 
     /**
-     * DISTRIBUTION OF DOFS
+     * DOFs DISTRIBUTION
      */
-    dof_handler.distribute_dofs(std::make_shared<fe::FESimplexP2<2>>(fe));
+    dof_handler.distribute_dofs(std::make_shared<fe::FESimplexP1<2>>(fe));
 
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
     linalg::FullMatrix local_matrix(n_dofs_per_cell);
     linalg::Vector local_rhs(n_dofs_per_cell);
 
-    //dubious about f term, it has too many zeroes. if the rhs is manually filled at random, the solution obtained doesnt look that bad. maybe we need to interpolate f better. rhs has always norm very close to zero
-    static double shape_integral_on_ref[6] = {0, 1.0/6, 0, 1.0/6, 0, 1.0/6};
+    // shape integral on the reference triangle TODO: MOVE IT TO THE FE CLASS
+    static double shape_integral_on_ref[3] = {1.0/6, 1.0/6, 1.0/6};
 
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it)
     {
@@ -90,19 +90,23 @@ int main(int argc, char *argv[])
         local_rhs.fill(0.0);
 
         fe.compute_stiffness_loc(triangle, local_matrix);
-
+    
         // average of the function f over the element
         double avg = f(v0[0], v0[1]) + f(v1[0], v1[1]) + f(v2[0], v2[1]);
         avg /= 3.0; 
 
         for(types::local_dof_index i = 0; i < n_dofs_per_cell; ++i)
         {
+            /*
+             * Approximation of the integral of f over the element
+             */
             local_rhs[i] += avg * shape_integral_on_ref[i] * 2 * volume;
         }
 
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
         linalg::MatrixTools::add_local_matrix_to_global(A, local_matrix, local_dofs);
         linalg::MatrixTools::add_local_vector_to_global(rhs, local_rhs, local_dofs);
+
     } 
 
     // apply homogeneous dirichlet boundary conditions
@@ -116,20 +120,21 @@ int main(int argc, char *argv[])
     /**
      * SAVE THE SOLUTION
      */
+
     fastfem::mesh::DataIO<2, 2> data_io(mesh, dof_handler, sol);
     data_io.save_vtx("solution_csr.vtk");
-    std::cout << "Max of solution: " << sol.max() << std::endl;
+
+    linalg::Vector exact_sol(n_dofs);
 
     // interpolate the exact solution
-    linalg::Vector exact_sol(n_dofs);
     linalg::MatrixTools::interpolate(exact_sol, dof_handler, exact_f);
+
+    std::cout << "Norm of difference: " << (sol - exact_sol).norm() << std::endl;
 
     mesh::DataIO<2, 2> data_io_exact(mesh, dof_handler, exact_sol);
     data_io_exact.save_vtx("exact_solution.vtk");
 
-
-
-    std::cout << "Norm of vector difference: " << (sol - exact_sol).norm() << std::endl;
+    std::cout << "Max of solution: " << sol.max() << std::endl;
 
     return EXIT_SUCCESS;
 }

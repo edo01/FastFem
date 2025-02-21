@@ -20,16 +20,6 @@
 
 using namespace fastfem;
 
-double distance(const mesh::Point<2> &v1, const mesh::Point<2> &v2)
-{
-    return std::sqrt((v2.coords[0] - v1.coords[0]) * (v2.coords[0] - v1.coords[0]) + (v2.coords[1] - v1.coords[1]) * (v2.coords[1] - v1.coords[1]));
-}
-
-double dot(const mesh::Point<2> &v1, const mesh::Point<2> &v2, const mesh::Point<2> &w1, const mesh::Point<2> &w2)
-{
-    return (v2.coords[0] - v1.coords[0]) * (w2.coords[0] - w1.coords[0]) + (v2.coords[1] - v1.coords[1]) * (w2.coords[1] - w1.coords[1]);
-}
-
 #include <cstdlib>
 
 int main(int argc, char *argv[])
@@ -42,94 +32,105 @@ int main(int argc, char *argv[])
 
     unsigned int N = std::atoi(argv[1]);
 
+    // f(x, y) = 4 - 2 * (x^2 + y^2), rhs of the Poisson equations
+    auto f = [](double var1, double var2) { return 4 - 2 * (var1 * var1 + var2 * var2); };
+    auto exact_f = [](double var1, double var2) { return (1 - var1 * var1) * (1 - var2 * var2); };
+
+    /**
+     * CREATE THE MESH
+     */
     mesh::SquareMaker mesh_maker(N);
     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
 
-    fe::FESimplexP1<2> fe;
+    /**
+     * CREATE THE FE AND DOF HANDLER
+     */
+    fe::FESimplexP2<2> fe;
     dof::DoFHandler<2> dof_handler(mesh);
 
-    dof_handler.distribute_dofs(std::make_shared<fe::FESimplexP1<2>>(fe));
+    // create the solver
+    linalg::CGSolver solver(1000, 1e-7);
+
+    /**
+     * DOFs DISTRIBUTION
+     */
+    dof_handler.distribute_dofs(std::make_shared<fe::FESimplexP2<2>>(fe));
 
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
 
-    //auto f_constant = [](double x, double y) { return 1; };
-    auto f = [](double x, double y) { return 4 - 2 * (x * x + y * y); };
-    //auto f = [](double x, double y) { return 10*10*10*10 * std::exp(- ((x - 0.5) * (x - 0.5) - (y - 0.5) * (y - 0.5))/0.001); };
-
+    /**
+     * INITIALIZE THE LINEAR SYSTEM
+     */
     linalg::Vector rhs(n_dofs);
-
     linalg::CSRPattern csr_pattern = linalg::CSRPattern::create_from_dof_handler(dof_handler);
-
     linalg::CSRMatrix A(n_dofs, csr_pattern);
 
+    /**
+     * ASSEMBLE THE LINEAR SYSTEM
+     */
     linalg::FullMatrix local_matrix(n_dofs_per_cell);
     linalg::Vector local_rhs(n_dofs_per_cell);
+
+    // shape integral on the reference triangle TODO: MOVE IT TO THE FE CLASS
+    static double shape_integral_on_ref[6] = {0, 1.0/6, 0, 1.0/6, 0, 1.0/6};
 
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it)
     {
         auto &elem = *it;
 
         mesh::Simplex<2, 2> triangle = mesh.get_Simplex(elem);
-
         mesh::Point<2> v0 = triangle.get_vertex(0);
         mesh::Point<2> v1 = triangle.get_vertex(1);
         mesh::Point<2> v2 = triangle.get_vertex(2);
-
-        mesh::Point<2> centroid = triangle.get_centroid();
-
         double volume = triangle.volume();
 
-        double lenght_01 = distance(v0, v1);
-        double lenght_12 = distance(v1, v2);
-        double lenght_20 = distance(v2, v0);
-
+        // reset the local matrix and rhs
         local_matrix.set_to_zero();
         local_rhs.fill(0.0);
 
-        local_matrix(0, 0) += lenght_12 * lenght_12 / (4 * volume);
-        local_matrix(1, 1) += lenght_20 * lenght_20 / (4 * volume);
-        local_matrix(2, 2) += lenght_01 * lenght_01 / (4 * volume);
+        fe.compute_stiffness_loc(triangle, local_matrix);
 
-        local_matrix(0, 1) += dot(v1, v2, v2, v0) / (4 * volume);
-        local_matrix(0, 2) += dot(v2, v1, v1, v0) / (4 * volume);
-        local_matrix(1, 0) += dot(v0, v2, v2, v1) / (4 * volume);
-        local_matrix(1, 2) += dot(v2, v0, v0, v1) / (4 * volume);
-        local_matrix(2, 0) += dot(v0, v1, v1, v2) / (4 * volume);
-        local_matrix(2, 1) += dot(v1, v0, v0, v2) / (4 * volume);
-    
-        local_rhs[0] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
-        local_rhs[1] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
-        local_rhs[2] += f(centroid.coords[0], centroid.coords[1]) * volume / 3;
+        // average of the function f over the element
+        double avg = f(v0[0], v0[1]) + f(v1[0], v1[1]) + f(v2[0], v2[1]);
+        avg /= 3.0; 
+
+        for(types::local_dof_index i = 0; i < n_dofs_per_cell; ++i)
+        {
+            /*
+             * Approximation of the integral of f over the element
+             */
+            local_rhs[i] += avg * shape_integral_on_ref[i] * 2 * volume;
+        }
 
         auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
         linalg::MatrixTools::add_local_matrix_to_global(A, local_matrix, local_dofs);
         linalg::MatrixTools::add_local_vector_to_global(rhs, local_rhs, local_dofs);
-
     } 
 
+    // apply homogeneous dirichlet boundary conditions
     linalg::MatrixTools::apply_homogeneous_dirichlet(A, rhs, dof_handler, 0);
 
-    linalg::CGSolver solver(1000, 1e-12);
+    /**
+     * SOLVE THE LINEAR SYSTEM
+     */
     linalg::Vector sol = solver.solve(A, rhs);
 
+    /**
+     * SAVE THE SOLUTION
+     */
     fastfem::mesh::DataIO<2, 2> data_io(mesh, dof_handler, sol);
     data_io.save_vtx("solution_csr.vtk");
+    std::cout << "Max of solution: " << sol.max() << std::endl;
 
-
-    fastfem::mesh::DataIO<2, 2> rhs_io(mesh, dof_handler, rhs);
-    rhs_io.save_vtx("rhs.vtk");
-
-    auto exact_f = [](double x, double y) { return (1 - x * x) * (1 - y * y); };
-
+    // interpolate the exact solution
     linalg::Vector exact_sol(n_dofs);
-
     linalg::MatrixTools::interpolate(exact_sol, dof_handler, exact_f);
-
-    std::cout << "Norm of difference: " << (sol - exact_sol).norm() << std::endl;
 
     mesh::DataIO<2, 2> data_io_exact(mesh, dof_handler, exact_sol);
     data_io_exact.save_vtx("exact_solution.vtk");
+
+    std::cout << "Norm of vector difference: " << (sol - exact_sol).norm() << std::endl;
 
     return EXIT_SUCCESS;
 }
