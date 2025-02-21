@@ -44,10 +44,10 @@ if(USE_OPENMP)
 endif()
 
 # Option to enable/disable building tests
-option(BUILD_TESTS "Build tests for FastFem" ON)
+option(BUILD_FASTFEM_TESTS "Build tests for FastFem" ON)
 
 # Build tests only if BUILD_TESTS is ON
-if(BUILD_TESTS)
+if(BUILD_FASTFEM_TESTS)
     message(STATUS "Building tests for FastFem")
     foreach(TEST_FILE ${TEST_SOURCES})
         get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
