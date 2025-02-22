@@ -1,7 +1,75 @@
 #include "FastFem/fe/FESimplexP.hpp"
 
+#include <cmath>
+#include <stdexcept>
+
 namespace fastfem{
 namespace fe{
+
+inline double distance(const mesh::Point<2> &v1, const mesh::Point<2> &v2)
+{
+    return std::sqrt((v2.coords[0] - v1.coords[0]) * (v2.coords[0] - v1.coords[0]) + (v2.coords[1] - v1.coords[1]) * (v2.coords[1] - v1.coords[1]));
+}
+
+inline double dot(const mesh::Point<2> &v1, const mesh::Point<2> &v2, const mesh::Point<2> &w1, const mesh::Point<2> &w2)
+{
+    return (v2.coords[0] - v1.coords[0]) * (w2.coords[0] - w1.coords[0]) + (v2.coords[1] - v1.coords[1]) * (w2.coords[1] - w1.coords[1]);
+}
+
+template<>
+void FESimplexP1<2, 2>::
+compute_stiffness_loc(const mesh::Simplex<2, 2> &elem, linalg::FullMatrix& matrix) const
+{
+    mesh::Point<2> v0 = elem.get_vertex(0);
+    mesh::Point<2> v1 = elem.get_vertex(1);
+    mesh::Point<2> v2 = elem.get_vertex(2);
+    double volume = elem.volume();
+
+    double lenght_01 = distance(v0, v1);
+    double lenght_12 = distance(v1, v2);
+    double lenght_20 = distance(v2, v0);
+
+    // matrix computed geometrically
+    matrix(0, 0) += lenght_12 * lenght_12 / (4 * volume);
+    matrix(1, 1) += lenght_20 * lenght_20 / (4 * volume);
+    matrix(2, 2) += lenght_01 * lenght_01 / (4 * volume);
+    matrix(0, 1) += dot(v1, v2, v2, v0) / (4 * volume);
+    matrix(0, 2) += dot(v2, v1, v1, v0) / (4 * volume);
+    matrix(1, 0) += dot(v0, v2, v2, v1) / (4 * volume);
+    matrix(1, 2) += dot(v2, v0, v0, v1) / (4 * volume);
+    matrix(2, 0) += dot(v0, v1, v1, v2) / (4 * volume);
+    matrix(2, 1) += dot(v1, v0, v0, v2) / (4 * volume);
+}
+
+template<>
+void FESimplexP1<1, 1>::
+compute_stiffness_loc(const mesh::Simplex<1, 1> &, linalg::FullMatrix&) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template<>
+void FESimplexP1<1, 2>::
+compute_stiffness_loc(const mesh::Simplex<1, 2> &, linalg::FullMatrix &) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template<>
+void FESimplexP1<1, 3>::
+compute_stiffness_loc(const mesh::Simplex<1, 3> &, linalg::FullMatrix&) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template<>
+void FESimplexP1<2, 3>::
+compute_stiffness_loc(const mesh::Simplex<2, 3> &, linalg::FullMatrix&) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
+
+template<>
+void FESimplexP1<3, 3>::
+compute_stiffness_loc(const mesh::Simplex<3, 3> &, linalg::FullMatrix&) const{
+    throw std::runtime_error("compute_stiffness_loc not implemented");
+}
 
 /**
  * @brief Constructor for the 1D case, in 1D space.

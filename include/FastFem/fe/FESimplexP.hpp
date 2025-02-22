@@ -116,9 +116,9 @@ public:
 
     unsigned int get_degree() const override { return 1; }
 
-    //void compute_stiffness_loc(mesh::Simplex<dim, spacedim> elem, double **matrix) const override;
+    void compute_stiffness_loc(const mesh::Simplex<dim, spacedim> &elem, linalg::FullMatrix &matrix) const override;
 
-    };
+};
 
 
 // Basic simplician P2 elements
