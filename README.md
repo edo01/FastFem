@@ -197,6 +197,35 @@ A brief overview of the usage of the main components is provided below:
 </p>
 <p align="center"><em>Figure: Symmetric CSR matrix pattern for P1, P2, and P3 elements.</em></p>
 
+```
+x x x x . . . . . x x x x x . . . . . . . . . . . 
+. x x . x x . . . x x x . . x x x x . . . . . . . 
+. . x x . x x . x x x x x x . x . x x x . . x x x 
+. . . x . . x x . . x . x x . . . . x x x x . . . 
+. . . . x x . . . . . . . . x x x . . . . . . . . 
+. . . . . x . . x . . x . . x x x x . . . . x x . 
+. . . . . . x x x . . . . x . . . . x x x x x . x 
+. . . . . . . x . . . . . . . . . . x . x x . . . 
+. . . . . . . . x . . . . . . . . x . x . . x x x 
+. . . . . . . . . x x x . . . . . . . . . . . . . 
+. . . . . . . . . . x x x x . . . . . . . . . . . 
+. . . . . . . . . . . x . . . x . x . . . . . . . 
+. . . . . . . . . . . . x x . . . . . . . . . . . 
+. . . . . . . . . . . . . x . . . . x x . . . . . 
+. . . . . . . . . . . . . . x x x . . . . . . . . 
+. . . . . . . . . . . . . . . x x x . . . . . . . 
+. . . . . . . . . . . . . . . . x . . . . . . . . 
+. . . . . . . . . . . . . . . . . x . . . . x x . 
+. . . . . . . . . . . . . . . . . . x x x x . . . 
+. . . . . . . . . . . . . . . . . . . x . . x . x 
+. . . . . . . . . . . . . . . . . . . . x x . . . 
+. . . . . . . . . . . . . . . . . . . . . x . . . 
+. . . . . . . . . . . . . . . . . . . . . . x x x 
+. . . . . . . . . . . . . . . . . . . . . . . x . 
+. . . . . . . . . . . . . . . . . . . . . . . . x 
+
+```
+
 The __FastFem library__ provides various sparse matrix formats optimized for finite element computations:
 
 - **SparseMatrix**: Abstract base class for sparse matrices.
