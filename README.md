@@ -421,7 +421,15 @@ FastFem includes multiple test modules to validate performance and accuracy. The
 
 Here the output of the test `csr_convergence.cpp` that compares the convergence rate of P1 and P2 elements when solving the Poisson problem on a unit square domain:
 
-![alt text](doc/image-2.png)
+```
+N         h              error_p1            error_p2            rate_p1        rate_p2        
+==========================================================================================
+20        0.05000000     2.92804000e-02      7.33476000e-02      1.000000       1.000000       
+40        0.02500000     1.46631000e-02      3.66761000e-02      1.995490       1.999819       
+80        0.01250000     7.33442000e-03      1.83383000e-02      1.998871       1.999961       
+160       0.00625000     3.66757000e-03      9.16925000e-03      1.999717       1.999969       
+320       0.00312500     1.83383000e-03      4.58409000e-03      1.999929       2.000337  
+```
 
 The test has been performed doubling the number of elements per dimension in the mesh. As expected, the error decreases with the mesh refinement. The convergence rate is very close to the theoretical one for P1 elements (target = 2.0), while it is lower for P2 elements (target = 3.0), for which it does not go over a rate of 2.0. This is may be explained for mainly two reasons: 
 
