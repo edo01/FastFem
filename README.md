@@ -192,37 +192,33 @@ A brief overview of the usage of the main components is provided below:
 
 #### **FastFem matrices**
 
-<p align="center">
-  <img src="doc/image.png" alt="Symmetric CSR matrix pattern for P1, P2, and P3 elements.">
-</p>
-<p align="center"><em>Figure: Symmetric CSR matrix pattern for P1, P2, and P3 elements.</em></p>
-
 ```
-x x x x . . . . . x x x x x . . . . . . . . . . . 
-. x x . x x . . . x x x . . x x x x . . . . . . . 
-. . x x . x x . x x x x x x . x . x x x . . x x x 
-. . . x . . x x . . x . x x . . . . x x x x . . . 
-. . . . x x . . . . . . . . x x x . . . . . . . . 
-. . . . . x . . x . . x . . x x x x . . . . x x . 
-. . . . . . x x x . . . . x . . . . x x x x x . x 
-. . . . . . . x . . . . . . . . . . x . x x . . . 
-. . . . . . . . x . . . . . . . . x . x . . x x x 
-. . . . . . . . . x x x . . . . . . . . . . . . . 
-. . . . . . . . . . x x x x . . . . . . . . . . . 
-. . . . . . . . . . . x . . . x . x . . . . . . . 
-. . . . . . . . . . . . x x . . . . . . . . . . . 
-. . . . . . . . . . . . . x . . . . x x . . . . . 
-. . . . . . . . . . . . . . x x x . . . . . . . . 
-. . . . . . . . . . . . . . . x x x . . . . . . . 
-. . . . . . . . . . . . . . . . x . . . . . . . . 
-. . . . . . . . . . . . . . . . . x . . . . x x . 
-. . . . . . . . . . . . . . . . . . x x x x . . . 
-. . . . . . . . . . . . . . . . . . . x . . x . x 
-. . . . . . . . . . . . . . . . . . . . x x . . . 
-. . . . . . . . . . . . . . . . . . . . . x . . . 
-. . . . . . . . . . . . . . . . . . . . . . x x x 
-. . . . . . . . . . . . . . . . . . . . . . . x . 
-. . . . . . . . . . . . . . . . . . . . . . . . x 
+        CSR Matrix (Standard Pattern):                                     CSR Matrix (Symmetric Pattern):
+x x x x . . . . . x x x x x . . . . . . . . . . .               x x x x . . . . . x x x x x . . . . . . . . . . .     
+x x x . x x . . . x x x . . x x x x . . . . . . .               . x x . x x . . . x x x . . x x x x . . . . . . .   
+x x x x . x x . x x x x x x . x . x x x . . x x x               . . x x . x x . x x x x x x . x . x x x . . x x x   
+x . x x . . x x . . x . x x . . . . x x x x . . .               . . . x . . x x . . x . x x . . . . x x x x . . .   
+. x . . x x . . . . . . . . x x x . . . . . . . .               . . . . x x . . . . . . . . x x x . . . . . . . .   
+. x x . x x . . x . . x . . x x x x . . . . x x .               . . . . . x . . x . . x . . x x x x . . . . x x .   
+. . x x . . x x x . . . . x . . . . x x x x x . x               . . . . . . x x x . . . . x . . . . x x x x x . x   
+. . . x . . x x . . . . . . . . . . x . x x . . .               . . . . . . . x . . . . . . . . . . x . x x . . .   
+. . x . . x x . x . . . . . . . . x . x . . x x x               . . . . . . . . x . . . . . . . . x . x . . x x x   
+x x x . . . . . . x x x . . . . . . . . . . . . .               . . . . . . . . . x x x . . . . . . . . . . . . .   
+x x x x . . . . . x x x x x . . . . . . . . . . .               . . . . . . . . . . x x x x . . . . . . . . . . .   
+x x x . . x . . . x x x . . . x . x . . . . . . .               . . . . . . . . . . . x . . . x . x . . . . . . .   
+x . x x . . . . . . x . x x . . . . . . . . . . .               . . . . . . . . . . . . x x . . . . . . . . . . .   
+x . x x . . x . . . x . x x . . . . x x . . . . .               . . . . . . . . . . . . . x . . . . x x . . . . .   
+. x . . x x . . . . . . . . x x x . . . . . . . .               . . . . . . . . . . . . . . x x x . . . . . . . .   
+. x x . x x . . . . . x . . x x x x . . . . . . .               . . . . . . . . . . . . . . . x x x . . . . . . .   
+. x . . x x . . . . . . . . x x x . . . . . . . .               . . . . . . . . . . . . . . . . x . . . . . . . .   
+. x x . . x . . x . . x . . . x . x . . . . x x .               . . . . . . . . . . . . . . . . . x . . . . x x .   
+. . x x . . x x . . . . . x . . . . x x x x . . .               . . . . . . . . . . . . . . . . . . x x x x . . .   
+. . x x . . x . x . . . . x . . . . x x . . x . x               . . . . . . . . . . . . . . . . . . . x . . x . x   
+. . . x . . x x . . . . . . . . . . x . x x . . .               . . . . . . . . . . . . . . . . . . . . x x . . .   
+. . . x . . x x . . . . . . . . . . x . x x . . .               . . . . . . . . . . . . . . . . . . . . . x . . .   
+. . x . . x x . x . . . . . . . . x . x . . x x x               . . . . . . . . . . . . . . . . . . . . . . x x x   
+. . x . . x . . x . . . . . . . . x . . . . x x .               . . . . . . . . . . . . . . . . . . . . . . . x .   
+. . x . . . x . x . . . . . . . . . . x . . x . x               . . . . . . . . . . . . . . . . . . . . . . . . x   
 
 ```
 
