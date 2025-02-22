@@ -1,5 +1,7 @@
 # FastFem
 
+![FastFem Image](doc/logo.png)
+
 FastFem is a finite element method (FEM) library developed as part of the course "Implementation of Finite Element Methods" (MU5MAM30) at Sorbonne University. The project was created by Edoardo Carrà, Lorenzo Gentile, and Pierpaolo Marzo.
 
 ## Table of Contents
@@ -291,15 +293,12 @@ The `DoFHandler` module in FastFem is responsible for managing the degrees of fr
   std::vector<global_dof_index> get_unordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
   std::vector<global_dof_index> get_ordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
   ```
-- **Iterating Over Cells**: The class provides iterators over mesh elements to facilitate matrix and vector assembly.
 - **Handling Boundary DoFs**: The module allows access to DoFs defined on boundary elements:
   ```cpp
   std::vector<global_dof_index> get_unordered_dofs_on_boundary(const mesh::MeshSimplex<dim-1, spacedim> &T) const;
   ```
-- **Storing and Accessing DoFs**: DoFs are stored in hash tables, with a mapping between mesh elements and their corresponding global DoF indices:
-  ```cpp
-  std::unordered_map<size_t, std::unordered_set<global_dof_index>> map_boundary_dofs;
-  ```
+- **Storing and Accessing DoFs**: DoFs are stored in hash tables, with a mapping between mesh elements and their corresponding global DoF indices.
+
 - **Numbering and Sharing of DoFs**
 
   __DoFs__ are assigned based on their association with mesh entities:
@@ -328,18 +327,28 @@ The `FESimplexP` module in FastFem defines a base class for simplicial Lagrange 
   std::vector<local_dof_index> get_local_dofs_on_subsimplex(
     const mesh::MeshSimplex<dim, spacedim> &T, global_vertex_index v) const;
   ```
-- **Accessing Element Properties**:
-  The class offers methods to get the number of DoFs associated with different mesh entities.
+
 - **Reference Simplex and Mapping:**
-   Each finite element is defined on a reference simplex, and an affine transformation maps it to the physical space.
+   Each finite element is defined on a reference simplex, and an **affine transformation** maps it to the physical space.
   ```cpp
   mesh::Simplex<dim, spacedim> get_reference_simplex() const;
   mesh::Point<spacedim> get_dof_coords(mesh::Simplex<dim, spacedim> T, local_dof_index dof) const;
   ```
 - **Computing Local Stiffness Matrices:**
-  The module includes virtual functions for computing element-level stiffness matrices.
+  The module includes virtual functions for computing element-level stiffness matrices. To compute the local stiffness matrices for P2 and P3 elements in 2 dimensions, we used Mathematica. The notebooks used for this purpose are available in the `notebooks` directory.
+  First, we derive the analytical expressions of the basis functions on the reference triangle by solving several linear systems. Then, we compute the pairwise dot products of the gradients of the basis elements. Finally, we integrate theese quantities and we use a change of coordinates to obtain the values of the integrals on a generic triangle (x_A, y_A), (x_B, y_B), (x_C, y_C).
+
+  If $\hat{T}$ denotes the reference triangle and $T$ the generic triangle, $F : \hat{T} \rightarrow T$ is defined as the affine transformation that maps (0,0), (1,0), (0,1) to (x_A, y_A), (x_B, y_B), (x_C, y_C) respectively. It is quite easy to derive the analytical expression of F and its Jacobian, and then use J to see how the gradients of the basis functions on the reference triangle are transformed on the generic triangle:
+
+  $\nabla \hat{\phi_i} = J^{-1} \nabla \phi_i$
+
+  We finally compute the stiffness matrix entries as:
+
+  $S_{ij} = \int_{T} \nabla \phi_i \cdot \nabla \phi_j dx dy = \int_{\hat{T}} (J^{-1}J^{-T}) \nabla \hat{\phi_i} \cdot \nabla \hat{\phi_j} |\det J| d\hat{x} d\hat{y}$
 
 
+
+  
 
 
 ### FastFem meshes
