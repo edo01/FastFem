@@ -11,13 +11,25 @@ FastFem is a finite element method (FEM) library developed as part of the course
   - [Installation](#installation)
     - [Requirements](#requirements)
     - [Build Instructions](#build-instructions)
-  - [FastFem Usage](#fastfem-usage)
+  - [FastFem Example](#fastfem-example)
+  - [FastFem Design](#fastfem-design)
     - [FastFem linear algebra](#fastfem-linear-algebra)
       - [**FastFem matrices**](#fastfem-matrices)
       - [**MatrixTools Utility Class**](#matrixtools-utility-class)
       - [Example: Applying Dirichlet Boundary Conditions](#example-applying-dirichlet-boundary-conditions)
       - [**Iterative Solvers**](#iterative-solvers)
       - [Example: Solving a System with CGSolver](#example-solving-a-system-with-cgsolver)
+    - [FastFem DofHandler](#fastfem-dofhandler)
+      - [Core Functionalities](#core-functionalities)
+    - [FESimplexP: Simplicial Lagrange Finite Elements in FastFem](#fesimplexp-simplicial-lagrange-finite-elements-in-fastfem)
+      - [Core Functionalities](#core-functionalities-1)
+    - [FastFem meshes](#fastfem-meshes)
+      - [**Core Components**](#core-components)
+      - [**Mesh Generation**](#mesh-generation)
+  - [FastFem Implementation insights](#fastfem-implementation-insights)
+    - [Type conventions](#type-conventions)
+    - [Dirichlet boundary conditions](#dirichlet-boundary-conditions)
+  - [Applying Homogeneous Dirichlet Boundary Conditions](#applying-homogeneous-dirichlet-boundary-conditions)
   - [Testing](#testing)
 
 ## Overview
@@ -26,10 +38,16 @@ FastFem is designed for efficient FEM computations, providing support for variou
 
 ## Features
 
-- Support for **Compressed Sparse Row (CSR)**, **Skylyne**, **COO** matrices.
+- Support for Compressed Sparse Row (CSR), Skylyne, COO matrices.
 - Multiple test modules for performance and correctness verification.
 - Various finite element operations including affine transformations and mesh handling.
-- Benchmarking tools for convergence analysis.
+- Benchmarking tools for testing theoretical convergence rates.
+- Iterative solvers including Conjugate Gradient (CG) and supporting future extensions. 
+- Support for P1, P2, and partially P3 elements.
+- Possible extension to any simplicial Lagrange element in 1D, 2D, and 3D.
+- Output in VTK format for visualization and post-processing in Paraview.
+- Support for Dirichlet boundary conditions.
+- Type conventions for better code readability and maintainability.
 
 ## Installation
 
@@ -38,7 +56,6 @@ FastFem is designed for efficient FEM computations, providing support for variou
 Ensure you have the following dependencies installed:
 - CMake
 - C++17
-- Python 3
 
 ### Build Instructions
 
@@ -60,9 +77,114 @@ make
 ```
 NB: some tests require an additional argument to specify the number of elements in the mesh.
 
-## FastFem Usage
+## FastFem Example
 
-An example of how to use FastFem can be found in the `test_p2`. The example demonstrates how to solve a Poisson problem using the library.
+The following example demonstrates the use of FastFem to solve a Poisson problem with Dirichlet boundary conditions on a unit square domain with P2 elements.
+
+Declare the problem parameters:
+```cpp
+auto f = [](double var1, double var2) { return 4 - 2 * (var1 * var1 + var2 * var2); };
+```
+Create the mesh, the FE, the DoFHandler and distribute the DoFs:
+
+- Meshes are created using the `SquareMaker` class, which generates a square mesh with `N` elements.
+- Finite elements are defined using the `FESimplexP2` class, which represents P2 elements in 2D.
+- The `DoFHandler` class manages degrees of freedom (DoFs) on the mesh.
+- The `distribute_dofs` method assigns DoFs to the mesh using the specified finite element.
+```cpp
+mesh::SquareMaker mesh_maker(N);
+mesh::Mesh<2> mesh = mesh_maker.make_mesh();
+
+fe::FESimplexP2<2> fe;
+dof::DoFHandler<2> dof_handler(mesh);
+
+dof_handler.distribute_dofs(std::make_shared<fe::FESimplexP2<2>>(fe));
+
+unsigned int n_dofs = dof_handler.get_n_dofs();
+unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
+```
+
+Initialize and assemble the linear system and create the solver:
+
+- The `CSRPattern` have to be initialized from the `DoFHandler` through the `create_from_dof_handler` method.
+- The `CSRMatrix` is created with the number of DoFs and the pattern.
+- The `MatrixTools` class is used to assemble the system matrix and the right-hand side vector.
+
+```cpp
+    //Initialize the linear system
+    linalg::Vector rhs(n_dofs);
+    linalg::CSRPattern csr_pattern =  linalg::CSRPattern::create_from_dof_handler(dof_handler);
+    linalg::CSRMatrix A(n_dofs, csr_pattern);
+```
+
+```cpp
+    //Assemble the linear system
+    linalg::FullMatrix local_matrix(n_dofs_per_cell);
+    linalg::Vector local_rhs(n_dofs_per_cell); 
+```
+In the assembly we loop over all elements of the mesh and for each element we compute the local contributions.
+
+The following snippet is an extract of the main operation performed in the loop:
+
+- The `elem_begin` and `elem_end` methods of the `DoFHandler` class provide iterators over the elements.
+- The `get_Simplex` method of the `Mesh` class returns the simplex corresponding to the element.
+- The `compute_stiffness_loc` method of the `FESimplexP2` class computes the local stiffness matrix for the element. 
+- The `local_rhs` vector is updated with the local contributions.
+- The global matrix and right-hand side are updated using the `MatrixTools` class. In particular:
+  - The `get_ordered_dofs_on_element` method of the `DoFHandler` class returns the DoFs on the element.
+  - The `add_local_matrix_to_global` method adds the local matrix to the global matrix.
+  - The `add_local_vector_to_global` method adds the local vector to the global right-hand side. 
+
+```cpp
+    for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it){
+    
+    auto &elem = *it;
+
+    mesh::Simplex<2, 2> triangle = mesh.get_Simplex(elem);
+
+    // reset the local matrix and rhs
+    local_matrix.set_to_zero();
+    local_rhs.fill(0.0);
+
+    fe.compute_stiffness_loc(triangle, local_matrix);
+
+    for(types::local_dof_index i = 0; i < n_dofs_per_cell; ++i)
+    {
+        local_rhs[i] += avg * shape_integral_on_ref[i] * 2 * volume;
+    }
+
+    auto local_dofs = dof_handler.get_ordered_dofs_on_element(elem);
+    linalg::MatrixTools::add_local_matrix_to_global(A, local_matrix, local_dofs);
+    linalg::MatrixTools::add_local_vector_to_global(rhs, local_rhs, local_dofs);
+
+    }
+```
+
+Apply Dirichlet boundary conditions and solve the system:
+
+- The `apply_homogeneous_dirichlet` method of the `MatrixTools` class enforces homogeneous Dirichlet boundary conditions.
+  
+```cpp
+    linalg::MatrixTools::apply_homogeneous_dirichlet(A, rhs, dof_handler, 0);
+```
+
+- The `CGSolver` class is used to solve the system with the Conjugate Gradient method.
+
+```cpp
+    linalg::CGSolver solver(1000, 1e-12);
+    linalg::Vector sol = solver.solve(A, rhs);
+```
+
+The solution is finally written to a file exploiting the `DataIO` class that
+provides the `data_io` method to save the solution in a .vtk file.
+
+```cpp
+    fastfem::mesh::DataIO<2, 2> data_io(mesh, dof_handler, sol);
+    data_io.save_vtx("solution_csr.vtk");
+```
+
+
+## FastFem Design
 
 A brief overview of the usage of the main components is provided below:
 
@@ -70,7 +192,12 @@ A brief overview of the usage of the main components is provided below:
 
 #### **FastFem matrices**
 
-The FastFem library provides various sparse matrix formats optimized for finite element computations:
+<p align="center">
+  <img src="doc/image.png" alt="Symmetric CSR matrix pattern for P1, P2, and P3 elements.">
+</p>
+<p align="center"><em>Figure: Symmetric CSR matrix pattern for P1, P2, and P3 elements.</em></p>
+
+The __FastFem library__ provides various sparse matrix formats optimized for finite element computations:
 
 - **SparseMatrix**: Abstract base class for sparse matrices.
 
@@ -123,6 +250,167 @@ linalg::CGSolver solver(1000, 1e-12);
 linalg::Vector sol = solver.solve(A, rhs);
 ```
 
+### FastFem DofHandler
+
+The `DoFHandler` module in FastFem is responsible for managing the degrees of freedom (DoFs) of a finite element space. It assigns DoFs to mesh elements, extracts DoFs on the boundary, and provides an efficient way to iterate over cells for assembling a linear system. This design avoids the need for a double loop over all DoFs (O(n_dofs²)) by ensuring that only nonzero interactions are considered.
+
+#### Core Functionalities
+
+- **Distributing DoFs on the Mesh**:
+  The method `distribute_dofs()` assigns DoFs to vertices, edges, faces, and elements according to the finite element space.
+  ```cpp
+  global_dof_index distribute_dofs(std::shared_ptr<fe::FESimplexP<dim, spacedim>> fe);
+  ```
+- **Retrieving Global DoF Indices**: Given an element, the class provides methods to retrieve global DoFs in ordered or unordered fashion:
+  ```cpp
+  std::vector<global_dof_index> get_unordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
+  std::vector<global_dof_index> get_ordered_dofs_on_element(const mesh::MeshSimplex<dim, spacedim> &T) const;
+  ```
+- **Iterating Over Cells**: The class provides iterators over mesh elements to facilitate matrix and vector assembly.
+- **Handling Boundary DoFs**: The module allows access to DoFs defined on boundary elements:
+  ```cpp
+  std::vector<global_dof_index> get_unordered_dofs_on_boundary(const mesh::MeshSimplex<dim-1, spacedim> &T) const;
+  ```
+- **Storing and Accessing DoFs**: DoFs are stored in hash tables, with a mapping between mesh elements and their corresponding global DoF indices:
+  ```cpp
+  std::unordered_map<size_t, std::unordered_set<global_dof_index>> map_boundary_dofs;
+  ```
+- **Numbering and Sharing of DoFs**
+
+  __DoFs__ are assigned based on their association with mesh entities:
+
+  __Vertices__: P1 elements assign DoFs at vertices.
+  __Edges__: Higher-order elements (P2, P3) introduce DoFs on edges.
+  __Faces and Cells__: Additional DoFs may be introduced for elements of order P3 and beyond.
+
+A key challenge in numbering DoFs is ensuring consistency across shared elements. This is addressed using adjacency structures, which allow efficient updating of DoFs across neighboring elements.
+
+### FESimplexP: Simplicial Lagrange Finite Elements in FastFem
+
+The `FESimplexP` module in FastFem defines a base class for simplicial Lagrange finite elements and its __specializations__ for __different__ polynomial __orders__ (P1, P2, P3). This module provides the fundamental tools for defining shape functions, degrees of freedom (DoFs), and assembling stiffness matrices.
+
+#### Core Functionalities
+
+- **Defining Finite Element Spaces**:  
+  The class `FESimplexP` serves as a base for simplicial finite elements of different orders, ensuring consistency across dimensions.
+  ```cpp
+  template <unsigned int dim, unsigned int spacedim=dim>
+  class FESimplexP;
+
+- **Managing Degrees of Freedom**:
+- The module provides methods to retrieve the local numbering of DoFs for different mesh entities (vertices, edges, faces, cells).
+  ```cpp
+  std::vector<local_dof_index> get_local_dofs_on_subsimplex(
+    const mesh::MeshSimplex<dim, spacedim> &T, global_vertex_index v) const;
+  ```
+- **Accessing Element Properties**:
+  The class offers methods to get the number of DoFs associated with different mesh entities.
+- **Reference Simplex and Mapping:**
+   Each finite element is defined on a reference simplex, and an affine transformation maps it to the physical space.
+  ```cpp
+  mesh::Simplex<dim, spacedim> get_reference_simplex() const;
+  mesh::Point<spacedim> get_dof_coords(mesh::Simplex<dim, spacedim> T, local_dof_index dof) const;
+  ```
+- **Computing Local Stiffness Matrices:**
+  The module includes virtual functions for computing element-level stiffness matrices.
+
+
+
+
+### FastFem meshes
+
+The `Mesh` module in FastFem provides a structured representation of simplicial conforming meshes. It defines vertices, elements, and connectivity information, supporting operations required for finite element analysis.
+
+- **Simplicial Mesh**: The mesh consists of simplices (triangles, tetrahedra) in dimensions up to 3.
+
+#### **Core Components**
+- **`Point` & `Vertex`**:  
+  - `Point<spacedim>` represents a coordinate in space.
+  - `Vertex<spacedim>` is a mesh vertex holding a `Point`.
+
+- **`Simplex<dim, spacedim>`**:  
+  - Represents a geometrical simplex (e.g., triangle, tetrahedron).
+  - Supports centroid computation and intersection with other simplices.
+
+- **`MeshSimplex<dim, spacedim>`**:  
+  - Represents a simplex in a mesh by storing vertex indices.
+  - Provides indexing for vertices, edges, faces, and cells.
+
+- **`Mesh<dim, spacedim>`**:  
+  - Stores vertices and elements.
+  - Supports operations like adding elements, retrieving simplices, and handling boundaries.
+
+#### **Mesh Generation**
+Specialized classes generate standard meshes:
+- **`CubeSurfaceMaker`**: Builds a structured mesh on a cube’s surface.
+- **`SphereSurfaceMaker`**: Constructs a sphere mesh by projecting a cube mesh.
+- **`SquareMaker`**: Generates a 2D square mesh with boundary elements.
+
+This modular and template-based approach ensures flexibility while enforcing constraints for finite element computations.
+
+## FastFem Implementation insights
+
+### Type conventions
+Type conventions for better code readability and maintainability. It is possible to set at compile time the length of the indices used in the code in order to save memory and improve performance.
+
+Examples of type conventions used in FastFem are:
+- **global_dof_index**: Type used to uniquely identify a degree of freedom in the mesh.
+- **ff_index**: Type used in linear algebra structures.
+
+These types can be set to either `unsigned int` or `unsigned long` based on the `USE_LONG_INDEX` preprocessor directive:
+
+```cpp
+#ifdef USE_LONG_INDEX
+typedef unsigned long global_dof_index;
+typedef unsigned long ff_index;
+#else
+typedef unsigned int global_dof_index;
+typedef unsigned int ff_index;
+#endif
+```
+
+### Dirichlet boundary conditions
+
+## Applying Homogeneous Dirichlet Boundary Conditions 
+
+![alt text](doc/image-1.png)
+
+The homogeneous Dirichlet boundary conditions are applied by modifying the system matrix and right-hand side vector. We enforce the boundary conditions by:  
+
+- Setting the corresponding rows and columns of the matrix to zero  
+- Assigning zero to the right-hand side at boundary DOFs  
+- Setting the diagonal entry to 1 to maintain matrix conditioning  
+
+```cpp
+void MatrixTools::apply_homogeneous_dirichlet(SparseMatrix& A, Vector& rhs, 
+    const DoFHandler<dim, spacedim> & dof_handler, boundary_index tag) 
+{
+    for (auto it = dof_handler.boundary_dofs_begin(tag); 
+         it != dof_handler.boundary_dofs_end(tag); ++it) 
+    {
+        global_dof_index dof = *it;
+        A.set_row_col_to_zero(dof);
+        rhs[dof] = 0.0;
+        A.set_entry(dof, dof, 1.0); 
+    }
+}
+```
+
+**CSR Matrix Optimized Application**:
+
+This version improves performance by precomputing a **column-to-values map** before applying the boundary conditions. This map associates each dofs (and so each line of the matrix) to an `std::vector<ff_index>` representing the column with which the dofs interacts and so are present in the `CSRPattern` and effectively have to be put to zero. This optimization avoids repeated searches in the sparse matrix structure, significantly speeding up the process.  
+
+```cpp
+std::map<global_dof_index, std::vector<ff_index>> col_to_values;
+std::vector<ff_index> &col_indices = A.base_pattern->col_indices;
+
+for (ff_index i = 0; i < col_indices.size(); ++i) {
+    col_to_values[col_indices[i]].push_back(i);
+}
+```
+
+
+
 ## Testing
 
 FastFem includes multiple test modules to validate performance and accuracy. These tests can be found in the `test/` directory and include:
@@ -130,3 +418,13 @@ FastFem includes multiple test modules to validate performance and accuracy. The
 - **Performance tests** for benchmarking execution times.
 - **Poisson solver tests** to validate FEM implementations.
 
+
+Here the output of the test `csr_convergence.cpp` that compares the convergence rate of P1 and P2 elements when solving the Poisson problem on a unit square domain:
+
+![alt text](doc/image-2.png)
+
+The test has been performed doubling the number of elements per dimension in the mesh. As expected, the error decreases with the mesh refinement. The convergence rate is very close to the theoretical one for P1 elements (target = 2.0), while it is lower for P2 elements (target = 3.0), for which it does not go over a rate of 2.0. This is may be explained for mainly two reasons: 
+
+- The rhs is computed as the average values of the function over the vertices of the element, multplied by the integral of the shape functions on the reference element. 
+
+- The error is not computed with the integral, but it is approximated.

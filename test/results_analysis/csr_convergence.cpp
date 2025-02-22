@@ -267,7 +267,7 @@ double run_p2_simulation(unsigned int N) {
 int main()
 {
     // Open CSV file to store the convergence results
-    std::ofstream results("../plot/convergence_results.csv");
+    std::ofstream results("../test/results_analysis/convergence_results.csv");
     if (!results.is_open()) {
         std::cerr << "Error: Could not open CSV file for writing." << std::endl;
         return EXIT_FAILURE;
