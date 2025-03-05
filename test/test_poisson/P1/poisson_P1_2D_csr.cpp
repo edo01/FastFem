@@ -33,15 +33,23 @@ int main(int argc, char *argv[])
 
     unsigned int N = std::atoi(argv[1]);
 
-    auto f = [](double var1, double var2) { return 4 - 2 * (var1 * var1 + var2 * var2); };
+    //auto f = [](double var1, double var2) { return 4 - 2 * (var1 * var1 + var2 * var2); };
     auto exact_f = [](double var1, double var2) { return (1 - var1 * var1) * (1 - var2 * var2); };
     
+    auto f = [](double var1, double var2) { return 10; };
+
     /**
      * CREATE THE MESH
      */
      mesh::SquareMaker mesh_maker(N);
      mesh::Mesh<2> mesh = mesh_maker.make_mesh();
  
+    std::cout << "============ MESH INFO =============" << std::endl;
+    std::cout << mesh.vtx_count() << " vertices" << std::endl;
+    std::cout << mesh.elem_count() << " elements" << std::endl;
+    std::cout << mesh.boundary_elem_count(0) << " boundary elements" << std::endl;
+    std::cout << "====================================" << std::endl << std::endl;
+
     /**
      * CREATE THE FE AND DOF HANDLER
      */
@@ -59,6 +67,11 @@ int main(int argc, char *argv[])
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
 
+    std::cout << "========= DOF DISTRIBUTION =========" << std::endl;
+    std::cout << n_dofs << " total dofs" << std::endl;
+    std::cout << n_dofs_per_cell << " dofs per element" << std::endl;
+    std::cout << "====================================" << std::endl << std::endl;
+
     /**
      * INITIALIZE THE LINEAR SYSTEM
      */
@@ -72,7 +85,7 @@ int main(int argc, char *argv[])
     linalg::FullMatrix local_matrix(n_dofs_per_cell);
     linalg::Vector local_rhs(n_dofs_per_cell);
 
-    // shape integral on the reference triangle TODO: MOVE IT TO THE FE CLASS
+    // shape integral on the reference triangle
     static double shape_integral_on_ref[3] = {1.0/6, 1.0/6, 1.0/6};
 
     for (auto it = dof_handler.elem_begin(); it != dof_handler.elem_end(); ++it)
@@ -115,6 +128,7 @@ int main(int argc, char *argv[])
     /**
      * SOLVE THE LINEAR SYSTEM
      */
+    std::cout << "Solving the linear system..." << std::endl << std::endl;
     linalg::Vector sol = solver.solve(A, rhs);
 
     /**
@@ -129,12 +143,15 @@ int main(int argc, char *argv[])
     // interpolate the exact solution
     linalg::MatrixTools::interpolate(exact_sol, dof_handler, exact_f);
 
+    std::cout << "===== SOLUTION INFO =====" << std::endl;
+    std::cout << "CG converged in " << solver.get_last_step() << " iterations" << std::endl;
+    std::cout << "Last residual: " << solver.get_error() << std::endl;
+    std::cout << "Max of solution: " << sol.max() << std::endl;
     std::cout << "Norm of difference: " << (sol - exact_sol).norm() << std::endl;
+    std::cout << "=========================" << std::endl << std::endl;
 
     mesh::DataIO<2, 2> data_io_exact(mesh, dof_handler, exact_sol);
     data_io_exact.save_vtx("exact_solution.vtk");
-
-    std::cout << "Max of solution: " << sol.max() << std::endl;
 
     return EXIT_SUCCESS;
 }

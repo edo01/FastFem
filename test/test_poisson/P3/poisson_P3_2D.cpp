@@ -39,6 +39,12 @@ int main(int argc, char *argv[])
     mesh::SquareMaker mesh_maker(N);
     mesh::Mesh<2> mesh = mesh_maker.make_mesh();
 
+    std::cout << "============ MESH INFO =============" << std::endl;
+    std::cout << mesh.vtx_count() << " vertices" << std::endl;
+    std::cout << mesh.elem_count() << " elements" << std::endl;
+    std::cout << mesh.boundary_elem_count(0) << " boundary elements" << std::endl;
+    std::cout << "====================================" << std::endl << std::endl;
+
     /**
      * CREATE THE FE AND DOF HANDLER
      */
@@ -55,6 +61,11 @@ int main(int argc, char *argv[])
 
     unsigned int n_dofs = dof_handler.get_n_dofs();
     unsigned int n_dofs_per_cell = fe.get_n_dofs_per_element();
+
+    std::cout << "========= DOF DISTRIBUTION =========" << std::endl;
+    std::cout << n_dofs << " total dofs" << std::endl;
+    std::cout << n_dofs_per_cell << " dofs per element" << std::endl;
+    std::cout << "====================================" << std::endl << std::endl;
 
     /**
      * INITIALIZE THE LINEAR SYSTEM
@@ -113,6 +124,7 @@ int main(int argc, char *argv[])
     /**
      * SOLVE THE LINEAR SYSTEM
      */
+    std::cout << "Solving the linear system..." << std::endl << std::endl;
     linalg::Vector sol = solver.solve(A, rhs);
 
     /**
@@ -120,13 +132,17 @@ int main(int argc, char *argv[])
      */
     fastfem::mesh::DataIO<2, 2> data_io(mesh, dof_handler, sol);
     data_io.save_vtx("solution_csr.vtk");
-    std::cout << "Max of solution: " << sol.max() << std::endl;
 
     // interpolate the exact solution
     linalg::Vector exact_sol(n_dofs);
     linalg::MatrixTools::interpolate(exact_sol, dof_handler, exact_f);
 
+    std::cout << "===== SOLUTION INFO =====" << std::endl;
+    std::cout << "CG converged in " << solver.get_last_step() << " iterations" << std::endl;
+    std::cout << "Last residual: " << solver.get_error() << std::endl;
+    std::cout << "Max of solution: " << sol.max() << std::endl;
     std::cout << "Norm of difference: " << (sol - exact_sol).norm() << std::endl;
+    std::cout << "=========================" << std::endl << std::endl;
 
     mesh::DataIO<2, 2> data_io_exact(mesh, dof_handler, exact_sol);
     data_io_exact.save_vtx("exact_solution.vtk");
